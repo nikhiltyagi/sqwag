@@ -9,10 +9,12 @@ from api.handlers import *
 
 square_resource = Resource(handler=SquareHandler)#, **ad)
 user_self_feeds_resource =  Resource(handler=UserSelfFeedsHandler)
+share_square_resource = Resource(handler=ShareSquareHandler)
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 
 urlpatterns = patterns('',
     url(r'^square/(?P<id>\d+)$', square_resource,{ 'emitter_format': 'json' }),
     url(r'^user/feeds/(?P<user_id>\d+)$', user_self_feeds_resource,{ 'emitter_format': 'json' }),
-    url(r'^square', square_resource,{ 'emitter_format': 'json' }),
+    url(r'^square/create', square_resource,{ 'emitter_format': 'json' }),
+    url(r'^square/share', share_square_resource,{ 'emitter_format': 'json' }),
 )

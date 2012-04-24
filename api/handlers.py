@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, \
+    ValidationError
 from piston.handler import BaseHandler
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
 from sqwag_api.forms import CreateSquareForm
-from sqwag_api.models import Square
+from sqwag_api.helper import mailentry
+from sqwag_api.models import *
 import simplejson
 import time
 
@@ -14,7 +16,7 @@ successResponse['message'] = SUCCESS_MSG
 failureResponse = {}
 class SquareHandler(BaseHandler):
     allowed_methods = ('GET', 'PUT', 'DELETE','POST')
-    fields = ('id','content_src','content_type','content_data', 'testme',
+    fields = ('id','content_src','content_type','content_data','content_description',
               'date_created',('user', ('id','first_name','last_name','email','username',)))
     #exclude = ('id', re.compile(r'^private_'))
     model = Square
@@ -22,14 +24,16 @@ class SquareHandler(BaseHandler):
         '''
         api to create square.
         '''
-        if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-            return failureResponse
+#        if not request.user.is_authenticated():
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
         squareForm =  CreateSquareForm(request.POST)
         if squareForm.is_valid():
             square = squareForm.save(commit=False)
             square.date_created = time.time()
+            square.shared_count=0
+            square.liked_count=0
             square.save()
             if square:
                 successResponse['result'] = square
@@ -95,4 +99,48 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['status'] = NOT_FOUND
             failureResponse['error'] = "Not Found"
             return failureResponse
-#        return { 'user': user, 'data_length': len(data) }
+
+class ShareSquareHandler(BaseHandler):
+    methods_allowed = ('GET','POST',)
+    
+    def create(self,request, *args, **kwargs):
+#        if not request.user.is_authenticated():
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        if request.POST['square_id'].isdigit():
+            squareObj = Square.objects.get(pk=request.POST['square_id'])
+            userObj = User.objects.get(pk=1)
+            userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
+            userSquare.save()
+            squareObj.shared_count = squareObj.shared_count + 1
+            squareObj.save()
+            to_email = squareObj.user.email
+            squareObj.id = None
+            #saving copy of this square
+            if request.POST['description']:
+                squareObj.content_description = request.POST['description']
+            squareObj.user = userObj
+            squareObj.shared_count = 0
+            squareObj.liked_count = 0
+            squareObj.date_created = time.time()
+            try:
+                squareObj.full_clean()
+                squareObj.save()
+                # inform the owner 
+                mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
+                mailentry(mailer)
+                successResponse['result'] = squareObj
+                return successResponse
+            except ValidationError, e :
+                squareObj = Square.objects.get(pk=request.POST['square_id'])
+                squareObj.shared_count = squareObj.shared_count - 1
+                squareObj.save()
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "bad entery detected"
+                return failureResponse
+                dummy = e.message() #TODO log error
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "square_id should be an integer"
+            return failureResponse

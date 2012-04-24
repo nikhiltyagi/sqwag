@@ -6,6 +6,7 @@ class Square(models.Model):
 	content_src = models.CharField(max_length=200)
 	content_type = models.CharField(max_length=50)
 	content_data = models.CharField(max_length=4000)
+	content_description = models.CharField(max_length=4000,null=True)
 	date_created = models.IntegerField('date published',null=True)
 	shared_count = models.IntegerField(null=True)
 	liked_count = models.IntegerField(null=True)

@@ -18,3 +18,5 @@ INVALID_CREDENTIALS = 411
 SUBJECT_REQ_INVITE = "Thankyou for your interest"
 BODY_REQ_INVITE = "We have received your request, Thanks for showing your interest in Sqwag"
 
+SUBJECT_SQUARE_ACTION_SHARED = "A user shared your square"
+BODY_SQUARE_ACTION_SHARED = "asdasdasdasd"
