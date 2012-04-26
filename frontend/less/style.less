@@ -1,0 +1,98 @@
+@import "normalize.less";
+@import "variables.less";
+@import "mixins.less";
+@import "grids.less";
+
+/* ===== Primary Styles ========================================================
+   Author:
+   ========================================================================== */
+
+body {
+  background: #ccc;
+  font: 12px verdana, arial;
+  margin: 100px 0;
+}
+.profile {
+  background: #069;
+}
+
+.container {
+  width: 910px;
+  margin: auto;
+  padding: 10px;
+}
+
+.brief {
+  background: rgba(0,0,0,0.6);
+  height: 60px;
+  z-index: 2;
+  position: relative;
+  margin-bottom: 0;
+}
+.cover {
+  height: 380px;
+  background: #fff;
+  margin-top: -60px;
+}
+.bio {
+  height: 90px;
+  background: #fff;
+}
+.sqwag {
+  height: 200px;
+  background: #fff;
+  border: 1px solid #999;
+  padding: 9px;
+}
+
+/* sqwags */
+.sq-text { 
+  .color(@text);
+}
+.sq-tweet { 
+  .color(@tweet);
+}
+
+/* =island */
+.island {
+  position: relative;
+  height: 100%;
+}
+.island > .hd {}
+.island > .bd {
+  margin: 16px 0;
+}
+.island > .ft {
+  font-size: 11px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+/* =media */
+.media {
+  .clearfix();
+}
+.media-obj {
+  float: left;
+  margin-right: 10px;
+}
+.media-obj-alt {
+  float: right;
+  margin-left: 10px;
+  margin-top: 6px;
+}
+.media-bd {}
+
+.action-links {
+  .no-bullet();
+}
+
+/* =elements */
+p {
+  font: 12px/1.5 verdana,arial;
+  margin: 0;
+}
+img {
+  max-width: 100%;
+}
