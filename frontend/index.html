@@ -24,24 +24,28 @@
 <body>
 <div class="container">
 	<header>
-	
+    <!-- TODO: figure out a better way. This is jugaad -->
+    <a href="" class="hidden" id="add-friend"></a>
 	</header>
 	<div role="main">
 	  <div class="sqwag-list row">
+      <script id="sqwag" type="text/html">
       <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag sq-text">
+      	<div class="sqwag sq-{{ content_type }}">
           <div class="island">
           	<div class="hd">
           		<div class="media">
-                <img class="media-obj" src="http://graph.facebook.com/apnerve/picture" alt=""/>
-                <div class="media-bd">Praveen Kumar</div>
+                <img class="media-obj avatar" src="http://graph.facebook.com/apnerve/picture" alt=""/>
+                <div class="media-bd">
+                  <p>
+                    <span class="fullname">Praveen Kumar</span>
+                    <span class="twitter-handle">@{{ user.username }}</span>
+                  </p>
+                </div>
               </div>
           	</div>
           	<div class="bd">
-          	  <p>I really love using this website! I can now share square with Sqwag and express myself! No more 140 characters limitation! </p>
+          	  <p class="tweet-text">{{ content_data }}</p>
           	</div>
           	<div class="ft">
               <div class="media">
@@ -49,8 +53,9 @@
               	<div class="media-bd">
                   <span class="pub-time">2 minutes ago</span>
                   <ul class="action-links">
-                    <li><a href="#">Sqwag</a></li>
-                    <li><a href="#">Share</a></li>
+                    <li><a href="#">reply</a></li>
+                    <li><a href="#">retweet</a></li>
+                    <li><a href="#">favorite</a></li>
                   </ul>
                 </div>
               </div>
@@ -58,63 +63,7 @@
           </div>
         </div>
       </div>
-      <div class="col-1">
-      	<div class="sqwag sq-tweet">
-          <div class="island">
-          	<div class="hd">
-          		<div class="media">
-                <img class="media-obj" src="http://graph.facebook.com/apnerve/picture" alt=""/>
-                <div class="media-bd">Praveen Kumar</div>
-              </div>
-          	</div>
-          	<div class="bd">
-          	  <p>I really love using this website! I can now share square with Sqwag and express myself! No more 140 characters limitation! </p>
-          	</div>
-          	<div class="ft">
-              <div class="media">
-              	<div class="media-obj-alt"><img src="img/icon-tweet.png" alt=""/></div>
-              	<div class="media-bd">
-                  <span class="pub-time">2 minutes ago</span>
-                  <ul class="action-links">
-                    <li><a href="#">Sqwag</a></li>
-                    <li><a href="#">Share</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
-      <div class="col-1">
-      	<div class="sqwag"></div>
-      </div>
+      </script>
 	  </div>
 	</div>
 	<footer>
@@ -126,6 +75,11 @@
 <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
 <!-- scripts concatenated and minified via ant build script-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.4/underscore-min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
+<script src="https://raw.github.com/andyet/ICanHaz.js/master/ICanHaz.min.js"></script>
+<script src="bbtest.js"></script>
 <script src="js/script.js"></script>
 <!-- end scripts-->
 

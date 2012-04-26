@@ -52,6 +52,13 @@ body {
 .sq-tweet { 
   .color(@tweet);
 }
+.sq-spottify {
+  .color(@spottify);
+}
+
+.avatar {
+  border-radius: 5px;
+}
 
 /* =island */
 .island {
@@ -86,6 +93,17 @@ body {
 
 .action-links {
   .no-bullet();
+  a {
+    color: #fff;
+    text-decoration: none;
+  }
+  li:after {
+    content: " ·";
+    color: #fff;
+  }
+  li:last-child:after {
+    content: "";
+  }
 }
 
 /* =elements */
