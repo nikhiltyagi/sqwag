@@ -38,3 +38,8 @@ class RequestInvitationForm(ModelForm):
             return email
         else:
             raise forms.ValidationError(u'Email is a required field')
+
+class CreateRelationshipForm(ModelForm):
+    class Meta:
+        model = Relationship
+        fields = ['id','subscriber','producer']

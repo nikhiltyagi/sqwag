@@ -46,4 +46,8 @@ class Emailer(models.Model):
 	is_sent = models.BooleanField(default=False)
 	status = models.TextField(null=True)
 	
-	
+class Relationship(models.Model):
+	subscriber = models.ForeignKey(User,related_name='subscriber')
+	producer = models.ForeignKey(User, related_name='producer')
+	date_subscribed = models.IntegerField('date subscribed')
+	permission = models.BooleanField()

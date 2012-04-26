@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, 
 from piston.handler import BaseHandler
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
-from sqwag_api.forms import CreateSquareForm
+from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
 from sqwag_api.helper import mailentry
 from sqwag_api.models import *
 import simplejson
@@ -14,6 +14,7 @@ successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
 failureResponse = {}
+
 class SquareHandler(BaseHandler):
     allowed_methods = ('GET', 'PUT', 'DELETE','POST')
     fields = ('id','content_src','content_type','content_data','content_description',
@@ -65,28 +66,7 @@ class SquareHandler(BaseHandler):
             failureResponse['status'] = SYSTEM_ERROR
             failureResponse['error'] = "System Error."
             return failureResponse
-    
-#    def testme(self, square):
-#        return square
-#    def read(self, request, id):
-#        square = Square.objects.get(id)
-#        return square
-#
-#    @throttle(5, 10*60) # allow 5 times in 10 minutes
-#    def update(self, request, id):
-#        square = Square.objects.get(id)
-#        square.data = request.PUT.get('data')
-#        square.save()
-#        return square
-#
-#    def delete(self, request, id):
-#        square = Square.objects.get(id)
-#        if not request.user == square.author:
-#            return rc.FORBIDDEN # returns HTTP 401
-#        square.delete()
-#        return rc.DELETED # returns HTTP 204
-    
-#
+
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
 #    
@@ -104,10 +84,10 @@ class ShareSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST',)
     
     def create(self,request, *args, **kwargs):
-#        if not request.user.is_authenticated():
-#            failureResponse['status'] = AUTHENTICATION_ERROR
-#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-#            return failureResponse
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
         if request.POST['square_id'].isdigit():
             squareObj = Square.objects.get(pk=request.POST['square_id'])
             userObj = User.objects.get(pk=1)
@@ -144,3 +124,66 @@ class ShareSquareHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "square_id should be an integer"
             return failureResponse
+
+class RelationshipHandler(BaseHandler):
+    methods_allowed = ('GET','POST',)
+    fields = ('id','date_subscribed','permission',('subscriber', ('id','first_name','last_name','email','username',)),
+              ('producer', ('id','first_name','last_name','email','username',)))
+    def create(self, request, *args, **kwargs):
+        relationshipForm = CreateRelationshipForm(request.POST)
+        if relationshipForm.is_valid():
+            sub = relationshipForm.cleaned_data['subscriber']
+            prod = relationshipForm.cleaned_data['producer']
+            print sub.id
+            print prod.id
+            # check is subscriber == producer
+            if sub == prod:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "You can not subscribe to yourself :)"
+                return failureResponse
+            # check if already following
+            try:
+                rel = Relationship.objects.get(subscriber=sub, producer=prod)
+                failureResponse['status'] = DUPLICATE
+                failureResponse['error'] = "You are already following this user"
+                return failureResponse
+            except Relationship.DoesNotExist:
+               # go ahed everything is fine
+                relationship = relationshipForm.save(commit=False)
+                relationship.date_subscribed = time.time()
+                relationship.permission = True
+                relationship.save()
+                to_email = relationship.producer.email
+                # notify producer user
+                mailer = Emailer(subject=SUBJECT_SUBSCRIBED,body=BODY_SUBSCRIBED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
+                mailentry(mailer)
+                successResponse['result'] = relationship
+                return successResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = relationshipForm.errors
+            return failureResponse
+
+class HomePageFeedHandler(BaseHandler):
+    methods_allowed = ('GET',)
+    
+    def read(self, request, user_id, *args, **kwargs):
+        # only loged in user can get it's own feed
+#        if not request.user.is_authenticated():
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        if user_id.isdigit():
+            relationships = Relationship.objects.filter(subscriber=user_id)
+            producers =  [relationship.producer for relationship in relationships]
+            squares = Square.objects.filter(user__in=producers)
+            if squares:
+                successResponse['result'] = squares
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "You need to subscribe to receive feeds"
+                return failureResponse
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "user_id is not an integer"
+        return failureResponse

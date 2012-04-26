@@ -50,7 +50,18 @@ def registerUser(request):
     if request.method == "POST":
         form =  RegisterationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+#            user = form.save(commit=False)
+#            user.date_joined = datetime.datetime.now()
+#            user.is_active = False
+#            user.save();
+            fname = form.cleaned_data['first_name']
+            lname = form.cleaned_data['last_name']
+            email = form.cleaned_data['email']
+            pwd = form.cleaned_data['password']
+            uname = form.cleaned_data['username']
+            user = User.objects.create_user(uname, email, pwd)
+            user.first_name = fname
+            user.last_name = lname
             user.date_joined = datetime.datetime.now()
             user.is_active = False
             user.save();
