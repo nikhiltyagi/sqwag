@@ -84,10 +84,10 @@ class ShareSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST',)
     
     def create(self,request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-            return failureResponse
+        #if not request.user.is_authenticated():
+        #    failureResponse['status'] = AUTHENTICATION_ERROR
+        #    failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+        #    return failureResponse
         if request.POST['square_id'].isdigit():
             squareObj = Square.objects.get(pk=request.POST['square_id'])
             userObj = User.objects.get(pk=1)
@@ -100,10 +100,10 @@ class ShareSquareHandler(BaseHandler):
             #saving copy of this square
             if request.POST['description']:
                 squareObj.content_description = request.POST['description']
-            squareObj.user = userObj
-            squareObj.shared_count = 0
-            squareObj.liked_count = 0
-            squareObj.date_created = time.time()
+                squareObj.user = userObj
+                squareObj.shared_count = 0
+                squareObj.liked_count = 0
+                squareObj.date_created = time.time()
             try:
                 squareObj.full_clean()
                 squareObj.save()
@@ -120,6 +120,8 @@ class ShareSquareHandler(BaseHandler):
                 failureResponse['error'] = "bad entery detected"
                 return failureResponse
                 dummy = e.message() #TODO log error
+
+                        
         else:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "square_id should be an integer"
@@ -187,3 +189,30 @@ class HomePageFeedHandler(BaseHandler):
         failureResponse['status'] = BAD_REQUEST
         failureResponse['error'] = "user_id is not an integer"
         return failureResponse
+    
+    
+class DeleteSquare(BaseHandler):
+    methods_allowed = ('POST')
+    
+    def create(self, request, *args, **kwargs):
+        sq_id = request.POST['square_id']
+        us_id = request.POST['user_id']
+        sq_obj = Square.objects.get(pk=sq_id)
+        if sq_obj:
+            sq_obj_us_id = unicode(sq_obj.user_id)
+            if sq_obj_us_id == us_id:
+                sq_obj.delete()
+                successResponse['result'] = "square deleted"
+                return successResponse
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "You are not authorised to delete this square"
+                return failureResponse
+        else:
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "Square not found"
+            return failureResponse
+        
+                
+        
+        
