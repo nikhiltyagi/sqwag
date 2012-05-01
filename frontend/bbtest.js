@@ -29,7 +29,7 @@
     getSquare: function () {
         var self =this;
     	$.ajax({
-    		url :"http://192.168.100.67:5000/api/user/homefeeds/7",
+    		url :"http://localhost:8000/api/user/homefeeds/1",
     		dataType: "json",
     		success : function(data, textStatus, jqXHR){
     		    if(data.status==1){

@@ -1,26 +1,35 @@
-@import "normalize.less";
-@import "variables.less";
-@import "mixins.less";
-@import "grids.less";
+@import "lib/reset.less";
+@import "lib/variables.less";
+@import "lib/mixins.less";
+@import "lib/layouts.less";
+@import "lib/grid.less";
+@import "lib/forms.less";
+@import "lib/buttons.less";
+@import "lib/wells.less";
+@import "lib/modals.less";
+@import "lib/navs.less";
+@import "lib/navbar.less";
+@import "lib/hero-unit.less";
+@import "lib/close.less";
+@import "lib/utilities.less";
 
 /* ===== Primary Styles ========================================================
-   Author:
+   Author: @apnerve
    ========================================================================== */
 
 body {
-  background: #ccc;
-  font: 12px verdana, arial;
-  margin: 100px 0;
+  margin: 0;
+  font-family: @baseFontFamily;
+  font-size: @baseFontSize;
+  line-height: @baseLineHeight;
+  color: @textColor;
+  background-color: @bodyBackground;
 }
+
 .profile {
   background: #069;
 }
 
-.container {
-  width: 910px;
-  margin: auto;
-  padding: 10px;
-}
 
 .brief {
   background: rgba(0,0,0,0.6);
@@ -113,4 +122,9 @@ p {
 }
 img {
   max-width: 100%;
+}
+
+/* =overrides */
+.modal form {
+  margin-bottom: 0;
 }

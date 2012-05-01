@@ -26,11 +26,68 @@
 	<header>
     <!-- TODO: figure out a better way. This is jugaad -->
     <a href="" class="hidden" id="add-friend"></a>
+    <div class="navbar">
+    	<div class="navbar-inner">
+    		<div class="container">
+    			<ul class="nav">
+    				<li>
+    					<a href="#register-form" data-toggle="modal">Register</a>
+    				</li>
+    				<li>
+    					<a href="#login-form" data-toggle="modal">Login</a>
+    				</li>
+    			</ul>
+    		</div>
+    	</div>
+    </div>
 	</header>
 	<div role="main">
+    <div class="hero-unit">
+    	<h1>SqWag</h1>
+    </div>
+    <div class="modal hide" id="register-form">
+      <form action="http://localhost:8000/sqwag/register/" method="post">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h1>Register</h1>
+        </div>
+        <div class="modal-body">
+        	<div class="form-controls">
+        	  <label for="username">Username</label>
+        	  <input class="input" type="text" name="username" id="username" required />
+        	</div>
+        	<div class="form-controls">
+        	  <label for="password">Password</label>
+        	  <input type="password" name="password" id="password" required />
+        	</div>
+        	<div class="form-controls">
+        	  <label for="email">Email</label>
+        	  <input type="email" name="email" id="email" required />
+        	</div>
+        </div>
+        <div class="modal-footer">
+        	<input class="btn btn-primary" type="submit" value="register" />
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal hide" id="login-form">
+      <form action="http://localhost:8000/sqwag/login/" method="post">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h1>Login</h1>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="login" />
+        </div>
+      </form>
+    </div>
+    
+    
 	  <div class="sqwag-list row">
       <script id="sqwag" type="text/html">
-      <div class="col-1">
+      <div class="span3">
       	<div class="sqwag sq-{{ content_type }}">
           <div class="island">
           	<div class="hd">
