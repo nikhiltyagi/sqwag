@@ -1,1 +1,4 @@
 *.pyc
+api/*.pyc
+piston/*.pyc
+sqwag_api/*.pyc
