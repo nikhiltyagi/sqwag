@@ -1,3 +1,4 @@
+context = context || {};
 (function ($) {
   Square = Backbone.Model.extend({
     //Create a model to hold friend atribute
@@ -19,6 +20,7 @@
     el: $("body"),
     initialize: function () {
       this.Squares = new Squares( null, { view: this });
+      context.Squares = this.Squares;
       //Create a friends collection when the view is initialized.
       //Pass it a reference to this view to create a connection between the two
     },

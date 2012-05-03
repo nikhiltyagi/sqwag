@@ -1,11 +1,16 @@
+var context = context || {};
+
 $(document).ready(function() {
+  $('#add-friend').click(); // init the app
+
+    
   $('#sqwag-form form').ajaxForm({
-    target: '#output',
     dataType: 'json',
     success: function(response) {
-      console.log(response.message);
-      $('#add-friend').click();
-      $('.close').click();
+      if(response.status==1){
+        $('.close').click(); // close the modal window
+        context.Squares.add(response.result);
+      }  
     }
   });
 });
