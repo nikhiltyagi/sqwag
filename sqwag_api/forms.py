@@ -23,7 +23,7 @@ class RegisterationForm(ModelForm):
 class CreateSquareForm(ModelForm):
     class Meta:
         model = Square
-        fields = ['id','content_src','content_type','content_data','user']
+        fields = ['id','content_src','content_type','content_data']
 
 class RequestInvitationForm(ModelForm):
     class Meta:
