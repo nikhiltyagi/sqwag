@@ -58,7 +58,7 @@
       //$("#friends-list").append("<li>" + model.get('content_data') + "</li>");
       var sq = ich.sqwag(model.attributes);
       console.log(sq);
-      $('.sqwag-list').append(sq);
+      $('.sqwag-list').prepend(sq);
       //Use .get to receive attributes of the model
     }
   });
