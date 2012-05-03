@@ -1,5 +1,4 @@
 (function ($) {
-  
   Square = Backbone.Model.extend({
     //Create a model to hold friend atribute
     content_data: null,
@@ -29,7 +28,7 @@
     getSquare: function () {
         var self =this;
     	$.ajax({
-    		url :"http://localhost:8000/api/user/homefeeds/1",
+    		url :"http://localhost:8000/api/user/homefeeds/",
     		dataType: "json",
     		success : function(data, textStatus, jqXHR){
     		    if(data.status==1){
@@ -58,6 +57,7 @@
       //The parameter passed is a reference to the model that was added
       //$("#friends-list").append("<li>" + model.get('content_data') + "</li>");
       var sq = ich.sqwag(model.attributes);
+      console.log(sq);
       $('.sqwag-list').append(sq);
       //Use .get to receive attributes of the model
     }

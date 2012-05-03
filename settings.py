@@ -1,8 +1,8 @@
 # Django settings for sqwag project.
-
+import os.path
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -20,7 +20,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'sqwag-dj',                      # Or path to database file if using sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': 'root',                  # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -112,6 +112,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, "./templates"),
 )
 
 INSTALLED_APPS = (
@@ -150,3 +151,4 @@ LOGGING = {
         },
     }
 }
+CONTENT_BASE = os.path.join(PROJECT_ROOT, 'frontend')
