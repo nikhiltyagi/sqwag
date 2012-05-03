@@ -168,14 +168,14 @@ class RelationshipHandler(BaseHandler):
 class HomePageFeedHandler(BaseHandler):
     methods_allowed = ('GET',)
     
-    def read(self, request, user_id, *args, **kwargs):
+    def read(self, request,*args, **kwargs):
         # only loged in user can get it's own feed
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
         user = request.user
-        relationships = Relationship.objects.filter(subscriber=user_id)
+        relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
         squares = Square.objects.filter(user__in=producers)
         if squares:

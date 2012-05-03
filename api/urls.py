@@ -22,6 +22,6 @@ urlpatterns = patterns('',
     url(r'^square/create', square_resource,{ 'emitter_format': 'json' }),
     url(r'^square/share', share_square_resource,{ 'emitter_format': 'json' }),
     url(r'^subscribe/', relationship_resource,{ 'emitter_format': 'json' }),
-    url(r'^user/homefeeds/(?P<user_id>\d+)$', home_page_feeds_resource,{ 'emitter_format': 'json' }),
+    url(r'^user/homefeeds/', home_page_feeds_resource,{ 'emitter_format': 'json' }),
     url(r'^square/delete', square_delete_resource,{'emitter_format': 'json'}),
 )
