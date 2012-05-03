@@ -23,24 +23,34 @@ def index(request):
     return HttpResponse("Hello, world. You're at the sqwag index.")
 
 def loginUser(request):
-    uname = request.POST['username']
-    pword = request.POST['password']
-    user = authenticate(username=uname, password=pword)
-    if user is not None:
-        if user.is_active:
-            login(request, user)
-            user = User.objects.get(username=uname)
-            respObj = {}
-            respObj['username'] = user.username
-            respObj['id'] = user.id
-            respObj['first_name'] = user.first_name
-            respObj['last_name'] = user.last_name
-            respObj['email'] =  user.email
-            successResponse['result'] = respObj
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    if 'username' in request.POST:
+        if 'password' in request.POST:
+            uname = request.POST['username']
+            pword = request.POST['password']
+            user = authenticate(username=uname, password=pword)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    user = User.objects.get(username=uname)
+                    respObj = {}
+                    respObj['username'] = user.username
+                    respObj['id'] = user.id
+                    respObj['first_name'] = user.first_name
+                    respObj['last_name'] = user.last_name
+                    respObj['email'] =  user.email
+                    successResponse['result'] = respObj
+                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                else:
+                    failureResponse['status'] = ACCOUNT_INACTIVE
+                    failureResponse['error'] = "your account is not active"
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            else:
+                failureResponse['status'] = INVALID_CREDENTIALS
+                failureResponse['error'] = "invalid credentials"
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         else:
-            failureResponse['status'] = ACCOUNT_INACTIVE
-            failureResponse['error'] = "your account is not active"
+            failureResponse['status'] = INVALID_CREDENTIALS
+            failureResponse['error'] = "invalid credentials"
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = INVALID_CREDENTIALS
@@ -65,6 +75,11 @@ def registerUser(request):
             user.date_joined = datetime.datetime.now()
             user.is_active = False
             user.save();
+            #subscribe own feeds
+            relationShip = Relationship(subscriber=user,producer=user)
+            relationShip.date_subscribed = time.time()
+            relationShip.permission = True
+            relationShip.save()
             respObj = {}
             respObj['username'] = user.username
             respObj['id'] = user.id
