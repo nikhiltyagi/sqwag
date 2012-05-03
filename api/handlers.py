@@ -70,8 +70,12 @@ class SquareHandler(BaseHandler):
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
 #    
-    def read(self, request, user_id):
-        squares = Square.objects.filter(user=user_id)
+    def read(self, request):
+        if not self.has_model():
+            failureResponse['status'] = SYSTEM_ERROR
+            failureResponse['error'] = "System Error."
+            return failureResponse 
+        squares = Square.objects.filter(user=request.user)
         if squares:
             successResponse['result']=squares
             return successResponse
@@ -120,8 +124,6 @@ class ShareSquareHandler(BaseHandler):
                 failureResponse['error'] = "bad entery detected"
                 return failureResponse
                 dummy = e.message() #TODO log error
-
-                        
         else:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "square_id should be an integer"
@@ -133,7 +135,7 @@ class RelationshipHandler(BaseHandler):
               ('producer', ('id','first_name','last_name','email','username',)))
     def create(self, request, *args, **kwargs):
         relationshipForm = CreateRelationshipForm(request.POST)
-        relationshipForm.user = request.user
+        #relationshipForm.user = request.user
         if relationshipForm.is_valid():
             sub = relationshipForm.cleaned_data['subscriber']
             prod = relationshipForm.cleaned_data['producer']
@@ -190,12 +192,14 @@ class DeleteSquare(BaseHandler):
     methods_allowed = ('POST')
     
     def create(self, request, *args, **kwargs):
-        sq_id = request.POST['square_id']
-        us_id = request.POST['user_id']
-        sq_obj = Square.objects.get(pk=sq_id)
-        if sq_obj:
-            sq_obj_us_id = unicode(sq_obj.user_id)
-            if sq_obj_us_id == us_id:
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        if "square_id" in request.POST:
+            sq_id = request.POST['square_id']
+            sq_obj = Square.objects.get(pk=sq_id, user = request.user)
+            if sq_obj:
                 sq_obj.delete()
                 successResponse['result'] = "square deleted"
                 return successResponse
@@ -204,10 +208,6 @@ class DeleteSquare(BaseHandler):
                 failureResponse['error'] = "You are not authorised to delete this square"
                 return failureResponse
         else:
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "Square not found"
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "square_id is required"
             return failureResponse
-        
-                
-        
-        
