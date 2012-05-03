@@ -30,12 +30,12 @@ class SquareHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
         squareForm =  CreateSquareForm(request.POST)
-        squareForm.user = request.user
         if squareForm.is_valid():
             square = squareForm.save(commit=False)
             square.date_created = time.time()
             square.shared_count=0
             square.liked_count=0
+            square.user = request.user
             square.save()
             if square:
                 successResponse['result'] = square
