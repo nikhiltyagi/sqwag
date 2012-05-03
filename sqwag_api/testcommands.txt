@@ -3,3 +3,7 @@ curl -d "subscriber=1&producer=1" http://localhost:8000/api/subscribe/ > /home/s
 register a user:
 curl -d "username=test&password=test&email=test@test.com" http://localhost:8000/sqwag/register/ > /home/saini/test.html
 curl -d "content_type=tweet&content_data=thisismytweet&content_description=sfsdfds&user=3" http://0.0.0.0:5000/api/square/create/
+
+
+login
+curl -d "username=saini&password=saini" httl://loclahost:8000/sqwag/login/

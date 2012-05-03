@@ -25,11 +25,12 @@ class SquareHandler(BaseHandler):
         '''
         api to create square.
         '''
-#        if not request.user.is_authenticated():
-#            failureResponse['status'] = AUTHENTICATION_ERROR
-#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-#            return failureResponse
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
         squareForm =  CreateSquareForm(request.POST)
+        squareForm.user = request.user
         if squareForm.is_valid():
             square = squareForm.save(commit=False)
             square.date_created = time.time()
@@ -47,8 +48,7 @@ class SquareHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = squareForm.errors
             return failureResponse
-        #return {"user":user}
-        #return BaseHandler.create(self, request, *args, **kwargs)
+
     def read(self, request,id, *args, **kwargs):
         if not self.has_model():
             failureResponse['status'] = SYSTEM_ERROR
@@ -84,13 +84,13 @@ class ShareSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST',)
     
     def create(self,request, *args, **kwargs):
-        #if not request.user.is_authenticated():
-        #    failureResponse['status'] = AUTHENTICATION_ERROR
-        #    failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-        #    return failureResponse
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
         if request.POST['square_id'].isdigit():
             squareObj = Square.objects.get(pk=request.POST['square_id'])
-            userObj = User.objects.get(pk=1)
+            userObj = request.user
             userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
             userSquare.save()
             squareObj.shared_count = squareObj.shared_count + 1
@@ -133,11 +133,10 @@ class RelationshipHandler(BaseHandler):
               ('producer', ('id','first_name','last_name','email','username',)))
     def create(self, request, *args, **kwargs):
         relationshipForm = CreateRelationshipForm(request.POST)
+        relationshipForm.user = request.user
         if relationshipForm.is_valid():
             sub = relationshipForm.cleaned_data['subscriber']
             prod = relationshipForm.cleaned_data['producer']
-            print sub.id
-            print prod.id
             # check is subscriber == producer
             if sub == prod:
                 failureResponse['status'] = BAD_REQUEST
@@ -171,26 +170,22 @@ class HomePageFeedHandler(BaseHandler):
     
     def read(self, request, user_id, *args, **kwargs):
         # only loged in user can get it's own feed
-#        if not request.user.is_authenticated():
-#            failureResponse['status'] = AUTHENTICATION_ERROR
-#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-#            return failureResponse
-        if user_id.isdigit():
-            relationships = Relationship.objects.filter(subscriber=user_id)
-            producers =  [relationship.producer for relationship in relationships]
-            squares = Square.objects.filter(user__in=producers)
-            if squares:
-                successResponse['result'] = squares
-                return successResponse
-            else:
-                failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "You need to subscribe to receive feeds"
-                return failureResponse
-        failureResponse['status'] = BAD_REQUEST
-        failureResponse['error'] = "user_id is not an integer"
-        return failureResponse
-    
-    
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        user = request.user
+        relationships = Relationship.objects.filter(subscriber=user_id)
+        producers =  [relationship.producer for relationship in relationships]
+        squares = Square.objects.filter(user__in=producers)
+        if squares:
+            successResponse['result'] = squares
+            return successResponse
+        else:
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "You need to subscribe to receive feeds"
+            return failureResponse
+
 class DeleteSquare(BaseHandler):
     methods_allowed = ('POST')
     
