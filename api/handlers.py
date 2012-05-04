@@ -70,19 +70,31 @@ class SquareHandler(BaseHandler):
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
 #    
-    def read(self, request):
+    def read(self, request, page):
         if not self.has_model():
             failureResponse['status'] = SYSTEM_ERROR
             failureResponse['error'] = "System Error."
             return failureResponse 
-        squares = Square.objects.filter(user=request.user)
+        squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        try:
+            squares = paginator.page(page)
+        except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+            squares = paginator.page(1)
+        except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+            squares = paginator.page(paginator.num_pages)
         if squares:
-            successResponse['result']=squares
+            next_page = int(page) + 1
+            next_url = "/user/feeds/"+user_id+"/"+ str(next_page)
+            successResponse['result'] = squares.object_list
+            successResponse['nexturl'] = next_url
             return successResponse
         else:
             failureResponse['status'] = NOT_FOUND
             failureResponse['error'] = "Not Found"
-            return failureResponse
+        return failureResponse
 
 class ShareSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST',)
