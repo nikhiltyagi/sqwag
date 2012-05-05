@@ -151,4 +151,4 @@ LOGGING = {
         },
     }
 }
-CONTENT_BASE = os.path.join(PROJECT_ROOT, 'frontend')
+CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
