@@ -10,7 +10,8 @@ context = context || {};
   Squares = Backbone.Collection.extend({
     initialize: function (models, options) {
       this.bind("add", options.view.addSquare);
-    }
+    },
+    url : '/api/user/homefeeds/'
   });
 
   AppView = Backbone.View.extend({
@@ -39,6 +40,9 @@ context = context || {};
               });
             }
           }
+          else if (data.status == 404) {
+            notify(data.error);
+          }
 
         }
       });
@@ -51,4 +55,5 @@ context = context || {};
   });
 
   var appview = new AppView;
+  
 })(jQuery);
