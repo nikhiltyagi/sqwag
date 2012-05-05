@@ -1,0 +1,154 @@
+@import "lib/reset.less";
+@import "lib/variables.less";
+@import "lib/mixins.less";
+@import "lib/layouts.less";
+@import "lib/grid.less";
+@import "lib/forms.less";
+@import "lib/buttons.less";
+@import "lib/wells.less";
+@import "lib/modals.less";
+@import "lib/navs.less";
+@import "lib/navbar.less";
+@import "lib/hero-unit.less";
+@import "lib/close.less";
+@import "lib/utilities.less";
+
+/* ===== Primary Styles ========================================================
+   Author: @apnerve
+   ========================================================================== */
+
+body {
+  margin: 0;
+  font-family: @baseFontFamily;
+  font-size: @baseFontSize;
+  line-height: @baseLineHeight;
+  color: @textColor;
+  background-color: @bodyBackground;
+}
+
+.profile {
+  background: #069;
+}
+
+/*
+.brief {
+  background: rgba(0,0,0,0.6);
+  height: 60px;
+  z-index: 2;
+  position: relative;
+  margin-bottom: 0;
+}
+.cover {
+  height: 380px;
+  background: #fff;
+  margin-top: -60px;
+}
+.bio {
+  height: 90px;
+  background: #fff;
+} */
+.sqwag {
+  height: 200px;
+  background: #fff;
+  border: 1px solid #999;
+  padding: 9px;
+  margin-top: 20px;
+}
+
+/* sqwags */
+.sq-text { 
+  .color(@text);
+}
+.sq-tweet { 
+  .color(@tweet);
+}
+.sq-spottify {
+  .color(@spottify);
+}
+
+.avatar {
+  border-radius: 5px;
+}
+
+/* =island */
+.island {
+  position: relative;
+  height: 100%;
+}
+.island > .hd {}
+.island > .bd {
+  margin: 16px 0;
+}
+.island > .ft {
+  font-size: 11px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+/* =media */
+.media {
+  .clearfix();
+}
+.media-obj {
+  float: left;
+  margin-right: 10px;
+}
+.media-obj-alt {
+  float: right;
+  margin-left: 10px;
+  margin-top: 6px;
+}
+.media-bd {}
+
+.action-links {
+  .no-bullet();
+  li {
+    display: inline-block;
+  }
+  a {
+    color: #fff;
+    text-decoration: none;
+  }
+  li:after {
+    content: " ·";
+    color: #fff;
+  }
+  li:last-child:after {
+    content: "";
+  }
+}
+
+/* =elements */
+p {
+  font: 12px/1.5 verdana,arial;
+  margin: 0;
+}
+img {
+  max-width: 100%;
+}
+
+/* =overrides */
+.modal form {
+  margin-bottom: 0;
+}
+
+.copyright {
+  text-align: center;
+}
+
+.logo {
+  background-color: @white;
+  border: 1px solid #999;
+  font-size: 18px;
+  padding: 10px 6px;
+}
+.logo > b {
+  border: 1px solid #999;
+  color: @blue;
+  padding: 2px;
+}
+
+/* =helpful */
+.align-right { text-align: right;}
+.align-center { text-align: center;}

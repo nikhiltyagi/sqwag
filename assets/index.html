@@ -1,0 +1,197 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>Sqwag</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width">
+
+	<link rel="stylesheet/less" href="less/style.less">
+	<script src="js/libs/less-1.3.0.min.js"></script>
+	
+	<!-- Use SimpLESS (Win/Linux/Mac) or LESS.app (Mac) to compile your .less files
+	to style.css, and replace the 2 lines above by this one:
+
+	<link rel="stylesheet" href="less/style.css">
+	 -->
+
+	<script src="js/libs/modernizr-2.5.3.min.js"></script>
+</head>
+<body>
+<div class="container">
+	<header>
+    <!-- TODO: figure out a better way. This is jugaad -->
+    <a href="" class="hidden" id="add-friend"></a>
+    <div class="navbar">
+    	<div class="navbar-inner">
+    		<div class="container">
+    			<ul class="nav">
+    				<li>
+    					<a href="#register-form" data-toggle="modal">Register</a>
+    				</li>
+    				<li>
+    					<a href="#login-form" data-toggle="modal">Login</a>
+    				</li>
+    				<li>
+    					<a href="#sqwag-form" data-toggle="modal">Create</a>
+    				</li>
+    			</ul>
+    		</div>
+    	</div>
+    </div>
+	</header>
+	<div role="main">
+    <div class="modal hide" id="register-form">
+      <form action="http://localhost:8000/sqwag/register/" method="post">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h1>Register</h1>
+        </div>
+        <div class="modal-body">
+        	<div class="form-controls">
+        	  <label for="username">Username</label>
+        	  <input class="input" type="text" name="username" id="username" required />
+        	</div>
+        	<div class="form-controls">
+        	  <label for="password">Password</label>
+        	  <input type="password" name="password" id="password" required />
+        	</div>
+        	<div class="form-controls">
+        	  <label for="email">Email</label>
+        	  <input type="email" name="email" id="email" required />
+        	</div>
+        </div>
+        <div class="modal-footer">
+        	<input class="btn btn-primary" type="submit" value="register" />
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal hide" id="login-form">
+      <form action="http://localhost:8000/sqwag/login/" method="post">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h1>Login</h1>
+        </div>
+        <div class="modal-body">
+          <div class="form-controls">
+            <label>Username</label>
+            <input type="text" name="username"/>
+          </div>
+          <div class="form-controls">
+            <label>Password</label>
+            <input type="password" name="password"/>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="login" />
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal hide" id="sqwag-form">
+      <form action="http://localhost:8000/api/square/create/" method="post">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h1>create square</h1>
+        </div>
+        <div class="modal-body">
+          <div class="form-controls">
+            <label for="sq-data">data</label>
+            <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?" required></textarea>
+          </div>
+          <div class="form-controls">
+            <label for="sq-data">description</label>
+            <input type="text" id="sq-data" name="content_description" required />
+          </div>
+          <div class="form-controls">
+            <label>square type</label>
+            <div class="controls">
+              <label class="radio">
+                <input type="radio" name="content_type" value="tweet" />
+                tweet
+              </label>
+            </div>
+            <div class="controls">
+              <label class="radio">
+                <input type="radio" name="content_type" value="text" />
+                text
+              </label>
+            </div>
+          </div>
+          <input type="hidden" name="content_src" value="twitter"/>
+          <input type="hidden" name="user" value="5"/>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="Add sqwag" />
+        </div>
+      </form>
+    </div>
+    
+    <div id="output">output here</div>
+	  <div class="sqwag-list row">
+      <script id="sqwag" type="text/html">
+      <div class="span3">
+      	<div class="sqwag sq-{{ content_type }}">
+          <div class="island">
+          	<div class="hd">
+          		<div class="media">
+                <img class="media-obj avatar" src="http://graph.facebook.com/{{ user.username }}/picture" alt=""/>
+                <div class="media-bd">
+                  <ul class="no-bullet">
+                    <li class="fullname">Praveen Kumar</li>
+                    <li class="twitter-handle"><a href="#">@{{ user.username }}</a></li>
+                  </ul>
+                </div>
+              </div>
+          	</div>
+          	<div class="bd">
+          	  <p class="tweet-text">{{ content_data }}</p>
+          	</div>
+          	<div class="ft">
+              <div class="media">
+              	<div class="media-obj-alt"><img src="img/icon-tweet.png" alt=""/></div>
+              	<div class="media-bd">
+                  <span class="pub-time">2 minutes ago</span>
+                  <ul class="action-links">
+                    <li><a href="#">reply</a></li>
+                    <li><a href="#">retweet</a></li>
+                    <li><a href="#">favorite</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </script>
+	  </div>
+	</div>
+	<footer>
+	
+	</footer>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
+
+<!-- scripts concatenated and minified via ant build script-->
+<script src="js/libs/bootstrap-modal.min.js"></script>
+<script src="js/libs/underscore-min.js"></script>
+<script src="js/libs/backbone-min.js"></script>
+<script src="js/libs/ICanHaz.min.js"></script>
+<script src="js/app.js"></script>
+<!-- end scripts-->
+<script>
+  $(document).ready(function() {
+    $('#add-friend').click(); // init the app
+    //console.log(document.cookie);
+  });
+</script>
+
+</body>
+</html>
