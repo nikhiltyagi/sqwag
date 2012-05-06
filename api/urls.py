@@ -18,7 +18,7 @@ square_delete_resource = CORSResource(handler=DeleteSquare)
 
 urlpatterns = patterns('',
     url(r'^square/(?P<id>\d+)$', square_resource,{ 'emitter_format': 'json' }),
-    url(r'^user/feeds/', user_self_feeds_resource,{ 'emitter_format': 'json' }),
+    url(r'^user/feeds/(?P<page>\d+)$', user_self_feeds_resource,{ 'emitter_format': 'json' }),
     url(r'^square/create', square_resource,{ 'emitter_format': 'json' }),
     url(r'^square/share', share_square_resource,{ 'emitter_format': 'json' }),
     url(r'^subscribe/', relationship_resource,{ 'emitter_format': 'json' }),

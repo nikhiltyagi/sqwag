@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, \
     ValidationError
 from piston.handler import BaseHandler
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
 from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
@@ -69,24 +70,31 @@ class SquareHandler(BaseHandler):
 
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
-         
-    def read(self, request, user_id):
-        squares = None
-        if user_id:
-            squares = Square.objects.filter(user=user_id)
-        else:
-            if not request.user.is_authenticated():
-                failureResponse['status'] = AUTHENTICATION_ERROR
-                failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-                return failureResponse
-            squares = Square.objects.filter(user=request.user)
+    def read(self, request, page):
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse 
+        squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        try:
+            squares = paginator.page(page)
+        except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+            squares = paginator.page(1)
+        except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+            squares = paginator.page(paginator.num_pages)
         if squares:
-                successResponse['result']=squares
-                return successResponse
+            next_page = int(page) + 1
+            next_url = "/user/feeds/"+ str(next_page)
+            successResponse['result'] = squares.object_list
+            successResponse['nexturl'] = next_url
+            return successResponse
         else:
             failureResponse['status'] = NOT_FOUND
             failureResponse['error'] = "Not Found"
-            return failureResponse
+        return failureResponse
 
 class ShareSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST',)

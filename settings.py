@@ -9,7 +9,7 @@ ADMINS = (
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'vaibps17@gmail.com'
+EMAIL_HOST_USER = 'nikhiltyagi.eng@gmail.com'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 
@@ -129,6 +129,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sqwag_api',
+    'registration',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -157,4 +158,4 @@ LOGGING = {
         },
     }
 }
-CONTENT_BASE = os.path.join(PROJECT_ROOT, 'frontend')
+CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
