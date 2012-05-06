@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, \
     ValidationError
 from piston.handler import BaseHandler
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
 from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
@@ -71,9 +72,9 @@ class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
 #    
     def read(self, request, page):
-        if not self.has_model():
-            failureResponse['status'] = SYSTEM_ERROR
-            failureResponse['error'] = "System Error."
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
@@ -87,7 +88,7 @@ class UserSelfFeedsHandler(BaseHandler):
             squares = paginator.page(paginator.num_pages)
         if squares:
             next_page = int(page) + 1
-            next_url = "/user/feeds/"+user_id+"/"+ str(next_page)
+            next_url = "/user/feeds/"+ str(next_page)
             successResponse['result'] = squares.object_list
             successResponse['nexturl'] = next_url
             return successResponse

@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core import serializers
 from django.core.exceptions import ValidationError
@@ -136,3 +136,18 @@ def cronMail(request):
             email.save()
     successResponse['result'] = "success"
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+
+def logout(self,request,user_id):
+    user_obj = User.objects.get(pk=user_id)
+    if user_obj:
+        if request.user.is_authenticated():
+            logout(request)
+            successResponse['result'] = "success"
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            successResponse['result'] = "success"
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "Not a valid user" 
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
