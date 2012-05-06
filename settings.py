@@ -20,7 +20,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'sqwag-dj',                      # Or path to database file if using sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
+        'PASSWORD': 'root',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -80,6 +80,12 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 TWITTER_CONSUMER_KEY = 'pZ7xPQJlkzaCxW73p276zw'
+TWITTER_CONSUMER_SECRET = 'fIkFmEyL7aI8k0YVAYK4xL4ZXoYQevHAvmipMEdCU9s'
+TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_AUTHORIZE_URL ='https://api.twitter.com/oauth/authorize'
+TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+CALLBACK_URL = 'http://127.0.0.1:8000/'
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (

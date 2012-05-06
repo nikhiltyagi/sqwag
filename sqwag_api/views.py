@@ -1,3 +1,4 @@
+from api.handlers import successResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core import serializers
@@ -5,15 +6,20 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.mail.message import BadHeaderError
 from django.core.serializers.json import DateTimeAwareJSONEncoder
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from oauth.oauth import OAuthToken
 from sqwag_api.constants import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
+from sqwag_api.twitterConnect import *
+from time import gmtime, strftime
 import datetime
+import httplib
+import oauth.oauth as oauth
+import settings
 import simplejson
 import time
-
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -135,4 +141,32 @@ def cronMail(request):
             email.status = e.message
             email.save()
     successResponse['result'] = "success"
+    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+
+def authTwitter(request):
+    twitterConnect = TwitterConnect()
+    twitterConnect.GetRequest()
+    tokenString = twitterConnect.mOauthRequestToken.to_string()
+    request.session[twitterConnect.mOauthRequestToken.key] = tokenString
+    request.session.modified = True
+    return HttpResponseRedirect(twitterConnect.mOauthRequestUrl)
+
+def accessTweeter(request):
+    key =request.GET['oauth_token']
+    tokenString = request.session.get(key,False)
+    pOauthRequestToken= OAuthToken.from_string(tokenString)
+    pPin = request.GET['oauth_verifier']
+    oauthAccess = OauthAccess(pOauthRequestToken, pPin)
+    oauthAccess.getOauthAccess()
+    # store mOauthAccessToken in data base for further use.
+    
+    api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+                            access_token_key=oauthAccess.mOauthAccessToken.key,
+                            access_token_secret=oauthAccess.mOauthAccessToken.secret)
+#    api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+#                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+#                            access_token_key=pOauthRequestToken.key,
+#                            access_token_secret=pOauthRequestToken.secret)
+    successResponse['result'] = oauthAccess.mUser.AsDict();
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')

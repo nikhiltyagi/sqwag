@@ -69,16 +69,20 @@ class SquareHandler(BaseHandler):
 
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
-#    
-    def read(self, request):
-        if not self.has_model():
-            failureResponse['status'] = SYSTEM_ERROR
-            failureResponse['error'] = "System Error."
-            return failureResponse 
-        squares = Square.objects.filter(user=request.user)
+         
+    def read(self, request, user_id):
+        squares = None
+        if user_id:
+            squares = Square.objects.filter(user=user_id)
+        else:
+            if not request.user.is_authenticated():
+                failureResponse['status'] = AUTHENTICATION_ERROR
+                failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+                return failureResponse
+            squares = Square.objects.filter(user=request.user)
         if squares:
-            successResponse['result']=squares
-            return successResponse
+                successResponse['result']=squares
+                return successResponse
         else:
             failureResponse['status'] = NOT_FOUND
             failureResponse['error'] = "Not Found"
