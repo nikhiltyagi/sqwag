@@ -170,16 +170,11 @@ def accessTweeter(request):
     successResponse['result'] = oauthAccess.mUser.AsDict();
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
 
-def logout(self,request,user_id):
-    user_obj = User.objects.get(pk=user_id)
-    if user_obj:
-        if request.user.is_authenticated():
-            logout(request)
-            successResponse['result'] = "success"
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-        else:
-            successResponse['result'] = "success"
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+def logoutUser(self,request):
+    if request.user.is_authenticated():
+        logout(request)
+        successResponse['result'] = "success"
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
         failureResponse['error'] = "Not a valid user" 

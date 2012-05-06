@@ -7,6 +7,7 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('sqwag_api.views',
     # Examples:
     url(r'^$', 'index', name='index'),
+    url(r'^logout/$', 'logoutUser', name='logout'),
     url(r'^login/$', 'loginUser', name='login'),
     url(r'^register/$', 'registerUser', name='register'),
     url(r'^reqinvite/$', 'requestInvitation', name='req_invite'),
