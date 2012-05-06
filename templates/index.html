@@ -33,15 +33,28 @@
     <div class="navbar-inner">
       <div class="container">
         <ul class="nav">
+          {% if loggedIn %}
+          <li>
+            <a>Feed</a>
+          </li>
+          <li>
+            <a>My sqwags</a>
+          </li>
+          <li>
+            <a>Top Sqwags</a>
+          </li>
+          <li>
+            <a href="#sqwag-form" data-toggle="modal">Create</a>
+          </li>
+          {% else %}
+          
           <li>
             <a href="#register-form" data-toggle="modal">Register</a>
           </li>
           <li>
             <a href="#login-form" data-toggle="modal">Login</a>
           </li>
-          <li>
-            <a href="#sqwag-form" data-toggle="modal">Create</a>
-          </li>
+          {% endif %}
         </ul>
       </div>
     </div>
@@ -132,7 +145,7 @@
         </div>
       </form>
     </div>
-    
+    <p id="console" class="alert alert-info hidden"></p>
 	  <div class="sqwag-list row">
       <script id="sqwag" type="text/html">
       <div class="span3">
@@ -179,15 +192,16 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="assets/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
-<!-- scripts concatenated and minified via ant build script-->
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
+<script src="assets/js/libs/jquery.form.js"></script>
+<script src="assets/js/script.js"></script>
+
+{% if loggedIn %}
 <script src="assets/js/libs/underscore-min.js"></script>
 <script src="assets/js/libs/backbone-min.js"></script>
-<script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
-<script src="assets/js/script.js"></script>
 <script src="assets/js/app.js"></script>
-<!-- end scripts-->
+{% endif %}
 
 </body>
 </html>
