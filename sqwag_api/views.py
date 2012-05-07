@@ -65,10 +65,6 @@ def registerUser(request):
     if request.method == "POST":
         form =  RegisterationForm(request.POST)
         if form.is_valid():
-#            user = form.save(commit=False)
-#            user.date_joined = datetime.datetime.now()
-#            user.is_active = False
-#            user.save();
             fname = form.cleaned_data['first_name']
             lname = form.cleaned_data['last_name']
             email = form.cleaned_data['email']
@@ -143,6 +139,10 @@ def cronMail(request):
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
 
 def authTwitter(request):
+    if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     twitterConnect = TwitterConnect()
     twitterConnect.GetRequest()
     tokenString = twitterConnect.mOauthRequestToken.to_string()
@@ -153,24 +153,43 @@ def authTwitter(request):
 def accessTweeter(request):
     key =request.GET['oauth_token']
     tokenString = request.session.get(key,False)
-    pOauthRequestToken= OAuthToken.from_string(tokenString)
-    pPin = request.GET['oauth_verifier']
-    oauthAccess = OauthAccess(pOauthRequestToken, pPin)
-    oauthAccess.getOauthAccess()
-    # store mOauthAccessToken in data base for further use.
-    
-    api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+    if(tokenString):
+        pOauthRequestToken= OAuthToken.from_string(tokenString)
+        pPin = request.GET['oauth_verifier']
+        oauthAccess = OauthAccess(pOauthRequestToken, pPin)
+        oauthAccess.getOauthAccess()
+        # store mOauthAccessToken in data base for further use.
+        # make entry in userAccount table
+        userAccount = UserAccount(user=request.user,account=ACCOUNT_TWITTER, account_id=oauthAccess.mUser.GetId(),
+                                  access_token=oauthAccess.mOauthAccessToken.to_string(), date_created=time.time())
+        try:
+            userAccount.full_clean()
+            userAccount.save()
+            successResponse['result'] = oauthAccess.mUser.AsDict();
+            
+            # follow this user by TWITTER_USER
+            sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
+            sqAccessTokenString = sqwagTwitterUserAccount.access_token
+            sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
+            api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
                             consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-                            access_token_key=oauthAccess.mOauthAccessToken.key,
-                            access_token_secret=oauthAccess.mOauthAccessToken.secret)
-#    api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-#                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-#                            access_token_key=pOauthRequestToken.key,
-#                            access_token_secret=pOauthRequestToken.secret)
-    successResponse['result'] = oauthAccess.mUser.AsDict();
-    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                            access_token_key=sqAccessToken.key,
+                            access_token_secret=sqAccessToken.secret)
+            followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
+            successResponse['followed'] = followedUser.AsDict()
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            
+        except ValidationError, e :
+            failureResponse['status'] = SYSTEM_ERROR
+            failureResponse['error'] = "some error occured, please try later"+e.message
+            #TODO: log it
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = SYSTEM_ERROR
+        failureResponse['error'] = "some error occured, please try later"#rc.FORBIDDEN
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
-def logoutUser(self,request):
+def logoutUser(request):
     if request.user.is_authenticated():
         logout(request)
         successResponse['result'] = "success"

@@ -129,7 +129,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sqwag_api',
-    #'registration',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -159,3 +158,6 @@ LOGGING = {
     }
 }
 CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
+
+SQWAG_TWITTER_USER = 'sqwaglc'
+SQWAG_TWITTER_USER_ACCOUNT_ID = 11
