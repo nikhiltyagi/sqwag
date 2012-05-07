@@ -26,6 +26,8 @@ class UserAccount(models.Model):
 	user = models.ForeignKey(User)
 	account = models.CharField(max_length=200)
 	account_id = models.CharField(max_length=100)
+	access_token = models.CharField(max_length=4000)
+	date_created = models.IntegerField()
 	
 	def __unicode__(self):
 		return self.account

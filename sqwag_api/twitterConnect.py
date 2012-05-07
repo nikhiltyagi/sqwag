@@ -41,7 +41,7 @@ class OauthAccess():
         self.mOauthAccessToken = self.mTwitterApi.getAccessToken(self.mPin)
         self.mAuthenticatedTwitterInstance = OAuthApi(self.CONSUMER_KEY, self.CONSUMER_SECRET, self.mOauthAccessToken)
         self.mUser = self.mAuthenticatedTwitterInstance.GetUserInfo()
-        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-                            access_token_key=self.mOauthAccessToken.key,
-                            access_token_secret=self.mOauthAccessToken.secret)
+#        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+#                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+#                            access_token_key=self.mOauthAccessToken.key,
+#                            access_token_secret=self.mOauthAccessToken.secret)

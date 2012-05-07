@@ -28,7 +28,7 @@ context = context || {};
     getSquare: function () {
       var self = this;
       $.ajax({
-        url: "http://localhost:8000/api/user/homefeeds/",
+        url: "http://127.0.0.1:8000/api/user/homefeeds/",
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           if (data.status == 1) {
