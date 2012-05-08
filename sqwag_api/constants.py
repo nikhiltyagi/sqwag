@@ -15,6 +15,7 @@ ACCOUNT_INACTIVE = 410
 INVALID_CREDENTIALS = 411
 DUPLICATE = 412
 NUMBER_OF_SQUARES = 2
+TO_MANY_REQUESTS = 3
 
 # request invitation constants
 SUBJECT_REQ_INVITE = "Thankyou for your interest"
