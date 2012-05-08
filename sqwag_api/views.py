@@ -168,7 +168,6 @@ def accessTweeter(request):
             userAccount.full_clean()
             userAccount.save()
             successResponse['result'] = oauthAccess.mUser.AsDict();
-            
             # follow this user by TWITTER_USER
             if request.user.id == settings.SQWAG_TWITTER_USER_ACCOUNT_ID:
                  return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -180,6 +179,7 @@ def accessTweeter(request):
                             access_token_key=sqAccessToken.key,
                             access_token_secret=sqAccessToken.secret)
             followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
+            successResponse['followed'] = followedUser.AsDict()
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         except ValidationError, e :
             failureResponse['status'] = SYSTEM_ERROR

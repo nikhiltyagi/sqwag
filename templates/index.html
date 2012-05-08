@@ -25,7 +25,7 @@
 <div class="container">
 	<header>
     <!-- TODO: figure out a better way. This is jugaad -->
-    <a href="" class="hidden" id="add-friend"></a>
+    <a id="feed"></a>
     <h1 class="align-center"><span class="logo"><b class="square">Sq</b>wag</span></h1>
     
 	</header>
@@ -35,7 +35,7 @@
         <ul class="nav">
           {% if loggedIn %}
           <li>
-            <a>Feed</a>
+            <a class="js-load" href="#feed" id="home">Feed</a>
           </li>
           <li>
             <a>My sqwags</a>
@@ -45,6 +45,11 @@
           </li>
           <li>
             <a href="#sqwag-form" data-toggle="modal">Create</a>
+          </li>
+          <li>
+            <a class="js-load" href="#settings">Settings</a><li>
+          <li>
+            <a class="js-link" href="/sqwag/logout/">Logout</a>
           </li>
           {% else %}
           
@@ -146,52 +151,20 @@
       </form>
     </div>
     <p id="console" class="alert alert-info hidden"></p>
-	  <div class="sqwag-list row">
-      <script id="sqwag" type="text/html">
-      <div class="span3">
-      	<div class="sqwag sq-{% templatetag openvariable %} content_type {% templatetag closevariable %}">
-          <div class="island">
-          	<div class="hd">
-          		<div class="media">
-                <img class="media-obj avatar" src="http://graph.facebook.com/{% templatetag openvariable %} user.username {% templatetag closevariable %}/picture" alt=""/>
-                <div class="media-bd">
-                  <ul class="no-bullet">
-                    <li class="fullname">Praveen Kumar</li>
-                    <li class="twitter-handle"><a href="#">@{% templatetag openvariable %}  user.username {% templatetag closevariable %}</a></li>
-                  </ul>
-                </div>
-              </div>
-          	</div>
-          	<div class="bd">
-          	  <p class="tweet-text">{% templatetag openvariable %} content_data {% templatetag closevariable %}</p>
-          	</div>
-          	<div class="ft">
-              <div class="media">
-              	<div class="media-obj-alt"><img src="assets/img/icon-tweet.png" alt=""/></div>
-              	<div class="media-bd">
-                  <span class="pub-time">2 minutes ago</span>
-                  <ul class="action-links">
-                    <li><a href="#">reply</a></li>
-                    <li><a href="#">retweet</a></li>
-                    <li><a href="#">favorite</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </script>
-	  </div>
+    
+    <div id="content">
+    </div>
+    
 	</div>
 	<footer>
     <p class="copyright">&copy; 2012. Sqwag inc.</p>
 	</footer>
 </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="assets/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
+<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="assets/js/libs/jquery-1.7.2.min.js"><\/script>')</script>-->
 
+<script src="assets/js/libs/jquery-1.7.2.min.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/script.js"></script>
