@@ -25,7 +25,7 @@ var SQ = {
     $('.js-load').click(function() {
       var tpl = $(this).attr('href').replace('#','');
       var url = '/assets/templates/' + tpl + '.html';
-      $("#content").load(url).fadeIn('slow');
+      $("#content").load(url);
       return false;
     });
 
