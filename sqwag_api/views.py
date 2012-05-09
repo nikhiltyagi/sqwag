@@ -161,14 +161,16 @@ def accessTweeter(request):
         # store mOauthAccessToken in data base for further use.
         # make entry in userAccount table
         userAccount = UserAccount(user=request.user,account=ACCOUNT_TWITTER, account_id=oauthAccess.mUser.GetId(),
-                                  access_token=oauthAccess.mOauthAccessToken.to_string(), date_created=time.time())
+                                  access_token=oauthAccess.mOauthAccessToken.to_string(), date_created=time.time(),
+                                  account_data=oauthAccess.mUser.AsJsonString(), account_pic=oauthAccess.mUser.GetProfileImageUrl(),
+                                  account_handle=oauthAccess.mUser.GetScreenName())
         try:
             userAccount.full_clean()
             userAccount.save()
             successResponse['result'] = oauthAccess.mUser.AsDict();
-            
-            '''
             # follow this user by TWITTER_USER
+            if request.user.id == settings.SQWAG_TWITTER_USER_ACCOUNT_ID:
+                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
             sqAccessTokenString = sqwagTwitterUserAccount.access_token
             sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
@@ -178,9 +180,7 @@ def accessTweeter(request):
                             access_token_secret=sqAccessToken.secret)
             followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
             successResponse['followed'] = followedUser.AsDict()
-            '''
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-            
         except ValidationError, e :
             failureResponse['status'] = SYSTEM_ERROR
             failureResponse['error'] = "some error occured, please try later"+e.message
@@ -200,3 +200,59 @@ def logoutUser(request):
         failureResponse['status'] = BAD_REQUEST
         failureResponse['error'] = "Not a valid user" 
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def syncTwitterFeeds(request):
+    sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
+    sqAccessTokenString = sqwagTwitterUserAccount.access_token
+    sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
+    api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+                    consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+                    access_token_key=sqAccessToken.key,
+                    access_token_secret=sqAccessToken.secret)
+    #check in db what was the last tweet's id fetched
+    feeds = None
+    retJson = []
+    try:
+        syncTwitterFeed = SyncTwitterFeed.objects.all()[-1]
+        last_tweet = syncTwitterFeed.last_tweet
+        if (time.time() - syncTwitterFeed.last_sync_time > 10):
+            feeds = api.GetFriendsTimeline(user=None, since_id = last_tweet)
+        else:
+            failureResponse['status'] = TO_MANY_REQUESTS
+            failureResponse['error'] = 'Too many requests in too less a time interval'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    except:
+        feeds = api.GetFriendsTimeline(user=None)
+    if(feeds):
+        for feed in feeds:
+            twitterUser = feed.GetUser()
+            try:
+                userAccount = UserAccount.objects.get(account_id = twitterUser.GetId(), account='twitter')
+                sqwagUser = userAccount.user
+                # now create a square of this tweet by this sqwag user
+                square = Square(user= sqwagUser, content_type='tweet',  content_src='twitter.com', 
+                                content_data = feed.GetText(), date_created = feed.GetCreatedAtInSeconds(),
+                                shared_count=0, liked_count=0)
+                square.user_account = userAccount
+                try:
+                    square.full_clean(exclude='content_description')
+                    square.save()
+                except ValidationError, e:
+                    print  "error in saving square"# TODO: log this
+            except UserAccount.DoesNotExist:
+                print "user account does not exist"
+        lastFeed = feeds[0]
+        syncTwitterFeed = SyncTwitterFeed(last_tweet=lastFeed.GetId(),date_created=feed.GetCreatedAtInSeconds(),
+                                          last_sync_time=time.time())
+        try:
+            syncTwitterFeed.full_clean()
+            syncTwitterFeed.save()
+        except ValidationError, e:
+            print "error in saving syncTwitterFeed"
+        successResponse['result']= 'success'
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = NOT_FOUND
+        failureResponse['message'] = 'no new feeds found'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        

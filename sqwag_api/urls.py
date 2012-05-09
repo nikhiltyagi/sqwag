@@ -14,6 +14,7 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^cronmail/$', 'cronMail', name='cron_email'),
     url(r'^authtwitter/$', 'authTwitter', name='cron_email'),
     url(r'^accesstweeter/$', 'accessTweeter', name='cron_email'),
+    url(r'^synctwitterfeeds/$', 'syncTwitterFeeds', name='cron_email'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
