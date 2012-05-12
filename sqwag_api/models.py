@@ -23,7 +23,7 @@ class Square(models.Model):
 	date_created = models.IntegerField('date published',null=True)
 	shared_count = models.IntegerField(null=True)
 	liked_count = models.IntegerField(null=True)
-	user_account = models.ForeignKey(UserAccount)
+	user_account = models.ForeignKey(UserAccount, null=True)
 
 	def __unicode__(self):
 		return self.content_data
@@ -61,3 +61,5 @@ class SyncTwitterFeed(models.Model):
 	last_tweet = models.CharField(max_length=40)
 	date_created = models.IntegerField()
 	last_sync_time = models.IntegerField()
+	def __unicode__(self):
+		return self.last_tweet

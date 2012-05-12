@@ -25,7 +25,9 @@ context = context || {};
     events: {
       "click #feed": "getSquare"
     },
-    getSquare: function () {
+    getSquare: function (event) {
+      // $(event.target) will give us the event object.
+      //alert($(event.target));
       var self = this;
       $.ajax({
         url: "/api/user/homefeeds/",

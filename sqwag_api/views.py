@@ -213,7 +213,7 @@ def syncTwitterFeeds(request):
     feeds = None
     retJson = []
     try:
-        syncTwitterFeed = SyncTwitterFeed.objects.all()[-1]
+        syncTwitterFeed = SyncTwitterFeed.objects.all().order_by('-last_sync_time')[0]
         last_tweet = syncTwitterFeed.last_tweet
         if (time.time() - syncTwitterFeed.last_sync_time > 10):
             feeds = api.GetFriendsTimeline(user=None, since_id = last_tweet)
@@ -224,7 +224,7 @@ def syncTwitterFeeds(request):
     except:
         feeds = api.GetFriendsTimeline(user=None)
     if(feeds):
-        for feed in feeds:
+        for feed in reversed(feeds):
             twitterUser = feed.GetUser()
             try:
                 userAccount = UserAccount.objects.get(account_id = twitterUser.GetId(), account='twitter')
