@@ -23,6 +23,7 @@ class Square(models.Model):
 	date_created = models.IntegerField('date published',null=True)
 	shared_count = models.IntegerField(null=True)
 	liked_count = models.IntegerField(null=True)
+	#square_type = models.CharField(max_length=50, null=True)
 	user_account = models.ForeignKey(UserAccount, null=True)
 
 	def __unicode__(self):

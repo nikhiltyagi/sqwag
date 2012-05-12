@@ -20,23 +20,22 @@ __author__ = 'python-twitter@googlegroups.com'
 __version__ = '0.8.2'
 
 
-import StringIO
 import base64
 import calendar
-import calendar
 import datetime
-import gzip
 import httplib
-import oauth2 as oauth
 import os
 import rfc822
 import sys
 import tempfile
 import textwrap
 import time
+import calendar
 import urllib
 import urllib2
 import urlparse
+import gzip
+import StringIO
 
 try:
   # Python >= 2.6
@@ -63,6 +62,7 @@ try:
 except ImportError:
   from md5 import md5
 
+import oauth2 as oauth
 
 
 CHARACTER_LIMIT = 140
@@ -2764,6 +2764,26 @@ class Api(object):
       data['in_reply_to_status_id'] = in_reply_to_status_id
     json = self._FetchUrl(url, post_data=data)
     data = self._ParseAndCheckTwitter(json)
+    return Status.NewFromJsonDict(data)
+
+  def RetweetPost(self, id):
+    '''
+    Retweet some twitter status.
+
+    The twitter.Api instance must be authenticated.
+
+    Args:
+        id:
+            The ID of an existing status that should be retweeted.
+    Returns:
+        A twitter.Status instance representing the message posted.
+    '''
+    if not self._oauth_consumer:
+        raise TwitterError("The twitter.Api instance must be authenticated.")
+    url = '%s/statuses/retweet/%d.json' % (self.base_url, id)
+    json = self._FetchUrl(url, post_data={'':None})
+    data = simplejson.loads(json)
+    self._CheckForTwitterError(data)
     return Status.NewFromJsonDict(data)
 
   def PostUpdates(self, status, continuation=None, **kwargs):
