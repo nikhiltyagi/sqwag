@@ -45,6 +45,9 @@ class SquareHandler(BaseHandler):
                 except UserAccount.DoesNotExist:
                     print "user account does not exist"
             square.save()
+            userProfile = UserProfile.objects.get(user=square.user)
+            userProfile.sqwag_count += 1
+            userProfile.save()
             if square:
                 successResponse['result'] = square
                 return successResponse
@@ -175,6 +178,15 @@ class RelationshipHandler(BaseHandler):
                 relationship.date_subscribed = time.time()
                 relationship.permission = True
                 relationship.save()
+                #update producer's profile
+                userProfile = UserProfile.objects.get(user=relationship.producer)
+                userProfile.followed_by_count += 1 
+                userProfile.save()
+                #update subscriber's profile
+                userProfile = UserProfile.objects.get(user=relationship.subscriber)
+                userProfile.following_count += 1 
+                userProfile.save()
+                
                 to_email = relationship.producer.email
                 # notify producer user
                 mailer = Emailer(subject=SUBJECT_SUBSCRIBED,body=BODY_SUBSCRIBED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
@@ -234,6 +246,9 @@ class DeleteSquareHandler(BaseHandler):
             sq_id = request.POST['square_id']
             sq_obj = Square.objects.get(pk=sq_id, user = request.user)
             if sq_obj:
+                userProfile = UserProfile.objects.get(user=sq_obj.user)
+                userProfile.sqwag_count = userProfile.sqwag_count - 1
+                userProfile.save()
                 sq_obj.delete()
                 successResponse['result'] = "square deleted"
                 return successResponse

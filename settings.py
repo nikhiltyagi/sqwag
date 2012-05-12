@@ -162,4 +162,5 @@ LOGGING = {
 CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_TWITTER_USER_ACCOUNT_ID = 35  #kind of misleading name. this is user's id in auth_user table
+SQWAG_TWITTER_USER_ACCOUNT_ID = 11  #kind of misleading name. this is user's id in auth_user table
+AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"

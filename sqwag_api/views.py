@@ -82,6 +82,8 @@ def registerUser(request):
             user.date_joined = datetime.datetime.now()
             user.is_active = False
             user.save();
+            # create a profile for this user
+            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0)
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
@@ -287,6 +289,9 @@ def syncTwitterFeeds(request):
                 try:
                     square.full_clean(exclude='content_description')
                     square.save()
+                    userProfile = UserProfile.objects.get(user=square.user)
+                    userProfile.sqwag_count += 1
+                    userProfile.save()
                 except ValidationError, e:
                     print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
