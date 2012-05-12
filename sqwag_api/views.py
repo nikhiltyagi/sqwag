@@ -1,12 +1,15 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.mail.message import BadHeaderError
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from oauth.oauth import OAuthToken
+from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
@@ -16,7 +19,9 @@ from time import gmtime, strftime
 import datetime
 import httplib
 import oauth.oauth as oauth
+import random
 import settings
+import sha
 import simplejson
 import time
 successResponse = {}
@@ -61,6 +66,7 @@ def loginUser(request):
         failureResponse['status'] = INVALID_CREDENTIALS
         failureResponse['error'] = "invalid credentials"
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    
 def registerUser(request):
     if request.method == "POST":
         form =  RegisterationForm(request.POST)
@@ -76,18 +82,27 @@ def registerUser(request):
             user.date_joined = datetime.datetime.now()
             user.is_active = False
             user.save();
+            registration_profile = RegistrationProfile.objects.create_profile(user)
+            #current_site = Site.objects.get_current()
+            subject = "Activation link from sqwag.com"
+            host = request.get_host()
+            if request.is_secure():
+                protocol = 'https://'
+            else:
+                protocol = 'http://'
+            message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
+            mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user.email,date_created=time.time())
+            mailentry(mailer) 
+            #this needs to be cronned as part of cron mail
+            #send_mail(subject,message,'coordinator@sqwag.com',[user.email],fail_silently=False)
             #subscribe own feeds
             relationShip = Relationship(subscriber=user,producer=user)
             relationShip.date_subscribed = time.time()
             relationShip.permission = True
             relationShip.save()
-            respObj = {}
-            respObj['username'] = user.username
-            respObj['id'] = user.id
-            respObj['first_name'] = user.first_name
-            respObj['last_name'] = user.last_name
-            respObj['email'] =  user.email
-            successResponse['result'] = respObj
+            
+            #respObj['url'] = current_site
+            successResponse['result'] = "Activation link is sent to the registration mail"
             #TODO: send email with activation link
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
@@ -200,7 +215,42 @@ def logoutUser(request):
         failureResponse['status'] = BAD_REQUEST
         failureResponse['error'] = "Not a valid user" 
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-
+    
+def activateUser(request,id,key):
+    user = User.objects.get(pk=id)
+    if not user.is_active:
+        Reg_prof = RegistrationProfile.objects.get(user=id,activation_key=key)
+        if Reg_prof:
+            #user = User.objects.get(pk=id)
+            user.is_active = True
+            user.save()
+            Reg_prof.date_activated = time.time()
+            Reg_prof.is_deleted = True
+            Reg_prof.save()
+            respObj = {}
+            respObj['message'] = "Account is Activated"
+            respObj['username'] = user.username
+            respObj['id'] = user.id
+            respObj['first_name'] = user.first_name
+            respObj['last_name'] = user.last_name
+            respObj['email'] =  user.email
+            successResponse['result'] = respObj
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = 'FAILED'
+            failureResponse['error'] = 'Activation key not valid'   
+    else:
+        respObj = {}
+        respObj['message'] = "Your Account is already active" 
+        respObj['username'] = user.username
+        respObj['id'] = user.id
+        respObj['first_name'] = user.first_name
+        respObj['last_name'] = user.last_name
+        respObj['email'] =  user.email
+        successResponse['result'] = respObj
+        #TODO: send email with activation link
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')        
+            
 def syncTwitterFeeds(request):
     sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
     sqAccessTokenString = sqwagTwitterUserAccount.access_token
@@ -278,4 +328,3 @@ def retweet(request):
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
         failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    
