@@ -19,7 +19,8 @@ failureResponse = {}
 class SquareHandler(BaseHandler):
     allowed_methods = ('GET', 'PUT', 'DELETE','POST')
     fields = ('id','content_src','content_type','content_data','content_description',
-              'date_created',('user', ('id','first_name','last_name','email','username',)))
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
     model = Square
     def create(self, request, *args, **kwargs):
@@ -37,6 +38,12 @@ class SquareHandler(BaseHandler):
             square.shared_count=0
             square.liked_count=0
             square.user = request.user
+            if square.content_src == 'twitter.com':
+                try:
+                    userAccount = UserAccount.objects.filter(user=request.user,account='twitter.com')
+                    square.user_account = userAccount
+                except UserAccount.DoesNotExist:
+                    print "user account does not exist"
             square.save()
             if square:
                 successResponse['result'] = square
@@ -70,7 +77,6 @@ class SquareHandler(BaseHandler):
 
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)
-#    
     def read(self, request, page):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR

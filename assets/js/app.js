@@ -23,12 +23,14 @@ context = context || {};
       context.Squares = this.Squares;
     },
     events: {
-      "click #add-friend": "getSquare"
+      "click #feed": "getSquare"
     },
-    getSquare: function () {
+    getSquare: function (event) {
+      // $(event.target) will give us the event object.
+      //alert($(event.target));
       var self = this;
       $.ajax({
-        url: "http://localhost:8000/api/user/homefeeds/",
+        url: "/api/user/homefeeds/",
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           if (data.status == 1) {
@@ -55,5 +57,4 @@ context = context || {};
   });
 
   var appview = new AppView;
-  
 })(jQuery);

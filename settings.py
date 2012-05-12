@@ -82,6 +82,12 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 TWITTER_CONSUMER_KEY = 'pZ7xPQJlkzaCxW73p276zw'
+TWITTER_CONSUMER_SECRET = 'fIkFmEyL7aI8k0YVAYK4xL4ZXoYQevHAvmipMEdCU9s'
+TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_AUTHORIZE_URL ='https://api.twitter.com/oauth/authorize'
+TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+CALLBACK_URL = 'http://127.0.0.1:8000/'
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
@@ -154,3 +160,6 @@ LOGGING = {
     }
 }
 CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
+
+SQWAG_TWITTER_USER = 'sqwaglc'
+SQWAG_TWITTER_USER_ACCOUNT_ID = 11  #kind of misleading name. this is user's id in auth_user table
