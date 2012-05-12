@@ -312,13 +312,16 @@ class PublicSqwagsFeedsHandler(BaseHandler):
 
 class UserInfo(BaseHandler):
     methods_allowed = ('GET')
-    fields = ('first_name','last_name','email','username')
-    model = User
+    fields = ('id','first_name','last_name','email','username','account','account_id','account_data','account_pic','account_handle','account_pic')
     
-    def read(self,request,id=None):        
+    def read(self,request,id=None,*args, **kwargs):        
         if id:
             user_obj = User.objects.get(pk=id)
-            successResponse['result'] = user_obj
+            useracc_obj = UserAccount.objects.filter(user=id)
+            Respobj = {}
+            Respobj['user'] = user_obj
+            Respobj['user_accounts']= useracc_obj
+            successResponse['result'] = Respobj
             return successResponse
         else:
             if request.user.is_authenticated():
