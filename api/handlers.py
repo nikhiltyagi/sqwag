@@ -18,7 +18,7 @@ failureResponse = {}
 
 class SquareHandler(BaseHandler):
     allowed_methods = ('GET', 'PUT', 'DELETE','POST')
-    fields = ('id','content_src','content_type','content_data','content_description',
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
@@ -189,8 +189,8 @@ class RelationshipHandler(BaseHandler):
 class HomePageFeedHandler(BaseHandler):
     methods_allowed = ('GET',)
     
-    def read(self, request,*args, **kwargs):
-        # only loged in user can get it's own feed
+    def read(self, request, page=1, *args, **kwargs):
+        # only authenticated user can get it's own feed
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
@@ -198,16 +198,31 @@ class HomePageFeedHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares = Square.objects.filter(user__in=producers)
-        if squares:
-            successResponse['result'] = squares
-            return successResponse
-        else:
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "You need to subscribe to receive feeds"
+        squares_all = Square.objects.filter(user__in=producers)
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        try:
+            squares = paginator.page(page)
+            if squares:
+                next_page = int(page) + 1
+                next_url = "/user/feeds/"+ str(next_page)
+                successResponse['result'] = squares.object_list
+                successResponse['nexturl'] = next_url
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "You need to subscribe to receive feeds"
             return failureResponse
+        except PageNotAnInteger:
+        # If page is not an integer, deliver failure response.
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "page should be an integer"
+        except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "page is out of bounds"
+        return failureResponse
 
-class DeleteSquare(BaseHandler):
+class DeleteSquareHandler(BaseHandler):
     methods_allowed = ('POST')
     
     def create(self, request, *args, **kwargs):
@@ -224,12 +239,76 @@ class DeleteSquare(BaseHandler):
                 return successResponse
             else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "You are not authorised to delete this square"
+                failureResponse['error'] = "You are not authorised to delete this square or the square is not present with us.    "
                 return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "square_id is required"
             return failureResponse
+
+class TopSqwagsFeedsHandler(BaseHandler):
+    methods_allowed = ('GET',)
+    
+    def read(self, request, page=1, *args, **kwargs):
+        # only authenticated user can get it's own feed
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        user = request.user
+        relationships = Relationship.objects.filter(subscriber=user)
+        producers =  [relationship.producer for relationship in relationships]
+        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count')
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        try:
+            squares = paginator.page(page)
+            if squares:
+                next_page = int(page) + 1
+                next_url = "/user/topsqwagsfeeds/"+ str(next_page)
+                successResponse['result'] = squares.object_list
+                successResponse['nexturl'] = next_url
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "You need to subscribe to receive feeds"
+            return failureResponse
+        except PageNotAnInteger:
+        # If page is not an integer, deliver failure response.
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "page should be an integer"
+        except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "page is out of bounds"
+        return failureResponse
+
+class PublicSqwagsFeedsHandler(BaseHandler):
+    methods_allowed = ('GET',)
+    
+    def read(self, request, page=1, *args, **kwargs):
+        squares_all = Square.objects.all().order_by('-date_created')
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        try:
+            squares = paginator.page(page)
+            if squares:
+                next_page = int(page) + 1
+                next_url = "/user/publicsquaresfeeds/"+ str(next_page)
+                successResponse['result'] = squares.object_list
+                successResponse['nexturl'] = next_url
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "Opps no feeds on sqwag platform"
+            return failureResponse
+        except PageNotAnInteger:
+        # If page is not an integer, deliver failure response.
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "page should be an integer"
+        except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "page is out of bounds"
+        return failureResponse
 
 class UserInfo(BaseHandler):
     methods_allowed = ('GET')
@@ -242,14 +321,10 @@ class UserInfo(BaseHandler):
             successResponse['result'] = user_obj
             return successResponse
         else:
-            #if request.user.is_authenticated():
-            #user_obj = User.objects.get(pk=request.user)
-            #successResponse['result'] = user_obj
-            #return successResponse
-            #else:
+            if request.user.is_authenticated():
+                successResponse['result'] = request.user
+                return successResponse
+            else:
                 failureResponse['status'] = AUTHENTICATION_ERROR
                 failureResponse['error'] = "Login Required"#rc.FORBIDDEN
                 return failureResponse
-            
-            
-        

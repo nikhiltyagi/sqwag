@@ -13,7 +13,9 @@ user_self_feeds_resource =  CORSResource(handler=UserSelfFeedsHandler)
 share_square_resource = CORSResource(handler=ShareSquareHandler)
 relationship_resource = CORSResource(handler=RelationshipHandler)
 home_page_feeds_resource = CORSResource(handler=HomePageFeedHandler)
-square_delete_resource = CORSResource(handler=DeleteSquare)
+square_delete_resource = CORSResource(handler=DeleteSquareHandler)
+top_sqwags_resource = CORSResource(handler=TopSqwagsFeedsHandler)
+public_sqwags_resource = CORSResource(handler=PublicSqwagsFeedsHandler)
 userinfo_resource = CORSResource(handler=UserInfo)
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 
@@ -23,8 +25,13 @@ urlpatterns = patterns('',
     url(r'^square/create', square_resource,{ 'emitter_format': 'json' }),
     url(r'^square/share', share_square_resource,{ 'emitter_format': 'json' }),
     url(r'^subscribe/', relationship_resource,{ 'emitter_format': 'json' }),
+    url(r'^user/homefeeds/(?P<page>\d+)$', home_page_feeds_resource,{ 'emitter_format': 'json' }),
     url(r'^user/homefeeds/', home_page_feeds_resource,{ 'emitter_format': 'json' }),
     url(r'^square/delete', square_delete_resource,{'emitter_format': 'json'}),
+    url(r'^user/topsqwagsfeeds/(?P<page>\d+)$', top_sqwags_resource,{ 'emitter_format': 'json' }),
+    url(r'^user/topsqwagsfeeds/', top_sqwags_resource,{ 'emitter_format': 'json' }),
+    url(r'^publicsqwagsfeeds/', public_sqwags_resource,{ 'emitter_format': 'json' }),
+    url(r'^publicsqwagsfeeds/(?P<page>\d+)$', public_sqwags_resource,{ 'emitter_format': 'json' }),
     url(r'^userinfo/(?P<id>\d+)$',userinfo_resource,{'emitter_format': 'json'}),
     url(r'^userinfo/',userinfo_resource,{'emitter_format': 'json'}),
 )

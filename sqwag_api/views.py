@@ -305,3 +305,26 @@ def syncTwitterFeeds(request):
         failureResponse['status'] = NOT_FOUND
         failureResponse['message'] = 'no new feeds found'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def retweet(request):
+    if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    try:
+        userTwitterUserAccount = UserAccount.objects.get(user=request.user, account='twitter')
+        userAccessTokenString = userTwitterUserAccount.access_token
+        userAccessToken = OAuthToken.from_string(userAccessTokenString)
+        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+                        consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+                        access_token_key=userAccessToken.key,
+                        access_token_secret=userAccessToken.secret)
+        tweetId = request.Get['tweet_id']
+        if isinstance( tweetId, int ):
+            status = api.RetweetPost(tweetId)
+            successResponse['result'] = status.AsDict()
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    except UserAccount.DoesNotExist:
+        failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
+        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')

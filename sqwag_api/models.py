@@ -81,35 +81,7 @@ class RegistrationManager(models.Manager):
                 profile.save()
                 return user
         return False
-    
-#    def create_inactive_user(self, username, password, email,
-#                             send_email=True, profile_callback=None):
-#        new_user = User.objects.create_user(username, email, password)
-#        new_user.is_active = False
-#        new_user.save()
-#        
-#        registration_profile = self.create_profile(new_user)
-#        
-#        if profile_callback is not None:
-#            profile_callback(user=new_user)
-#        
-#        if send_email:
-#            from django.core.mail import send_mail
-#            current_site = Site.objects.get_current()
-#            
-#            subject = render_to_string('registration/activation_email_subject.txt',
-#                                       { 'site': current_site })
-#            # Email subject *must not* contain newlines
-#            subject = ''.join(subject.splitlines())
-#            
-#            message = render_to_string('registration/activation_email.txt',
-#                                       { 'activation_key': registration_profile.activation_key,
-#                                         'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
-#                                         'site': current_site })
-#            
-#            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [new_user.email])
-#        return new_user
-    
+
     def create_profile(self, user):
         salt = sha.new(str(random.random())).hexdigest()[:5]
         activation_key = sha.new(salt+user.username).hexdigest()
@@ -144,7 +116,6 @@ class RegistrationProfile(models.Model):
         return self.activation_key == "ALREADY_ACTIVATED" or \
                (self.user.date_joined + expiration_date <= datetime.datetime.now())
     activation_key_expired.boolean = True	
-
 
 
 class SyncTwitterFeed(models.Model):
