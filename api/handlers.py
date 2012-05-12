@@ -224,3 +224,26 @@ class DeleteSquare(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "square_id is required"
             return failureResponse
+
+class UserInfo(BaseHandler):
+    methods_allowed = ('GET')
+    fields = ('first_name','last_name','email','username')
+    model = User
+    
+    def read(self,request,id=None):        
+        if id:
+            user_obj = User.objects.get(pk=id)
+            successResponse['result'] = user_obj
+            return successResponse
+        else:
+            #if request.user.is_authenticated():
+            #user_obj = User.objects.get(pk=request.user)
+            #successResponse['result'] = user_obj
+            #return successResponse
+            #else:
+                failureResponse['status'] = AUTHENTICATION_ERROR
+                failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+                return failureResponse
+            
+            
+        

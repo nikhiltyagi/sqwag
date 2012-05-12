@@ -11,6 +11,7 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^register/$', 'registerUser', name='register'),
     url(r'^reqinvite/$', 'requestInvitation', name='req_invite'),
     url(r'^cronmail/$', 'cronMail', name='cron_email'),
+    url(r'^activate/(?P<id>\d+)/(?P<key>\w+)$', 'activateUser', name='activate_user'),
     
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
