@@ -115,7 +115,7 @@ class ShareSquareHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
         if 'square_id' in request.POST:
-            if request.POST['suqare_id'].isdigit():
+            if request.POST['square_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
                 userObj = request.user
                 userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
@@ -218,7 +218,7 @@ class HomePageFeedHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers)
+        squares_all = Square.objects.filter(user__in=producers).order_by('-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)

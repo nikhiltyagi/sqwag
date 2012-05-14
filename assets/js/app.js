@@ -50,9 +50,12 @@ context = context || {};
       });
     },
     addSquare: function (model) {
-      var sq = ich.sqwag(model.attributes);
+      if(model.attributes.content_type == 'tweet') {
+        var sq = ich.tweet(model.attributes);
+      }
+      else var sq = ich.text(model.attributes);
       console.log(sq);
-      $('.sqwag-list').prepend(sq);
+      $('.sqwag-list').append(sq);
     }
   });
 

@@ -60,9 +60,18 @@ var SQ = {
         }
         else {
           SQ.notify(data.error);
-          SQ.close();
         }
+        SQ.close();
       }
+    });
+  },
+  bindButtons: function() {
+    $('.resqwag').live('click', function() {
+      var square_id = $(this).data('id');
+      $.post('/api/square/share', {'square_id' : square_id}, function() {
+        SQ.notify('ho gaya!');
+        SQ.fetchFeed();
+      });
     });
   }
 }
@@ -70,5 +79,6 @@ var SQ = {
 $(document).ready(function() {
   SQ.bindLinks();  
   SQ.bindForms(); 
+  SQ.bindButtons();
   SQ.init();   
 });
