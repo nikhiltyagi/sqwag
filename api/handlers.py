@@ -131,7 +131,7 @@ class ShareSquareHandler(BaseHandler):
                 squareObj.liked_count = 0
                 squareObj.date_created = time.time()
             try:
-                squareObj.full_clean()
+                squareObj.full_clean(exclude='content_description')
                 squareObj.save()
                 # inform the owner 
                 mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
