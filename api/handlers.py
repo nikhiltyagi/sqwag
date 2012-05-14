@@ -327,22 +327,24 @@ class PublicSqwagsFeedsHandler(BaseHandler):
 
 class UserInfo(BaseHandler):
     methods_allowed = ('GET')
-    fields = ('id','first_name','last_name','email','username','account','account_id','account_data','account_pic','account_handle','account_pic')
+    fields = ('id','first_name','last_name','email','username','account','account_id',
+              'account_data','account_pic','account_handle','account_pic', 'sqwag_image_url',
+               'sqwag_count','following_count','followed_by_count')
     
-    def read(self,request,id=None,*args, **kwargs):        
-        if id:
-            user_obj = User.objects.get(pk=id)
-            useracc_obj = UserAccount.objects.filter(user=id)
-            Respobj = {}
-            Respobj['user'] = user_obj
-            Respobj['user_accounts']= useracc_obj
-            successResponse['result'] = Respobj
-            return successResponse
-        else:
+    def read(self,request,id=None,*args, **kwargs):
+        if not id:
             if request.user.is_authenticated():
-                successResponse['result'] = request.user
-                return successResponse
+                id = request.user.id
             else:
                 failureResponse['status'] = AUTHENTICATION_ERROR
                 failureResponse['error'] = "Login Required"#rc.FORBIDDEN
                 return failureResponse
+        user_obj = User.objects.get(pk=id)
+        userProfile = UserProfile.objects.get(user=user_obj)
+        useracc_obj = UserAccount.objects.filter(user=id)
+        Respobj = {}
+        Respobj['user'] = user_obj
+        Respobj['user_profile'] = userProfile
+        Respobj['user_accounts']= useracc_obj
+        successResponse['result'] = Respobj
+        return successResponse
