@@ -114,41 +114,49 @@ class ShareSquareHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
-        if request.POST['square_id'].isdigit():
-            squareObj = Square.objects.get(pk=request.POST['square_id'])
-            userObj = request.user
-            userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
-            userSquare.save()
-            squareObj.shared_count = squareObj.shared_count + 1
-            squareObj.save()
-            to_email = squareObj.user.email
-            squareObj.id = None
-            #saving copy of this square
-            if request.POST['description']:
-                squareObj.content_description = request.POST['description']
-                squareObj.user = userObj
-                squareObj.shared_count = 0
-                squareObj.liked_count = 0
-                squareObj.date_created = time.time()
-            try:
-                squareObj.full_clean(exclude='content_description')
-                squareObj.save()
-                # inform the owner 
-                mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
-                mailentry(mailer)
-                successResponse['result'] = squareObj
-                return successResponse
-            except ValidationError, e :
+        if 'square_id' in request.POST:
+            if request.POST['suqare_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
-                squareObj.shared_count = squareObj.shared_count - 1
+                userObj = request.user
+                userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
+                userSquare.save()
+                squareObj.shared_count = squareObj.shared_count + 1
                 squareObj.save()
+                to_email = squareObj.user.email
+                squareObj.id = None
+                #saving copy of this square
+                if 'description' in request.POST:
+                    squareObj.content_description = request.POST['description']
+                    squareObj.user = userObj
+                    squareObj.shared_count = 0
+                    squareObj.liked_count = 0
+                    squareObj.date_created = time.time()
+                try:
+                    squareObj.full_clean(exclude='content_description')
+                    squareObj.save()
+                    # inform the owner 
+                    mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
+                    mailentry(mailer)
+                    userProfile = UserProfile.objects.get(user=squareObj.user)
+                    userProfile.sqwag_count += 1
+                    userProfile.save()
+                    successResponse['result'] = squareObj
+                    return successResponse
+                except ValidationError, e :
+                    squareObj = Square.objects.get(pk=request.POST['square_id'])
+                    squareObj.shared_count = squareObj.shared_count - 1
+                    squareObj.save()
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = "bad entery detected"
+                    return failureResponse
+                    dummy = e.message() #TODO log error
+            else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "bad entery detected"
+                failureResponse['error'] = "square_id should be an integer"
                 return failureResponse
-                dummy = e.message() #TODO log error
         else:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = "square_id should be an integer"
+            failureResponse['error'] = "square_id is required"
             return failureResponse
 
 class RelationshipHandler(BaseHandler):
