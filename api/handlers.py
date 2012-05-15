@@ -45,9 +45,12 @@ class SquareHandler(BaseHandler):
                 except UserAccount.DoesNotExist:
                     print "user account does not exist"
             square.save()
-            userProfile = UserProfile.objects.get(user=square.user)
-            userProfile.sqwag_count += 1
-            userProfile.save()
+            try:
+                userProfile = UserProfile.objects.get(user=square.user)
+                userProfile.sqwag_count += 1
+                userProfile.save()
+            except ObjectDoesNotExist:
+                print "profile doesnot exist"
             if square:
                 successResponse['result'] = square
                 return successResponse
