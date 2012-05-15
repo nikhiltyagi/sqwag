@@ -22,19 +22,23 @@ context = context || {};
       });
       context.Squares = this.Squares;
       ctx = {
-        page:0,
+        page:1,
         url:'/api/user/homefeeds/',
         collection:this.Squares
       };
       feedHandler.init(ctx);
     },
     events: {
-      "click #feed": "getSquare"
+      "click #feed": "getSquare",
+      "click #next": "nextSquare"
     },
     getSquare: function (event) {
       // $(event.target) will give us the event object.
       //alert($(event.target));
       feedHandler.getFeed();
+    },
+    nextSquare: function() {
+      feedHandler.nextFeed();
     },
     addSquare: function (model) {
       if(model.attributes.content_type == 'tweet') {
@@ -61,7 +65,7 @@ context = context || {};
     getFeed : function(){
       var self = this;
       $.ajax({
-        url: self.dataSource.url+'/'+self.dataSource.page,
+        url: self.dataSource.url + self.dataSource.page,
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           if (data.status == 1) {
@@ -74,7 +78,7 @@ context = context || {};
             }
           }
           else if (data.status == 404) {
-            notify(data.error);
+            SQ.notify(data.error);
           }
 
         }
