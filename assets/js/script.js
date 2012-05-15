@@ -2,6 +2,11 @@ var context = context || {};
 
 var SQ = {
   init: function() {
+    var self = this;
+    self.bindLinks();  
+    self.bindForms(); 
+    self.bindButtons();
+    self.bindSqwags();
     $('#home').click();
   },
   
@@ -22,6 +27,7 @@ var SQ = {
   },
   
   bindLinks: function() {
+    var self = this;
     $('.js-load').click(function() {
       var tpl = $(this).attr('href').replace('#','');
       var url = '/assets/templates/' + tpl + '.html';
@@ -32,22 +38,23 @@ var SQ = {
     $('.js-link').click(function() {
       var link = $(this).attr('href');
       var jxhr = $.get(link).complete(function() {
-        SQ.refresh();
+        self.refresh();
       });
       return false;
     });
   },
   
   bindForms: function() {
+     var self = this;
      $('#login-form form').ajaxForm({
       dataType: 'json',
       success: function(data) {
         if(data.status == 1) {
-          SQ.refresh();
+          self.refresh();
         }
         else {
-          SQ.notify(data.error);
-          SQ.close();
+          self.notify(data.error);
+          self.close(); // TODO : refactor
         }
       }
     }); 
@@ -56,29 +63,34 @@ var SQ = {
       dataType: 'json',
       success: function(data) {
         if(data.status == 1) {
-          SQ.notify(data.status);
+          self.notify(data.status);
         }
         else {
-          SQ.notify(data.error);
+          self.notify(data.error);
         }
-        SQ.close();
+        self.close();
       }
     });
   },
   bindButtons: function() {
+    var self = this;
     $('.resqwag').live('click', function() {
       var square_id = $(this).data('id');
       $.post('/api/square/share', {'square_id' : square_id}, function() {
-        SQ.notify('ho gaya!');
-        SQ.fetchFeed();
+        self.notify('ho gaya!');
+        self.fetchFeed();
       });
+    });
+  },
+  bindSqwags: function() {
+    $('.sqwag').live('mouseover mouseout', function(event) {
+      var mask = $(this).find('.mask');
+      if(event.type == 'mouseover') {
+        mask.show();
+      }
+      else {
+        mask.hide();
+      }
     });
   }
 }
-
-$(document).ready(function() {
-  SQ.bindLinks();  
-  SQ.bindForms(); 
-  SQ.bindButtons();
-  SQ.init();   
-});
