@@ -15,12 +15,15 @@ var bb = {
         });
         
         context.Squares = this.Squares;
-        ctx = {
-          page:1,
-          url: self.context.feedUrl,
+        var options = {
+          "dataSource":{
+            page: 1,
+            url:self.context.feedUrl,
+          },
           collection:this.Squares
         };
-        self.feedHandler.init(ctx);
+        
+        self.feedHandler.init(options);
       },
       events: {
         "click #feed": "getSquare",
@@ -45,41 +48,38 @@ var bb = {
     });
     self.feedHandler = {
       init: function(context){
-        var self = this;
-        self.dataSource = {
-          page : context.page,
-          url : context.url
+        var me = this;
+        me.config = {
+          "dataSource":{
+            page: 1,
+            url:"/api/publicsqwagfeed/",
+          },
+          "collection":null
         };
-        self.collection = context.collection;
+        $.extend(me.config,context)
       },
       getFeed : function(){
-        var self = this;
+        var me = this;
         $.ajax({
-          url: self.dataSource.url + self.dataSource.page,
+          url: me.config.dataSource.url + me.config.dataSource.page,
           dataType: "json",
           success: function (data, textStatus, jqXHR) {
             if (data.status == 1) {
-              self.dataSource.page = self.dataSource.page + 1;
+              me.config.dataSource.page = me.config.dataSource.page + 1;
               result = data.result;
               if (result.constructor == Array) {
                 $.each(result, function (index, value) {
                   console.log(index + ': ' + value.date_created);
-                  self.collection.add(value);
+                  me.config.collection.add(value);
                 });
               }
             }
-            else if (data.status == 404) {
+            else {
               SQ.notify(data.error);
             }
-
           }
         }); 
       },
-      nextFeed : function(){
-        var self = this;
-        //self.dataSource.page = self.dataSource.page + 1;
-        //self.getFeed();
-      }
     };
     new self.AppView;
   },
