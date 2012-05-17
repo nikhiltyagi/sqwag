@@ -1,11 +1,14 @@
 var SQ = {
   init: function(context) {
     var self = this;
+    self.backbone = context.backbone;
     self.bindLinks();  
     self.bindForms(); 
     self.bindButtons();
     self.bindSqwags();
+    self.backbone.init(context);
     self.router = context.router;
+    self.router.init();
     self.router.routeTo(context.route);
   },
 

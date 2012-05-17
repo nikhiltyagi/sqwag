@@ -173,10 +173,11 @@
 <script>
 
 $(document).ready(function() {
-  router.init();
+  
   var context = {
       "router" :router,
       "route": "home",
+      "backbone": bb,
   };
   {% if loggedIn %}
     options = {
@@ -189,7 +190,6 @@ $(document).ready(function() {
   {% endif %}
   $.extend(context,options);
   SQ.init(context);
-  bb.init(context);
 });
 </script>
 </body>

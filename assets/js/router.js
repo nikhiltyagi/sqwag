@@ -20,8 +20,8 @@ var router = {
 		var self = this;
 		var config = self.routes[route];
 		self.loadTemplate(config.template);
-		SQ.fetchFeed();
 	},
+	
 	loadTemplate : function(template){
 		var self = this;
 		$(template.elementId).load(template.url);

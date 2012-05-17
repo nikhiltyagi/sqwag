@@ -77,8 +77,8 @@ var bb = {
       },
       nextFeed : function(){
         var self = this;
-        self.dataSource.page = self.dataSource.page + 1;
-        self.getFeed();
+        //self.dataSource.page = self.dataSource.page + 1;
+        //self.getFeed();
       }
     };
     new self.AppView;
