@@ -100,6 +100,7 @@ class UserSelfFeedsHandler(BaseHandler):
             squares = paginator.page(paginator.num_pages)
         if squares:
             next_page = int(page) + 1
+            #TODO: see if next page exists or not
             next_url = "/user/feeds/"+ str(next_page)
             successResponse['result'] = squares.object_list
             successResponse['nexturl'] = next_url
@@ -121,6 +122,10 @@ class ShareSquareHandler(BaseHandler):
             if request.POST['square_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
                 userObj = request.user
+                if(squareObj.user==userObj):
+                    failureResponse['status'] = DUPLICATE
+                    failureResponse['error'] = "you can not share your own square"
+                    return failureResponse
                 userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
                 userSquare.save()
                 squareObj.shared_count = squareObj.shared_count + 1

@@ -69,6 +69,7 @@ context = context || {};
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           if (data.status == 1) {
+            self.dataSource.page = self.dataSource.page + 1;
             result = data.result;
             if (result.constructor == Array) {
               $.each(result, function (index, value) {
@@ -89,7 +90,6 @@ context = context || {};
       self.dataSource.page = self.dataSource.page + 1;
       self.getFeed();
     }
-
   }
 
   var appview = new AppView;
