@@ -1,15 +1,14 @@
-var context = context || {};
-
 var SQ = {
-  init: function() {
+  init: function(context) {
     var self = this;
     self.bindLinks();  
     self.bindForms(); 
     self.bindButtons();
     self.bindSqwags();
-    $('#home').click();
+    self.router = context.router;
+    self.router.routeTo(context.route);
   },
-  
+
   fetchFeed: function() {
     $('#feed').click();
   },
@@ -29,9 +28,8 @@ var SQ = {
   bindLinks: function() {
     var self = this;
     $('.js-load').click(function() {
-      var tpl = $(this).attr('href').replace('#','');
-      var url = '/assets/templates/' + tpl + '.html';
-      $("#content").load(url);
+      var route = $(this).attr('href').replace('#','');
+      self.router.routeTo(route);
       return false;
     });
 

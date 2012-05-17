@@ -160,28 +160,37 @@
   <link rel="stylesheet" href="less/style.css">
    -->
 
-  <script src="assets/js/libs/modernizr-2.5.3.min.js"></script>
+<script src="assets/js/libs/modernizr-2.5.3.min.js"></script>
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/script.js"></script>
-
 <script src="assets/js/libs/underscore-min.js"></script>
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
+<script src="assets/js/router.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
 
 $(document).ready(function() {
-  var context = {};
+  router.init();
+  var context = {
+      "router" :router,
+      "route": "home",
+  };
   {% if loggedIn %}
-    context.feedURL = '/api/user/homefeeds/';
+    options = {
+      "feedUrl":"/api/user/homefeeds/"
+    };
   {% else %}
-    context.feedURL = '/api/publicsqwagsfeeds/';
+    options = {
+      "feedUrl":"/api/publicsqwagsfeeds/"
+    };
   {% endif %}
-  SQ.init(context);   
+  $.extend(context,options);
+  SQ.init(context);
+  bb.init(context);
 });
-
 </script>
 </body>
 </html>
