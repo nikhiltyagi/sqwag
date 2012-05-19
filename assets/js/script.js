@@ -16,10 +16,6 @@ var SQ = {
     self.router.routeTo(context.route);
   },
 
-  fetchFeed: function() {
-    $('#feed').click();
-  },
-  
   close: function() {
     $('.close').click();
   },
@@ -51,7 +47,23 @@ var SQ = {
   
   bindForms: function() {
      var self = this;
+
+     $('#sqwag-form form').ajaxForm({
+      url: window.location.href+'api/square/create/',
+      dataType: 'json',
+      success: function(data) {
+        if(data.status == 1) {
+          self.refresh();
+        }
+        else {
+          self.notify(data.error);
+          self.close(); // TODO : refactor
+        }
+      }
+    }); 
+
      $('#login-form form').ajaxForm({
+      url: window.location.href+'sqwag/login/',
       dataType: 'json',
       success: function(data) {
         if(data.status == 1) {
@@ -65,6 +77,7 @@ var SQ = {
     }); 
     
     $('#register-form form').ajaxForm({
+      url: window.location.href+'sqwag/register/',
       dataType: 'json',
       success: function(data) {
         if(data.status == 1) {
