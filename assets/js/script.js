@@ -1,6 +1,7 @@
 var SQ = {
   init: function(context) {
     var self = this;
+    self.context = context;
     self.backbone = context.backbone;
     self.bindLinks();  
     self.bindForms(); 
@@ -85,6 +86,11 @@ var SQ = {
         self.fetchFeed();
       });
     });
+    $(window).scroll(function () {
+    if ($(window).height() + $(window).scrollTop() == $(document).height()) {
+      self.backbone.feedHandler.getFeed();
+    }
+  });
   },
   bindSqwags: function() {
     $('.sqwag').live('mouseover mouseout', function(event) {
@@ -96,5 +102,7 @@ var SQ = {
         mask.hide();
       }
     });
-  }
+  },
+
+  
 }

@@ -8,8 +8,9 @@ var bb = {
       },
     }); 
     self.AppView = Backbone.View.extend({
-      el: $("body"),
+      //el: $("body");
       initialize: function () {
+        this.el = $("body");
         this.Squares = new self.Squares(null, {
           view: this
         });
@@ -25,10 +26,10 @@ var bb = {
         
         self.feedHandler.init(options);
       },
-      events: {
+      /*events: {
         "click #feed": "getSquare",
         "click #next": "getSquare",
-      },
+      },*/
       getSquare: function (event) {
         // $(event.target) will give us the event object.
         //alert($(event.target));
@@ -82,6 +83,5 @@ var bb = {
       },
     };
     new self.AppView;
-  },
-  
-}
+  }
+};
