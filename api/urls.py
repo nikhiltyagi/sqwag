@@ -17,6 +17,8 @@ square_delete_resource = CORSResource(handler=DeleteSquareHandler)
 top_sqwags_resource = CORSResource(handler=TopSqwagsFeedsHandler)
 public_sqwags_resource = CORSResource(handler=PublicSqwagsFeedsHandler)
 userinfo_resource = CORSResource(handler=UserInfo)
+image_square_resource = CORSResource(handler=ImageSquareHandler)#, **ad)
+
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 
 urlpatterns = patterns('',
@@ -33,4 +35,5 @@ urlpatterns = patterns('',
     url(r'^publicsqwagfeed/(?P<page>\d+)$', public_sqwags_resource,{ 'emitter_format': 'json' }),
     url(r'^userinfo/(?P<id>\d+)$',userinfo_resource,{'emitter_format': 'json'}),
     url(r'^userinfo/',userinfo_resource,{'emitter_format': 'json'}),
+    url(r'^imagesquare/create', image_square_resource, {'emitter_format': 'json'}),
 )

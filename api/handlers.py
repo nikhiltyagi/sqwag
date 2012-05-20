@@ -1,12 +1,13 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, \
     ValidationError
-from piston.handler import BaseHandler
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
+from piston.handler import BaseHandler
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
 from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
-from sqwag_api.helper import mailentry
+from sqwag_api.helper import mailentry, handle_uploaded_file
 from sqwag_api.models import *
 import simplejson
 import time
@@ -57,7 +58,7 @@ class SquareHandler(BaseHandler):
             else:
                 failureResponse['status'] = SYSTEM_ERROR
                 failureResponse['error'] = "System Error."
-                return 
+                return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = squareForm.errors
@@ -80,6 +81,59 @@ class SquareHandler(BaseHandler):
             failureResponse['status'] = SYSTEM_ERROR
             failureResponse['error'] = "System Error."
             return failureResponse
+
+
+class ImageSquareHandler(BaseHandler):
+    allowed_methods = ('POST')
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    model = Square
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"
+            return failureResponse
+        if request.method == 'POST':
+            form = CreateSquareForm(request.POST, request.FILES)
+            if form.is_valid():
+                if 'content_file' in request.FILES:
+                    image_url = handle_uploaded_file(request.FILES['content_file'],request)
+                    print type(image_url)
+                    square = form.save(commit=False)
+                    square.content_type = "image"
+                    square.content_data = image_url
+                    square.date_created = time.time()
+                    square.shared_count=0
+                    square.liked_count=0
+                    square.user = request.user
+                    square.save()
+                    try:
+                        userProfile = UserProfile.objects.get(user=square.user)
+                        userProfile.sqwag_count += 1
+                        userProfile.save()
+                    except ObjectDoesNotExist:
+                        print "profile does not exist"
+                    if square:
+                        successResponse['result'] = square
+                        return successResponse
+                    else:
+                        failureResponse['status'] = SYSTEM_ERROR
+                        failureResponse['error'] = "System Error."
+                        return failureResponse
+                else:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = "please select an image to upload"
+                    return failureResponse
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = form.errors
+                return failureResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['message'] = 'POST expected'
+            return failureResponse
+
 
 class UserSelfFeedsHandler(BaseHandler):
     methods_allowed = ('GET',)

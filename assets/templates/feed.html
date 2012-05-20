@@ -69,6 +69,36 @@
         </div>
       </div>
       </script>
+
+      <script id="image" type="text/html">
+      <div class="span3">
+        <div class="sqwag sq-{{ content_type }}">
+          <div class="island">
+            <div class="mask">
+              <span class="sqwag-count">{{ shared_count }}</span>
+              <div class="buttons-group fr">
+                <button>send</button><button data-id="{{ id }}" class="resqwag">sqwag</button>
+              </div>
+            </div>
+            <div class="hd">
+              <div class="media">
+                <img class="media-obj avatar" src="{{ user_account.account_pic }}" alt=""/>
+              </div>
+            </div>
+            <div class="bd">
+              <img class="media-obj image-sqwag" src="{{ content_data }}" alt=""/>
+            </div>
+            <div class="ft">
+              <div class="media">
+                <div class="media-bd">
+                  <span class="pub-time">{{ date_created }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </script>
        
 	  </div>
     <script>      

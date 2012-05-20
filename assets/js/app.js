@@ -42,8 +42,12 @@ var bb = {
         if(model.attributes.content_type == 'tweet') {
           var sq = ich.tweet(model.attributes);
         }
-        else var sq = ich.text(model.attributes);
-        console.log(sq);
+        else if(model.attributes.content_type == 'text'){
+          var sq = ich.text(model.attributes);
+        } 
+        else {
+          var sq = ich.image(model.attributes);
+        }
         $('.sqwag-list').append(sq);
       }
     });

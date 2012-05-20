@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core import serializers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core.mail.message import BadHeaderError
 from django.core.serializers.json import DateTimeAwareJSONEncoder
@@ -187,7 +187,7 @@ def accessTweeter(request):
             successResponse['result'] = oauthAccess.mUser.AsDict();
             # follow this user by TWITTER_USER
             if request.user.id == settings.SQWAG_TWITTER_USER_ACCOUNT_ID:
-                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
             sqAccessTokenString = sqwagTwitterUserAccount.access_token
             sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
@@ -240,7 +240,7 @@ def activateUser(request,id,key):
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = 'FAILED'
-            failureResponse['error'] = 'Activation key not valid'   
+            failureResponse['error'] = 'Activation key not valid'
     else:
         respObj = {}
         respObj['message'] = "Your Account is already active" 
@@ -251,7 +251,7 @@ def activateUser(request,id,key):
         respObj['email'] =  user.email
         successResponse['result'] = respObj
         #TODO: send email with activation link
-        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')        
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             
 def syncTwitterFeeds(request):
     sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
@@ -263,7 +263,6 @@ def syncTwitterFeeds(request):
                     access_token_secret=sqAccessToken.secret)
     #check in db what was the last tweet's id fetched
     feeds = None
-    retJson = []
     try:
         syncTwitterFeed = SyncTwitterFeed.objects.all().order_by('-last_sync_time')[0]
         last_tweet = syncTwitterFeed.last_tweet
@@ -332,4 +331,49 @@ def retweet(request):
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
         failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def uploadImageSquare(request):
+    if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    if request.method == 'POST':
+        form = CreateSquareForm(request.POST, request.FILES)
+        if form.is_valid():
+            if 'content_file' in request.FILES:
+                image_url = handle_uploaded_file(request.FILES['content_file'],request)
+                print type(image_url)
+                square = form.save(commit=False)
+                square.content_type = "image"
+                #square.content_data = image_url
+                square.date_created = time.time()
+                square.shared_count=0
+                square.liked_count=0
+                square.user = request.user
+                square.save()
+                try:
+                    userProfile = UserProfile.objects.get(user=square.user)
+                    userProfile.sqwag_count += 1
+                    userProfile.save()
+                except ObjectDoesNotExist:
+                    print "profile does not exist"
+                if square:
+                    successResponse['result'] = square
+                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                else:
+                    failureResponse['status'] = SYSTEM_ERROR
+                    failureResponse['error'] = "System Error."
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "please select an image to upload"
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = form.errors
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['message'] = 'POST expected'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
