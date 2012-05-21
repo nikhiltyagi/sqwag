@@ -87,6 +87,25 @@ body {
   width: 100%;
 }
 
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  margin: -10px;
+  padding: 6px;
+  display: none;
+}
+.buttons-group {
+  position: relative;
+  bottom: -10px;
+}
+button {
+  background: #f2f2f2;
+  border: 1px solid #ccc;
+}
 /* =media */
 .media {
   .clearfix();
@@ -122,7 +141,7 @@ body {
 
 /* =elements */
 p {
-  font: 12px/1.5 verdana,arial;
+  font: 11px/1.2 verdana,arial;
   margin: 0;
 }
 img {
@@ -151,6 +170,8 @@ img {
 }
 
 /* =helpful */
+.fl { float: left;}
+.fr { float: right;}
 .align-right { text-align: right;}
 .align-center { text-align: center;}
 .hidden { display: none;}

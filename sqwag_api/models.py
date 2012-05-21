@@ -22,6 +22,13 @@ class UserAccount(models.Model):
     def __unicode__(self):
         return self.account
 
+class UserProfile(models.Model):
+    user =  models.OneToOneField(User)
+    sqwag_image_url = models.URLField(null=True)
+    sqwag_count = models.IntegerField()
+    following_count = models.IntegerField()
+    followed_by_count = models.IntegerField()
+
 class Square(models.Model):
     user = models.ForeignKey(User)
     content_src = models.CharField(max_length=200)

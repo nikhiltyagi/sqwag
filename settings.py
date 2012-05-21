@@ -51,9 +51,10 @@ USE_I18N = True
 # calendars according to the current locale
 USE_L10N = True
 
+CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(CONTENT_BASE, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -131,6 +132,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sqwag_api',
+    'sorl.thumbnail',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -159,7 +161,8 @@ LOGGING = {
         },
     }
 }
-CONTENT_BASE = os.path.join(PROJECT_ROOT, 'assets')
+
 
 SQWAG_TWITTER_USER = 'sqwaglc'
 SQWAG_TWITTER_USER_ACCOUNT_ID = 35  #kind of misleading name. this is user's id in auth_user table
+AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"

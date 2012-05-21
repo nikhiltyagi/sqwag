@@ -25,6 +25,11 @@ class CreateSquareForm(ModelForm):
         model = Square
         fields = ['id','content_src','content_type','content_data']
 
+class CreateImageSquareForm(ModelForm):
+    class Meta:
+        model = Square
+        fields = ['id','content_src','content_type']
+
 class RequestInvitationForm(ModelForm):
     class Meta:
         model =  RequestInvitation
