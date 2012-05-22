@@ -9,6 +9,7 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from httplib2 import Http
+from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
 from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *
@@ -20,7 +21,6 @@ from time import gmtime, strftime
 from urllib import urlencode
 import datetime
 import httplib
-import json
 import oauth.oauth as oauth
 import random
 import settings
@@ -443,30 +443,40 @@ def accessInsta(request):
                     grant_type='authorization_code',redirect_uri=settings.INSTA_CALLBACK_URL,
                     code=codeReceived)
         resp, content = h.request(settings.INSTA_ACCESS_TOKEN_URL, "POST", urlencode(data))
-        contentJson = json.loads(content)
-        userAccount = UserAccount(user=request.user,account=ACCOUNT_INSTAGRAM, account_id=contentJson.user.id,
-                                  access_token=contentJson.access_token, date_created=time.time(),
-                                  account_data=content, account_pic=contentJson.user.profile_picture,
-                                  account_handle=contentJson.user.username)
-        try:
-            userAccount.full_clean()
-            userAccount.save()
-            successResponse['result'] = content;
-            # follow this user by TWITTER_USER
-            if request.user.id == settings.SQWAG_USER_ID:
+        #print resp
+        #respJson = json.loads(resp)
+        if resp.status==200:
+            contentJson = simplejson.loads(content)
+            userAccount = UserAccount(user=request.user,account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
+                                      access_token=contentJson['access_token'], date_created=time.time(),
+                                      account_data=content, account_pic=contentJson['user']['profile_picture'],
+                                      account_handle=contentJson['user']['username'])
+            try:
+                userAccount.full_clean()
+                userAccount.save()
+                successResponse['result'] = contentJson;
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-            sqwagInstagramUserAccount = UserAccount.objects.get(user=settings.SQWAG_USER_ID, account='instagram')
-            sqAccessToken = sqwagInstagramUserAccount.access_token
-            #TODO work is remaining. integrate insta live feeds here
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-        except ValidationError, e :
-            failureResponse['status'] = SYSTEM_ERROR
-            failureResponse['error'] = "some error occured, please try later"+e.message
-            #TODO: log it
+            except ValidationError, e:
+                failureResponse['status'] = SYSTEM_ERROR
+                failureResponse['error'] = "some error occured, please try later"+e.message
+                #TODO: log it
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = resp.status
+            failureResponse['message'] = 'INSTA ERROR'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-        successResponse['result'] = content
-        return HttpResponse(content, mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
         failureResponse['message'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def getInstaFeed(request):
+    instaUserAccount = UserAccount.objects.get(user = request.user, account=ACCOUNT_INSTAGRAM)
+    url = "https://api.instagram.com/v1/users/self/feed?access_token="+instaUserAccount.access_token
+    h = Http()
+    resp, content = h.request(url, "GET")
+    if resp.status==200:
+        contentJson = simplejson.loads(content)
+        return HttpResponse(content,mimetype='application/javascript') 
+    #successResponse['result']=media
+    #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')

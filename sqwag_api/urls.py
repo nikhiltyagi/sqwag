@@ -21,6 +21,7 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^retweet/(?P<tweet_id>\d+)$', 'retweet',name='retweet'),
     url(r'^reply/(?P<tweet_id>\d+)/(?P<message>\w+)/(?P<user_handle>\w+)$','replyTweet',name='replyTweet'),
     url(r'^favourite/(?P<tweet_id>\d+)/$','favTweet',name='favTweet'),
+    url(r'^getinstafeed$','getInstaFeed',name='getInstaFeed')
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
