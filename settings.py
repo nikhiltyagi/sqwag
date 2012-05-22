@@ -10,7 +10,7 @@ ADMINS = (
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'nikhiltyagi.eng@gmail.com'
-EMAIL_HOST_PASSWORD = 'Lucky@nikhil'
+EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -164,5 +164,5 @@ LOGGING = {
 
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_TWITTER_USER_ACCOUNT_ID = 11  #kind of misleading name. this is user's id in auth_user table
+SQWAG_TWITTER_USER_ACCOUNT_ID = 35  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"
