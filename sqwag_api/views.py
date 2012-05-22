@@ -313,7 +313,7 @@ def syncTwitterFeeds(request):
         failureResponse['message'] = 'no new feeds found'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
-def retweet(request):
+def retweet(request,tweet_id):
     if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
@@ -326,11 +326,60 @@ def retweet(request):
                         consumer_secret=settings.TWITTER_CONSUMER_SECRET,
                         access_token_key=userAccessToken.key,
                         access_token_secret=userAccessToken.secret)
-        tweetId = request.Get['tweet_id']
-        if isinstance( tweetId, int ):
-            status = api.RetweetPost(tweetId)
-            successResponse['result'] = status.AsDict()
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        #if isinstance( tweetId, long ):
+        tweet = long(tweet_id)
+        status = api.RetweetPost(tweet)
+        successResponse['result'] = status.AsDict()
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        #else:
+            #failureResponse['result'] = "BAD REQUEST"
+            #return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript') 
+    except UserAccount.DoesNotExist:
+        failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
+        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def replyTweet(request,tweet_id,message,user_handle):
+    if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    try:
+        userTwitterUserAccount = UserAccount.objects.get(user=request.user, account='twitter')
+        userAccessTokenString = userTwitterUserAccount.access_token
+        userAccessToken = OAuthToken.from_string(userAccessTokenString)
+        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+                        consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+                        access_token_key=userAccessToken.key,
+                        access_token_secret=userAccessToken.secret)
+        #if isinstance( tweetId, long ):
+        tweet = long(tweet_id)
+        status = api.PostUpdate('@'+user_handle+' '+message,tweet)
+        successResponse['result'] = status.AsDict()
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    except UserAccount.DoesNotExist:
+        failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
+        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    
+def favTweet(request,tweet_id):
+    if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    try:
+        userTwitterUserAccount = UserAccount.objects.get(user=request.user, account='twitter')
+        userAccessTokenString = userTwitterUserAccount.access_token
+        userAccessToken = OAuthToken.from_string(userAccessTokenString)
+        api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
+                        consumer_secret=settings.TWITTER_CONSUMER_SECRET,
+                        access_token_key=userAccessToken.key,
+                        access_token_secret=userAccessToken.secret)
+        #if isinstance( tweetId, long ):
+        status = api.GetStatus(tweet_id)
+        fav = api.CreateFavorite(status)
+        successResponse['result'] = status.AsDict()
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
         failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
@@ -408,12 +457,7 @@ def accessInsta(request):
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             sqwagInstagramUserAccount = UserAccount.objects.get(user=settings.SQWAG_USER_ID, account='instagram')
             sqAccessToken = sqwagInstagramUserAccount.access_token
-            api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
-                            consumer_secret=settings.TWITTER_CONSUMER_SECRET,
-                            access_token_key=sqAccessToken.key,
-                            access_token_secret=sqAccessToken.secret)
-            followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
-            successResponse['followed'] = followedUser.AsDict()
+            #TODO work is remaining. integrate insta live feeds here
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         except ValidationError, e :
             failureResponse['status'] = SYSTEM_ERROR

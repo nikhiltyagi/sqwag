@@ -66,6 +66,11 @@ body {
 .sq-spottify {
   .color(@spottify);
 }
+.sq-image {
+  padding: 0;
+  border: 0;
+  height: 220px;
+}
 
 .avatar {
   border-radius: 5px;
@@ -85,7 +90,11 @@ body {
   position: absolute;
   bottom: 0;
   width: 100%;
-}
+}  
+  .sq-image .ft {
+    bottom: 10px;
+    left: 10px;
+  }
 
 .mask {
   position: absolute;
@@ -98,6 +107,9 @@ body {
   padding: 6px;
   display: none;
 }
+  .sq-image .mask {
+    margin: 0;
+  }
 .buttons-group {
   position: relative;
   bottom: -10px;
