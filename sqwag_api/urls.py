@@ -13,12 +13,15 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^reqinvite/$', 'requestInvitation', name='req_invite'),
     url(r'^cronmail/$', 'cronMail', name='cron_email'),
     url(r'^activate/(?P<id>\d+)/(?P<key>\w+)$', 'activateUser', name='activate_user'),
-    url(r'^authtwitter/$', 'authTwitter', name='cron_email'),
-    url(r'^accesstweeter/$', 'accessTweeter', name='cron_email'),
-    url(r'^synctwitterfeeds/$', 'syncTwitterFeeds', name='cron_email'),
+    url(r'^authtwitter/$', 'authTwitter', name='authtwitter'),
+    url(r'^accesstweeter/$', 'accessTweeter', name='accesstwitter'),
+    url(r'^synctwitterfeeds/$', 'syncTwitterFeeds', name='synctwiter'),
+    url(r'^authinsta/$', 'authInsta', name='authinsta'),
+    url(r'^accessinsta/$', 'accessInsta', name='accessinsta'),
     url(r'^retweet/(?P<tweet_id>\d+)$', 'retweet',name='retweet'),
     url(r'^reply/(?P<tweet_id>\d+)/(?P<message>\w+)/(?P<user_handle>\w+)$','replyTweet',name='replyTweet'),
     url(r'^favourite/(?P<tweet_id>\d+)/$','favTweet',name='favTweet'),
+    url(r'^getinstafeed$','getInstaFeed',name='getInstaFeed')
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

@@ -82,6 +82,9 @@ var bb = {
             else {
               SQ.notify(data.error);
             }
+          },
+          complete: function(jqXHR, textStatus){
+            smartDate.refresh();
           }
         }); 
       },

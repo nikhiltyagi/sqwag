@@ -89,6 +89,13 @@ TWITTER_AUTHORIZE_URL ='https://api.twitter.com/oauth/authorize'
 TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
 CALLBACK_URL = 'http://127.0.0.1:8000/'
 
+INSTA_CLIENT_ID = '5c5c226787414350b60778e4a9e1905d'
+INSTA_CLIENT_SECRET = 'df9cbdb9bc2441deb182108be04251b8'
+INSTA_AUTHORIZE_URL = 'https://api.instagram.com/oauth/authorize/?'
+INSTA_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
+INSTA_WEBSITE_URL = 'http://127.0.0.1:8000/'
+INSTA_CALLBACK_URL = 'http://127.0.0.1:8000/sqwag/accessinsta/'
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
@@ -164,5 +171,5 @@ LOGGING = {
 
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_TWITTER_USER_ACCOUNT_ID = 35  #kind of misleading name. this is user's id in auth_user table
+SQWAG_USER_ID = 11  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"

@@ -8,6 +8,8 @@ from django.core.mail.message import BadHeaderError
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
+from httplib2 import Http
+from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
 from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *
@@ -16,6 +18,7 @@ from sqwag_api.helper import *
 from sqwag_api.models import *
 from sqwag_api.twitterConnect import *
 from time import gmtime, strftime
+from urllib import urlencode
 import datetime
 import httplib
 import oauth.oauth as oauth
@@ -186,9 +189,9 @@ def accessTweeter(request):
             userAccount.save()
             successResponse['result'] = oauthAccess.mUser.AsDict();
             # follow this user by TWITTER_USER
-            if request.user.id == settings.SQWAG_TWITTER_USER_ACCOUNT_ID :
+            if request.user.id == settings.SQWAG_USER_ID:
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-            sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
+            sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_USER_ID, account='twitter')
             sqAccessTokenString = sqwagTwitterUserAccount.access_token
             sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
             api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
@@ -254,7 +257,7 @@ def activateUser(request,id,key):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             
 def syncTwitterFeeds(request):
-    sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_TWITTER_USER_ACCOUNT_ID, account='twitter')
+    sqwagTwitterUserAccount = UserAccount.objects.get(user=settings.SQWAG_USER_ID, account='twitter')
     sqAccessTokenString = sqwagTwitterUserAccount.access_token
     sqAccessToken = OAuthToken.from_string(sqAccessTokenString)
     api = twitter.Api(consumer_key=settings.TWITTER_CONSUMER_KEY,
@@ -426,3 +429,54 @@ def uploadImageSquare(request):
         failureResponse['status'] = BAD_REQUEST
         failureResponse['message'] = 'POST expected'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def authInsta(request):
+    # get authttoken
+    authorizationUrl = settings.INSTA_AUTHORIZE_URL+'client_id='+settings.INSTA_CLIENT_ID+'&redirect_uri='+settings.INSTA_CALLBACK_URL+'&response_type=code'
+    return HttpResponseRedirect(authorizationUrl)
+def accessInsta(request):
+    if 'code' in request.GET:
+        codeReceived = request.GET['code']
+        
+        h = Http()
+        data = dict(client_id=settings.INSTA_CLIENT_ID, client_secret=settings.INSTA_CLIENT_SECRET,
+                    grant_type='authorization_code',redirect_uri=settings.INSTA_CALLBACK_URL,
+                    code=codeReceived)
+        resp, content = h.request(settings.INSTA_ACCESS_TOKEN_URL, "POST", urlencode(data))
+        #print resp
+        #respJson = json.loads(resp)
+        if resp.status==200:
+            contentJson = simplejson.loads(content)
+            userAccount = UserAccount(user=request.user,account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
+                                      access_token=contentJson['access_token'], date_created=time.time(),
+                                      account_data=content, account_pic=contentJson['user']['profile_picture'],
+                                      account_handle=contentJson['user']['username'])
+            try:
+                userAccount.full_clean()
+                userAccount.save()
+                successResponse['result'] = contentJson;
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            except ValidationError, e:
+                failureResponse['status'] = SYSTEM_ERROR
+                failureResponse['error'] = "some error occured, please try later"+e.message
+                #TODO: log it
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = resp.status
+            failureResponse['message'] = 'INSTA ERROR'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['message'] = 'GET parameter missing'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def getInstaFeed(request):
+    instaUserAccount = UserAccount.objects.get(user = request.user, account=ACCOUNT_INSTAGRAM)
+    url = "https://api.instagram.com/v1/users/self/feed?access_token="+instaUserAccount.access_token
+    h = Http()
+    resp, content = h.request(url, "GET")
+    if resp.status==200:
+        contentJson = simplejson.loads(content)
+        return HttpResponse(content,mimetype='application/javascript') 
+    #successResponse['result']=media
+    #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')

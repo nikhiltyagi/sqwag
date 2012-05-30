@@ -30,4 +30,5 @@ BODY_SUBSCRIBED = "A user has subscribed for you feeds."
 
 #Accounts
 ACCOUNT_TWITTER = "twitter"
+ACCOUNT_INSTAGRAM = "instagram"
 
