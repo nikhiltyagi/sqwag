@@ -87,11 +87,11 @@ var smartDate = {
         }
     },
     refresh: function(){
-        var self = this;
+        var self = this;  
         $(".pub-time").each(function(){
             if($(this).attr('data-time')){
                 var serverTime = $(this).attr('data-time');
-                $(this).text(self.getSmartDate(serverTime));
+                $(this).text(smartDate.getSmartDate(serverTime)); // setInterval has some problems with this.
             }
         });
     },
