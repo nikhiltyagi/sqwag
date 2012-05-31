@@ -94,7 +94,14 @@ var smartDate = {
                 $(this).text(self.getSmartDate(serverTime));
             }
         });
-    }
+    },
+    /*autoRefresh: function(){
+        var self = this;
+        setTimeout(function(){
+            self.refresh();
+            self.autoRefresh();
+        },60*60*1000);
+    }*/
 };
 smartDate.init();
 

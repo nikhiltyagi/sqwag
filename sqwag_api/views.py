@@ -9,7 +9,7 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from httplib2 import Http
-from instagram.client import InstagramAPI
+#from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
 from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *

@@ -14,6 +14,7 @@ var SQ = {
     self.router.init();
     // route to a template
     self.router.routeTo(context.route);
+    //smartDate.autoRefresh();
   },
 
   close: function() {
