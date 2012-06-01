@@ -144,24 +144,32 @@ class UserSelfFeedsHandler(BaseHandler):
             return failureResponse 
         squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
+            if squares:
+                next_page = int(page) + 1
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
+                successResponse['result'] = squares.object_list
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "You need to subscribe to receive feeds"
+            return failureResponse
         except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-            squares = paginator.page(1)
+        # If page is not an integer, deliver failure response.
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "page should be an integer"
         except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-            squares = paginator.page(paginator.num_pages)
-        if squares:
-            next_page = int(page) + 1
-            #TODO: see if next page exists or not
-            next_url = "/user/feeds/"+ str(next_page)
-            successResponse['result'] = squares.object_list
-            successResponse['nexturl'] = next_url
-            return successResponse
-        else:
             failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "Not Found"
+            failureResponse['error'] = "page is out of bounds"
         return failureResponse
 
 class ShareSquareHandler(BaseHandler):
@@ -284,11 +292,16 @@ class HomePageFeedHandler(BaseHandler):
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
                 next_page = int(page) + 1
-                next_url = "/user/feeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -347,11 +360,16 @@ class TopSqwagsFeedsHandler(BaseHandler):
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
                 next_page = int(page) + 1
-                next_url = "/user/topsqwagsfeeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -375,15 +393,20 @@ class PublicSqwagsFeedsHandler(BaseHandler):
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
                 next_page = int(page) + 1
-                next_url = "/user/publicsquaresfeeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext = True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "Opps no feeds on sqwag platform"
+                failureResponse['error'] = "You need to subscribe to receive feeds"
             return failureResponse
         except PageNotAnInteger:
         # If page is not an integer, deliver failure response.

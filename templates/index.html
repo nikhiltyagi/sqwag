@@ -178,12 +178,10 @@ $(document).ready(function() {
   {% if loggedIn %}
     options = {
       "route":"home",
-      "feedUrl":"/api/user/homefeeds/"
     };
   {% else %}
     options = {
       "route":"publicfeed",
-      "feedUrl":"/api/publicsqwagfeed/"
     };
   {% endif %}
   $.extend(context,options);
