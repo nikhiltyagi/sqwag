@@ -74,7 +74,6 @@ var bb = {
               result = data.result;
               if (result.constructor == Array) {
                 $.each(result, function (index, value) {
-                  console.log(index + ': ' + value.date_created);
                   me.config.collection.add(value);
                 });
               }

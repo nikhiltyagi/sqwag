@@ -8,7 +8,7 @@ var SQ = {
     self.bindButtons();
     self.bindSqwags();
     // initialize backbone
-    self.backbone.init(context);
+    //self.backbone.init(context);
     self.router = context.router;
     //initialize routers 
     self.router.init();

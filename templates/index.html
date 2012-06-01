@@ -38,10 +38,10 @@
             <a class="js-load" href="#feed" id="home">Feed</a>
           </li>
           <li>
-            <a>My sqwags</a>
+            <a class="js-load" href="#myfeed" id="myfeed">My sqwags</a>
           </li>
           <li>
-            <a>Top Sqwags</a>
+            <a class="js-load" href="#topsqwags" id="topsqwags">Top Sqwags</a>
           </li>
           <li>
             <a href="#sqwag-form" data-toggle="modal">Create</a>
@@ -177,10 +177,12 @@ $(document).ready(function() {
   };
   {% if loggedIn %}
     options = {
+      "route":"home",
       "feedUrl":"/api/user/homefeeds/"
     };
   {% else %}
     options = {
+      "route":"publicfeed",
       "feedUrl":"/api/publicsqwagfeed/"
     };
   {% endif %}

@@ -343,7 +343,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count')
+        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count','-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)

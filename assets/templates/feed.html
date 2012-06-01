@@ -97,8 +97,9 @@
        
 	  </div>
     <script>      
-      if(!ich.sqwag) {
-        ich.grabTemplates();
-      }
-    SQ.backbone.feedHandler.getFeed();
+      ich.grabTemplates();
+      var router = SQ.router;
+      var config = router.routes[router.currentRoute];
+      SQ.backbone.init(config.bb_config);
+      SQ.backbone.feedHandler.getFeed();
     </script>

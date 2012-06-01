@@ -8,10 +8,10 @@ var smartDate = {
         var self = this;
 
         self.config = {
-            "serverTime": ""
+            "serverTime": "",
         };
         // merging two objects.
-        if (null !== options && options.constructor == Object) {
+        if (null != options && options.constructor == Object) {
             $.extend(self.config, options);
         }
         self.min = 60;
@@ -39,33 +39,33 @@ var smartDate = {
         if (difference < self.min) {
             justNow = true;
         } else if (difference < self.hour) {
-            number = difference / self.min;
+            var number = difference / self.min;
             options = {
-                "unit" : "min"
+                "unit" : "min",
             };
         } else if (difference < self.day) {
-            number = difference / self.hour;
+            var number = difference / self.hour;
             options = {
                 "prefix": "about an",
                 "unit" : "hour"                
             };
         } else if (difference < self.week) {
-            number = difference / self.day;
+            var number = difference / self.day;
             options = {
                 "unit" : "day"
             };
         } else if (difference < self.month) {
-            number = difference / self.week;
+            var number = difference / self.week;
             options = {
                 "unit" : "week"
             };
         } else if (difference < self.year) {
-            number = difference / self.month;
+            var number = difference / self.month;
             options = {
                 "unit" : "month"
             };
         } else {
-            number = difference / self.year;
+            var number = difference / self.year;
             options = {
                 "unit" : "year"
             };
@@ -94,7 +94,7 @@ var smartDate = {
                 $(this).text(smartDate.getSmartDate(serverTime)); // setInterval has some problems with this.
             }
         });
-    }
+    },
     /*autoRefresh: function(){
         var self = this;
         setTimeout(function(){
@@ -111,6 +111,5 @@ usage :
         "serverTime": 1338397533  // in seconds. 
     };
     smartDate.init(options);
-    alert(smartDate.getSmartDate());
+    alert(smartDate.getSmartDate());​
 */
-​
