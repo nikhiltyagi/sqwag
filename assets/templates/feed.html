@@ -1,4 +1,4 @@
-<div class="sqwag-list row">
+<div id="sqwag-list-id" class="sqwag-list row">
       <script id="tweet" type="text/html">
       <div class="span3">
       	<div class="sqwag sq-{{ content_type }}">
@@ -94,12 +94,4 @@
         </div>
       </div>
       </script>
-       
 	  </div>
-    <script>      
-      ich.grabTemplates();
-      var router = SQ.router;
-      var config = router.routes[router.currentRoute];
-      SQ.backbone.init(config.bb_config);
-      SQ.backbone.feedHandler.getFeed();
-    </script>

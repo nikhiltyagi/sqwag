@@ -48,7 +48,12 @@ var bb = {
         else {
           var sq = ich.image(model.attributes);
         }
-        $('.sqwag-list').append(sq);
+        if(model.attributes.isPrepend){
+          $('.sqwag-list').prepend(sq);
+        }else{
+          $('.sqwag-list').append(sq);
+        }
+        
       }
     });
     self.feedHandler = {
@@ -95,6 +100,28 @@ var bb = {
           }); 
         }
       },
+      reSqwag : function(dataObject){
+        var me =this;
+        $.ajax({
+          url:"/api/square/share",
+          dataType: "json",
+          type: "POST",
+          data: dataObject,
+          success: function (data, textStatus, jqXHR){
+            if(data.status == 1){
+              SQ.notify('re-sqwaged successfully!');
+              result =  data.result;
+              result.isPrepend = true; // to prepend it to the list. default is append
+              me.config.collection.add(result);
+            }else{
+              SQ.notify(data.error);
+            }
+          },
+          complete: function(jqXHR, textStatus){
+            smartDate.refresh();
+          }
+        });
+      }
     };
     new self.AppView;
   }

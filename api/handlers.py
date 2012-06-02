@@ -144,12 +144,10 @@ class UserSelfFeedsHandler(BaseHandler):
             return failureResponse 
         squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
-        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
             isNext = True
             if squares:
-                next_page = int(page) + 1
                 if int(page) >= paginator.num_pages:
                     isNext = False
                 else:
@@ -173,8 +171,12 @@ class UserSelfFeedsHandler(BaseHandler):
         return failureResponse
 
 class ShareSquareHandler(BaseHandler):
-    methods_allowed = ('GET','POST',)
-    
+    methods_allowed = ('POST',)
+    successResponse = {}
+    model = Square
+    successResponse['status'] = SUCCESS_STATUS_CODE
+    successResponse['message'] = SUCCESS_MSG
+    failureResponse = {}
     def create(self,request, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -184,42 +186,40 @@ class ShareSquareHandler(BaseHandler):
             if request.POST['square_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
                 userObj = request.user
-                if(squareObj.user==userObj):
-                    failureResponse['status'] = DUPLICATE
-                    failureResponse['error'] = "you can not share your own square"
-                    return failureResponse
+#                if(squareObj.user==userObj):
+#                    failureResponse['status'] = DUPLICATE
+#                    failureResponse['error'] = "you can not share your own square"
+#                    return failureResponse
                 userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
                 userSquare.save()
                 squareObj.shared_count = squareObj.shared_count + 1
                 squareObj.save()
                 to_email = squareObj.user.email
-                squareObj.id = None
+                
+                newSquare = Square(user=userObj,content_type=squareObj.content_type,content_src=squareObj.content_src,
+                                   content_data=squareObj.content_data,date_created=time.time(),shared_count=0,
+                                   liked_count=0)
                 #saving copy of this square
                 if 'description' in request.POST:
-                    squareObj.content_description = request.POST['description']
-                    squareObj.user = userObj
-                    squareObj.shared_count = 0
-                    squareObj.liked_count = 0
-                    squareObj.date_created = time.time()
+                    newSquare.content_description = request.POST['description']
                 try:
-                    squareObj.full_clean(exclude='content_description')
-                    squareObj.save()
+                    #newSquare.full_clean(exclude='content_description')
+                    newSquare.user_account = squareObj.user_account
+                    newSquare.save()
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
                     mailentry(mailer)
-                    userProfile = UserProfile.objects.get(user=squareObj.user)
+                    userProfile = UserProfile.objects.get(user=newSquare.user)
                     userProfile.sqwag_count += 1
                     userProfile.save()
-                    successResponse['result'] = squareObj
+                    successResponse['result'] = newSquare
                     return successResponse
                 except ValidationError, e :
-                    squareObj = Square.objects.get(pk=request.POST['square_id'])
                     squareObj.shared_count = squareObj.shared_count - 1
                     squareObj.save()
                     failureResponse['status'] = BAD_REQUEST
-                    failureResponse['error'] = "bad entery detected"
+                    failureResponse['error'] = e.message
                     return failureResponse
-                    dummy = e.message() #TODO log error
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "square_id should be an integer"
@@ -246,12 +246,12 @@ class RelationshipHandler(BaseHandler):
                 return failureResponse
             # check if already following
             try:
-                rel = Relationship.objects.get(subscriber=sub, producer=prod)
+                Relationship.objects.get(subscriber=sub, producer=prod)
                 failureResponse['status'] = DUPLICATE
                 failureResponse['error'] = "You are already following this user"
                 return failureResponse
             except Relationship.DoesNotExist:
-               # go ahed everything is fine
+                # go ahead everything is fine
                 relationship = relationshipForm.save(commit=False)
                 relationship.date_subscribed = time.time()
                 relationship.permission = True
@@ -278,6 +278,7 @@ class RelationshipHandler(BaseHandler):
 
 class HomePageFeedHandler(BaseHandler):
     methods_allowed = ('GET',)
+    #model= Square
     
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
@@ -294,7 +295,6 @@ class HomePageFeedHandler(BaseHandler):
             squares = paginator.page(page)
             isNext = True
             if squares:
-                next_page = int(page) + 1
                 if int(page) >= paginator.num_pages:
                     isNext = False
                 else:
@@ -362,7 +362,6 @@ class TopSqwagsFeedsHandler(BaseHandler):
             squares = paginator.page(page)
             isNext = True
             if squares:
-                next_page = int(page) + 1
                 if int(page) >= paginator.num_pages:
                     isNext = False
                 else:
@@ -395,7 +394,6 @@ class PublicSqwagsFeedsHandler(BaseHandler):
             squares = paginator.page(page)
             isNext = True
             if squares:
-                next_page = int(page) + 1
                 if int(page) >= paginator.num_pages:
                     isNext = False
                 else:

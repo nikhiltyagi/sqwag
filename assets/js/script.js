@@ -93,16 +93,14 @@ var SQ = {
     var self = this;
     $('.resqwag').live('click', function() {
       var square_id = $(this).data('id');
-      $.post('/api/square/share', {'square_id' : square_id}, function() {
-        self.notify('ho gaya!');
-        self.fetchFeed();
-      });
+      self.backbone.feedHandler.reSqwag({'square_id' : square_id});
     });
+    
     $(window).scroll(function () {
-    if ($(window).height() + $(window).scrollTop() == $(document).height()) {
-      self.backbone.feedHandler.getFeed();
-    }
-  });
+      if ($(window).height() + $(window).scrollTop() == $(document).height()) {
+        self.backbone.feedHandler.getFeed();
+      }
+    });
   },
   bindSqwags: function() {
     $('.sqwag').live('mouseover mouseout', function(event) {
