@@ -136,7 +136,12 @@ class ImageSquareHandler(BaseHandler):
 
 
 class UserSelfFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     def read(self, request, page):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -277,8 +282,12 @@ class RelationshipHandler(BaseHandler):
             return failureResponse
 
 class HomePageFeedHandler(BaseHandler):
-    methods_allowed = ('GET',)
-    #model= Square
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
@@ -345,8 +354,12 @@ class DeleteSquareHandler(BaseHandler):
             return failureResponse
 
 class TopSqwagsFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
-    
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
         if not request.user.is_authenticated():
@@ -385,7 +398,12 @@ class TopSqwagsFeedsHandler(BaseHandler):
         return failureResponse
 
 class PublicSqwagsFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
         squares_all = Square.objects.all().order_by('-date_created')

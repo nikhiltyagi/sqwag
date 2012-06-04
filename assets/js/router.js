@@ -81,7 +81,6 @@ var router = {
 				ich.grabTemplates();
 				template.isLoaded=true;
 				template.getData();
-				
 			});
 		}
 	}
