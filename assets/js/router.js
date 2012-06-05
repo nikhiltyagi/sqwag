@@ -25,6 +25,15 @@ var router = {
 				$(self.settingsTemplate.targetElement).load(self.settingsTemplate.url);
 			}
 		};
+		self.formTemplate = {
+			"url":"/assets/templates/form.html",
+			"targetElement":"#content",
+			"isLoaded":true,
+
+			getData : function(){
+				$(self.formTemplate.targetElement).load(self.formTemplate.url);
+			}
+		};
 		self.routes = {
 			"settings":{"template":self.settingsTemplate},
 			"home" :{"template":self.feedTemplate,
@@ -53,7 +62,7 @@ var router = {
 				}
 			},
 			"logout" : {},
-			"xyz" : {}
+			"sqwag-form" : {"template":self.formTemplate}
 		};
 		// merging two objects.
 		if(null!=context && context.constructor==Object){

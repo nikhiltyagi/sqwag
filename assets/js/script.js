@@ -47,7 +47,7 @@ var SQ = {
   bindForms: function() {
      var self = this;
 
-     $('#sqwag-form form').ajaxForm({
+     $('.sqwag-form form').ajaxForm({
       url: window.location.href+'api/square/create/',
       dataType: 'json',
       success: function(data) {

@@ -43,8 +43,12 @@
           <li>
             <a class="js-load" href="#topsqwags" id="topsqwags">Top Sqwags</a>
           </li>
-          <li>
-            <a href="#sqwag-form" data-toggle="modal">Create</a>
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" data-toggle="dropdown">Create <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="#sqwag-text-form" data-toggle="modal">text</a></li>
+              <li><a href="#sqwag-image-form" data-toggle="modal">image</a></li>
+            </ul>
           </li>
           <li>
             <a class="js-load" href="#settings">Settings</a><li>
@@ -113,7 +117,7 @@
       </form>
     </div>
     
-    <div class="modal hide" id="sqwag-form">
+    <div class="modal hide sqwag-form" id="sqwag-text-form">
       <form action="" method="post">
         <div class="modal-header">
           <a class="close" data-dismiss="modal">&times;</a>
@@ -128,22 +132,42 @@
             <label for="sq-data">description</label>
             <input type="text" id="sq-data" name="content_description" required />
           </div>
-          <div class="form-controls">
-            <label>square type</label>
-            <div class="controls">
-              <label class="radio">
-                <input type="radio" name="content_type" value="text" />
-                text
-              </label>
-            </div>
-          </div>
-          <input type="hidden" name="content_src" value="twitter"/>
+          <input type="hidden" name="content_type" value="text" />
+          <input type="hidden" name="content_src" value="text"/>
         </div>
         <div class="modal-footer">
           <input type="submit" class="btn btn-primary" value="Add sqwag" />
         </div>
       </form>
     </div>
+    
+    <div class="modal hide .sqwag-form" id="sqwag-image-form">
+      <form enctype="multipart/form-data" method="post" action="http://127.0.0.1:8000/api/imagesquare/create/">
+		<div class="modal-header">
+          <h1>create square</h1>
+        </div>
+        	<div class="modal-body">
+        		<div class="form-controls">
+        		  <label for="imagefile">chose Image</label>
+        		  <input id "imagefile" type="file" name="content_file" />
+        		</div>
+        		<div class="form-controls">
+        		            <label for="sq-data">data</label>
+        		            <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?" required></textarea>
+        		          </div>
+        		          <div class="form-controls">
+        		            <label for="sq-data">description</label>
+        		            <input type="text" id="sq-data" name="content_description" required />
+        		          </div>
+                      <input type="hidden" name="content_type" value="image" />
+        		          <input type="hidden" name="content_src" value="image"/>
+        	</div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="Add sqwag" />
+        </div>
+      </form>
+        </div>
+    
     <p id="console" class="alert alert-info hidden"></p>
     
     <div id="content">
@@ -157,6 +181,7 @@
 
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
+<script src="assets/js/libs/bootstrap-dropdown.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="assets/js/router.js"></script>
