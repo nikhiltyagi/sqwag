@@ -7,13 +7,12 @@ var SQ = {
     self.bindForms(); 
     self.bindButtons();
     self.bindSqwags();
-    // initialize backbone
-    self.backbone.init(context);
     self.router = context.router;
     //initialize routers 
     self.router.init();
     // route to a template
     self.router.routeTo(context.route);
+    setInterval(smartDate.refresh, 60*1000);
   },
 
   close: function() {
@@ -48,7 +47,7 @@ var SQ = {
   bindForms: function() {
      var self = this;
 
-     $('#sqwag-form form').ajaxForm({
+     $('.sqwag-form form').ajaxForm({
       url: window.location.href+'api/square/create/',
       dataType: 'json',
       success: function(data) {
@@ -94,16 +93,14 @@ var SQ = {
     var self = this;
     $('.resqwag').live('click', function() {
       var square_id = $(this).data('id');
-      $.post('/api/square/share', {'square_id' : square_id}, function() {
-        self.notify('ho gaya!');
-        self.fetchFeed();
-      });
+      self.backbone.feedHandler.reSqwag({'square_id' : square_id});
     });
+    
     $(window).scroll(function () {
-    if ($(window).height() + $(window).scrollTop() == $(document).height()) {
-      self.backbone.feedHandler.getFeed();
-    }
-  });
+      if ($(window).height() + $(window).scrollTop() == $(document).height()) {
+        self.backbone.feedHandler.getFeed();
+      }
+    });
   },
   bindSqwags: function() {
     $('.sqwag').live('mouseover mouseout', function(event) {

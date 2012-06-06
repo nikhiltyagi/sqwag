@@ -48,12 +48,18 @@ var bb = {
         else {
           var sq = ich.image(model.attributes);
         }
-        $('.sqwag-list').append(sq);
+        if(model.attributes.isPrepend){
+          $('.sqwag-list').prepend(sq);
+        }else{
+          $('.sqwag-list').append(sq);
+        }
+        
       }
     });
     self.feedHandler = {
       init: function(context){
         var me = this;
+        me.isNext = true;
         me.config = {
           "dataSource":{
             page: 1,
@@ -65,29 +71,57 @@ var bb = {
       },
       getFeed : function(){
         var me = this;
-        $.ajax({
-          url: me.config.dataSource.url + me.config.dataSource.page,
-          dataType: "json",
-          success: function (data, textStatus, jqXHR) {
-            if (data.status == 1) {
-              me.config.dataSource.page = me.config.dataSource.page + 1;
-              result = data.result;
-              if (result.constructor == Array) {
-                $.each(result, function (index, value) {
-                  console.log(index + ': ' + value.date_created);
-                  me.config.collection.add(value);
-                });
+        if(me.isNext){
+          $.ajax({
+            url: me.config.dataSource.url + me.config.dataSource.page,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+              if (data.status == 1) {
+                if(data.isNext==true){
+                  me.isNext = true;
+                  me.config.dataSource.page = me.config.dataSource.page + 1;
+                }else{
+                  me.isNext = false;
+                }
+                result = data.result;
+                if (result.constructor == Array) {
+                  $.each(result, function (index, value) {
+                    me.config.collection.add(value);
+                  });
+                }
               }
+              else {
+                SQ.notify(data.error);
+              }
+            },
+            complete: function(jqXHR, textStatus){
+              smartDate.refresh();
             }
-            else {
+          }); 
+        }
+      },
+      reSqwag : function(dataObject){
+        var me =this;
+        $.ajax({
+          url:"/api/square/share",
+          dataType: "json",
+          type: "POST",
+          data: dataObject,
+          success: function (data, textStatus, jqXHR){
+            if(data.status == 1){
+              SQ.notify('re-sqwaged successfully!');
+              result =  data.result;
+              result.isPrepend = true; // to prepend it to the list. default is append
+              me.config.collection.add(result);
+            }else{
               SQ.notify(data.error);
             }
           },
           complete: function(jqXHR, textStatus){
             smartDate.refresh();
           }
-        }); 
-      },
+        });
+      }
     };
     new self.AppView;
   }

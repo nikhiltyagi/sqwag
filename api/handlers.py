@@ -136,7 +136,12 @@ class ImageSquareHandler(BaseHandler):
 
 
 class UserSelfFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     def read(self, request, page):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -146,27 +151,37 @@ class UserSelfFeedsHandler(BaseHandler):
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
+            if squares:
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
+                successResponse['result'] = squares.object_list
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
+                return successResponse
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "You need to subscribe to receive feeds"
+            return failureResponse
         except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-            squares = paginator.page(1)
+        # If page is not an integer, deliver failure response.
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "page should be an integer"
         except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-            squares = paginator.page(paginator.num_pages)
-        if squares:
-            next_page = int(page) + 1
-            #TODO: see if next page exists or not
-            next_url = "/user/feeds/"+ str(next_page)
-            successResponse['result'] = squares.object_list
-            successResponse['nexturl'] = next_url
-            return successResponse
-        else:
             failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "Not Found"
+            failureResponse['error'] = "page is out of bounds"
         return failureResponse
 
 class ShareSquareHandler(BaseHandler):
-    methods_allowed = ('GET','POST',)
-    
+    methods_allowed = ('POST',)
+    successResponse = {}
+    model = Square
+    successResponse['status'] = SUCCESS_STATUS_CODE
+    successResponse['message'] = SUCCESS_MSG
+    failureResponse = {}
     def create(self,request, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -176,42 +191,40 @@ class ShareSquareHandler(BaseHandler):
             if request.POST['square_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
                 userObj = request.user
-                if(squareObj.user==userObj):
-                    failureResponse['status'] = DUPLICATE
-                    failureResponse['error'] = "you can not share your own square"
-                    return failureResponse
+#                if(squareObj.user==userObj):
+#                    failureResponse['status'] = DUPLICATE
+#                    failureResponse['error'] = "you can not share your own square"
+#                    return failureResponse
                 userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
                 userSquare.save()
                 squareObj.shared_count = squareObj.shared_count + 1
                 squareObj.save()
                 to_email = squareObj.user.email
-                squareObj.id = None
+                
+                newSquare = Square(user=userObj,content_type=squareObj.content_type,content_src=squareObj.content_src,
+                                   content_data=squareObj.content_data,date_created=time.time(),shared_count=0,
+                                   liked_count=0)
                 #saving copy of this square
                 if 'description' in request.POST:
-                    squareObj.content_description = request.POST['description']
-                    squareObj.user = userObj
-                    squareObj.shared_count = 0
-                    squareObj.liked_count = 0
-                    squareObj.date_created = time.time()
+                    newSquare.content_description = request.POST['description']
                 try:
-                    squareObj.full_clean(exclude='content_description')
-                    squareObj.save()
+                    #newSquare.full_clean(exclude='content_description')
+                    newSquare.user_account = squareObj.user_account
+                    newSquare.save()
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
                     mailentry(mailer)
-                    userProfile = UserProfile.objects.get(user=squareObj.user)
+                    userProfile = UserProfile.objects.get(user=newSquare.user)
                     userProfile.sqwag_count += 1
                     userProfile.save()
-                    successResponse['result'] = squareObj
+                    successResponse['result'] = newSquare
                     return successResponse
                 except ValidationError, e :
-                    squareObj = Square.objects.get(pk=request.POST['square_id'])
                     squareObj.shared_count = squareObj.shared_count - 1
                     squareObj.save()
                     failureResponse['status'] = BAD_REQUEST
-                    failureResponse['error'] = "bad entery detected"
+                    failureResponse['error'] = e.message
                     return failureResponse
-                    dummy = e.message() #TODO log error
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "square_id should be an integer"
@@ -238,12 +251,12 @@ class RelationshipHandler(BaseHandler):
                 return failureResponse
             # check if already following
             try:
-                rel = Relationship.objects.get(subscriber=sub, producer=prod)
+                Relationship.objects.get(subscriber=sub, producer=prod)
                 failureResponse['status'] = DUPLICATE
                 failureResponse['error'] = "You are already following this user"
                 return failureResponse
             except Relationship.DoesNotExist:
-               # go ahed everything is fine
+                # go ahead everything is fine
                 relationship = relationshipForm.save(commit=False)
                 relationship.date_subscribed = time.time()
                 relationship.permission = True
@@ -269,7 +282,12 @@ class RelationshipHandler(BaseHandler):
             return failureResponse
 
 class HomePageFeedHandler(BaseHandler):
-    methods_allowed = ('GET',)
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
@@ -284,11 +302,15 @@ class HomePageFeedHandler(BaseHandler):
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
-                next_page = int(page) + 1
-                next_url = "/user/feeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -332,8 +354,12 @@ class DeleteSquareHandler(BaseHandler):
             return failureResponse
 
 class TopSqwagsFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
-    
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
         if not request.user.is_authenticated():
@@ -343,15 +369,19 @@ class TopSqwagsFeedsHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count')
+        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count','-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
-                next_page = int(page) + 1
-                next_url = "/user/topsqwagsfeeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext=True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -368,22 +398,31 @@ class TopSqwagsFeedsHandler(BaseHandler):
         return failureResponse
 
 class PublicSqwagsFeedsHandler(BaseHandler):
-    methods_allowed = ('GET',)
+    allowed_methods = ('GET',)
+    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',('user', ('id','first_name','last_name','email','username',)),(
+              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    #exclude = ('id', re.compile(r'^private_'))
+    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
         squares_all = Square.objects.all().order_by('-date_created')
         paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
         try:
             squares = paginator.page(page)
+            isNext = True
             if squares:
-                next_page = int(page) + 1
-                next_url = "/user/publicsquaresfeeds/"+ str(next_page)
+                if int(page) >= paginator.num_pages:
+                    isNext = False
+                else:
+                    isNext = True
                 successResponse['result'] = squares.object_list
-                successResponse['nexturl'] = next_url
+                successResponse['isNext'] = isNext
+                successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "Opps no feeds on sqwag platform"
+                failureResponse['error'] = "You need to subscribe to receive feeds"
             return failureResponse
         except PageNotAnInteger:
         # If page is not an integer, deliver failure response.
