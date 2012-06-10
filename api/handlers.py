@@ -7,7 +7,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
 from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
-from sqwag_api.helper import mailentry, handle_uploaded_file
+from sqwag_api.helper import *
 from sqwag_api.models import *
 import simplejson
 import time
@@ -18,7 +18,7 @@ successResponse['message'] = SUCCESS_MSG
 failureResponse = {}
 
 class SquareHandler(BaseHandler):
-    allowed_methods = ('GET', 'PUT', 'DELETE','POST')
+    allowed_methods = ('POST',)
     fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
@@ -32,56 +32,8 @@ class SquareHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
-        squareForm =  CreateSquareForm(request.POST)
-        if squareForm.is_valid():
-            square = squareForm.save(commit=False)
-            square.date_created = time.time()
-            square.shared_count=0
-            square.liked_count=0
-            square.user = request.user
-            if square.content_src == 'twitter.com':
-                try:
-                    userAccount = UserAccount.objects.filter(user=request.user,account='twitter.com')
-                    square.user_account = userAccount
-                except UserAccount.DoesNotExist:
-                    print "user account does not exist"
-            square.save()
-            try:
-                userProfile = UserProfile.objects.get(user=square.user)
-                userProfile.sqwag_count += 1
-                userProfile.save()
-            except ObjectDoesNotExist:
-                print "profile doesnot exist"
-            if square:
-                successResponse['result'] = square
-                return successResponse
-            else:
-                failureResponse['status'] = SYSTEM_ERROR
-                failureResponse['error'] = "System Error."
-                return failureResponse
-        else:
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = squareForm.errors
-            return failureResponse
-
-    def read(self, request,id, *args, **kwargs):
-        if not self.has_model():
-            failureResponse['status'] = SYSTEM_ERROR
-            failureResponse['error'] = "System Error."
-            return failureResponse 
-        try:
-            square = Square.objects.get(pk=id)
-            successResponse['result'] = square
-            return successResponse
-        except ObjectDoesNotExist:
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "Not Found"
-            return failureResponse
-        except MultipleObjectsReturned: # should never happen, since we're using a PK
-            failureResponse['status'] = SYSTEM_ERROR
-            failureResponse['error'] = "System Error."
-            return failureResponse
-
+        resultWrapper = crateSquare(request)
+        return resultWrapper
 
 class ImageSquareHandler(BaseHandler):
     allowed_methods = ('POST')
@@ -98,29 +50,16 @@ class ImageSquareHandler(BaseHandler):
             form = CreateSquareForm(request.POST, request.FILES)
             if form.is_valid():
                 if 'content_file' in request.FILES:
-                    image_url = handle_uploaded_file(request.FILES['content_file'],request)
-                    print type(image_url)
+                    wrapper = handle_uploaded_file(request.FILES['content_file'],request)
+                    if wrapper['status']==SUCCESS_STATUS_CODE:
+                        image_url = wrapper['result']
+                    else:
+                        return wrapper
                     square = form.save(commit=False)
                     square.content_type = "image"
                     square.content_data = image_url
-                    square.date_created = time.time()
-                    square.shared_count=0
-                    square.liked_count=0
-                    square.user = request.user
-                    square.save()
-                    try:
-                        userProfile = UserProfile.objects.get(user=square.user)
-                        userProfile.sqwag_count += 1
-                        userProfile.save()
-                    except ObjectDoesNotExist:
-                        print "profile does not exist"
-                    if square:
-                        successResponse['result'] = square
-                        return successResponse
-                    else:
-                        failureResponse['status'] = SYSTEM_ERROR
-                        failureResponse['error'] = "System Error."
-                        return failureResponse
+                    resultWrapper = saveSquareBoilerPlate(request.user, square)
+                    return resultWrapper
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = "please select an image to upload"
@@ -142,38 +81,14 @@ class UserSelfFeedsHandler(BaseHandler):
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
     model = Square
-    def read(self, request, page):
+    def read(self, request, page=1):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
-        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
-        try:
-            squares = paginator.page(page)
-            isNext = True
-            if squares:
-                if int(page) >= paginator.num_pages:
-                    isNext = False
-                else:
-                    isNext=True
-                successResponse['result'] = squares.object_list
-                successResponse['isNext'] = isNext
-                successResponse['totalPages']= paginator.num_pages
-                return successResponse
-            else:
-                failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "You need to subscribe to receive feeds"
-            return failureResponse
-        except PageNotAnInteger:
-        # If page is not an integer, deliver failure response.
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = "page should be an integer"
-        except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "page is out of bounds"
-        return failureResponse
+        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        return resultWrapper
 
 class ShareSquareHandler(BaseHandler):
     methods_allowed = ('POST',)
@@ -281,6 +196,73 @@ class RelationshipHandler(BaseHandler):
             failureResponse['error'] = relationshipForm.errors
             return failureResponse
 
+class GetFollowersHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    fields = ('id','first_name','last_name','email','username','account','account_id',
+              'account_pic','account_handle','account_pic', 'sqwag_image_url',
+               'sqwag_count','following_count','followed_by_count')
+    def read(self, request,id,page=1, *args, **kwargs):
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        if id:
+            try:
+                user = User.objects.get(pk=id)
+            except User.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "user does not exist"#rc.FORBIDDEN
+                return failureResponse
+        else:
+            user = request.user
+        try:
+            relationships =  Relationship.objects.filter(producer=user)
+            if relationships.count() > 1:
+                resultWrapper = relationshipPaginator(relationships, NUMBER_OF_SQUARES, page, user, 'subscriber')
+                return resultWrapper
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "oops, no body is following you."
+                return failureResponse
+        except Relationship.DoesNotExist:
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "oops, no body is following you."
+            return failureResponse
+
+class GetProducersHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    fields = ('id','first_name','last_name','email','username','account','account_id',
+              'account_pic','account_handle','account_pic', 'sqwag_image_url',
+               'sqwag_count','following_count','followed_by_count')
+    def read(self, request,id,page=1, *args, **kwargs):
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        if id:
+            try:
+                user = User.objects.get(pk=id)
+            except User.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "user does not exist"#rc.FORBIDDEN
+                return failureResponse
+        else:
+            user = request.user
+        try:
+            relationships =  Relationship.objects.filter(subscriber=user)
+            if relationships.count() > 1:
+                resultWrapper = relationshipPaginator(relationships, NUMBER_OF_SQUARES, page, user, 'producer')
+                return resultWrapper
+            else:
+                failureResponse['status'] = NOT_FOUND
+                failureResponse['error'] = "oops, you are not following no body."
+                return failureResponse
+        except Relationship.DoesNotExist:
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = "oops, you are not following no body"
+            return failureResponse
+
+
 class HomePageFeedHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
@@ -299,32 +281,8 @@ class HomePageFeedHandler(BaseHandler):
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
         squares_all = Square.objects.filter(user__in=producers).order_by('-date_created')
-        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
-        try:
-            squares = paginator.page(page)
-            isNext = True
-            if squares:
-                if int(page) >= paginator.num_pages:
-                    isNext = False
-                else:
-                    isNext=True
-                successResponse['result'] = squares.object_list
-                successResponse['isNext'] = isNext
-                successResponse['totalPages']= paginator.num_pages
-                return successResponse
-            else:
-                failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "You need to subscribe to receive feeds"
-            return failureResponse
-        except PageNotAnInteger:
-        # If page is not an integer, deliver failure response.
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = "page should be an integer"
-        except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "page is out of bounds"
-        return failureResponse
+        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        return resultWrapper
 
 class DeleteSquareHandler(BaseHandler):
     methods_allowed = ('POST')
@@ -341,7 +299,7 @@ class DeleteSquareHandler(BaseHandler):
                 userProfile = UserProfile.objects.get(user=sq_obj.user)
                 userProfile.sqwag_count = userProfile.sqwag_count - 1
                 userProfile.save()
-                sq_obj.delete()
+                sq_obj.delete()  # TODO: SOFT DELETE REQUIRED. NOT HARD DELETE
                 successResponse['result'] = "square deleted"
                 return successResponse
             else:
@@ -370,27 +328,55 @@ class TopSqwagsFeedsHandler(BaseHandler):
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
         squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count','-date_created')
-        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
+        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        return resultWrapper
+
+class TopPeopleHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    fields = ('id','first_name','last_name','email','username','account','account_id',
+              'account_data','account_pic','account_handle','account_pic', 'sqwag_image_url',
+               'sqwag_count','following_count','followed_by_count')
+    #exclude = ('id', re.compile(r'^private_'))
+    def read(self, request, page=1, *args, **kwargs):
+        # only authenticated user can get it's own feed
+        if not request.user.is_authenticated():
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        # get user profiles with most followers
+        userProfiles = UserProfile.objects.all().order_by("-followed_by_count")
+        #userProfiles = Square.objects.filter(user=request.user).order_by('-date_created')
+        paginator = Paginator(userProfiles,NUMBER_OF_SQUARES)
         try:
-            squares = paginator.page(page)
+            profiles = paginator.page(page)
             isNext = True
-            if squares:
+            if profiles.object_list:
                 if int(page) >= paginator.num_pages:
                     isNext = False
                 else:
                     isNext=True
-                successResponse['result'] = squares.object_list
+                users = []
+                for profile in profiles.object_list:
+                    userObj = profile.user
+                    useracc_obj = UserAccount.objects.filter(user=userObj)
+                    userInfo = {}
+                    userInfo['user'] = userObj
+                    userInfo['user_profile'] = profile
+                    userInfo['user_accounts']= useracc_obj
+                    users.append(userInfo)
+                successResponse['result'] = users
                 successResponse['isNext'] = isNext
                 successResponse['totalPages']= paginator.num_pages
                 return successResponse
             else:
                 failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "You need to subscribe to receive feeds"
-            return failureResponse
+                failureResponse['error'] = "not much users on the platform. :("
+                return failureResponse
         except PageNotAnInteger:
         # If page is not an integer, deliver failure response.
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = "page should be an integer"
+            return failureResponse
         except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
             failureResponse['status'] = NOT_FOUND
@@ -407,37 +393,13 @@ class PublicSqwagsFeedsHandler(BaseHandler):
     
     def read(self, request, page=1, *args, **kwargs):
         squares_all = Square.objects.all().order_by('-date_created')
-        paginator = Paginator(squares_all,NUMBER_OF_SQUARES)
-        try:
-            squares = paginator.page(page)
-            isNext = True
-            if squares:
-                if int(page) >= paginator.num_pages:
-                    isNext = False
-                else:
-                    isNext = True
-                successResponse['result'] = squares.object_list
-                successResponse['isNext'] = isNext
-                successResponse['totalPages']= paginator.num_pages
-                return successResponse
-            else:
-                failureResponse['status'] = NOT_FOUND
-                failureResponse['error'] = "You need to subscribe to receive feeds"
-            return failureResponse
-        except PageNotAnInteger:
-        # If page is not an integer, deliver failure response.
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = "page should be an integer"
-        except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-            failureResponse['status'] = NOT_FOUND
-            failureResponse['error'] = "page is out of bounds"
-        return failureResponse
+        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        return resultWrapper
 
 class UserInfo(BaseHandler):
     methods_allowed = ('GET')
     fields = ('id','first_name','last_name','email','username','account','account_id',
-              'account_data','account_pic','account_handle','account_pic', 'sqwag_image_url',
+              'account_pic','account_handle', 'sqwag_image_url',
                'sqwag_count','following_count','followed_by_count')
     
     def read(self,request,id=None,*args, **kwargs):
@@ -449,11 +411,5 @@ class UserInfo(BaseHandler):
                 failureResponse['error'] = "Login Required"#rc.FORBIDDEN
                 return failureResponse
         user_obj = User.objects.get(pk=id)
-        userProfile = UserProfile.objects.get(user=user_obj)
-        useracc_obj = UserAccount.objects.filter(user=id)
-        Respobj = {}
-        Respobj['user'] = user_obj
-        Respobj['user_profile'] = userProfile
-        Respobj['user_accounts']= useracc_obj
-        successResponse['result'] = Respobj
-        return successResponse
+        userInfo = getCompleteUserInfo(user_obj)
+        return userInfo

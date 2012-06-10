@@ -102,6 +102,7 @@ var SQ = {
       }
     });
   },
+  
   bindSqwags: function() {
     $('.sqwag').live('mouseover mouseout', function(event) {
       var mask = $(this).find('.mask');

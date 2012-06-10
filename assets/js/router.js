@@ -14,7 +14,6 @@ var router = {
 				SQ.backbone.init(config.bb_config);
 				SQ.backbone.feedHandler.getFeed();
 			}
-
 		};
 		self.settingsTemplate = {
 			"url":"/assets/templates/settings.html",
@@ -59,6 +58,11 @@ var router = {
 			"topsqwags" :  {"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/topsqwagsfeeds/"
+				}
+			},
+			"userprofile" :  {"template":self.feedTemplate,
+				"bb_config":{
+					"feedUrl":"/api/user/feeds/"
 				}
 			},
 			"logout" : {},

@@ -385,51 +385,6 @@ def favTweet(request,tweet_id):
         failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
-def uploadImageSquare(request):
-    if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"
-            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    if request.method == 'POST':
-        form = CreateSquareForm(request.POST, request.FILES)
-        if form.is_valid():
-            if 'content_file' in request.FILES:
-                image_url = handle_uploaded_file(request.FILES['content_file'],request)
-                print type(image_url)
-                square = form.save(commit=False)
-                square.content_type = "image"
-                #square.content_data = image_url
-                square.date_created = time.time()
-                square.shared_count=0
-                square.liked_count=0
-                square.user = request.user
-                square.save()
-                try:
-                    userProfile = UserProfile.objects.get(user=square.user)
-                    userProfile.sqwag_count += 1
-                    userProfile.save()
-                except ObjectDoesNotExist:
-                    print "profile does not exist"
-                if square:
-                    successResponse['result'] = square
-                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-                else:
-                    failureResponse['status'] = SYSTEM_ERROR
-                    failureResponse['error'] = "System Error."
-                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-            else:
-                failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "please select an image to upload"
-                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-        else:
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = form.errors
-            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    else:
-        failureResponse['status'] = BAD_REQUEST
-        failureResponse['message'] = 'POST expected'
-        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-
 def authInsta(request):
     # get authttoken
     authorizationUrl = settings.INSTA_AUTHORIZE_URL+'client_id='+settings.INSTA_CLIENT_ID+'&redirect_uri='+settings.INSTA_CALLBACK_URL+'&response_type=code'

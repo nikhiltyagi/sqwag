@@ -72,6 +72,9 @@ class Relationship(models.Model):
     producer = models.ForeignKey(User, related_name='producer')
     date_subscribed = models.IntegerField('date subscribed')
     permission = models.BooleanField()
+    
+    def __unicode__(self):
+        return self.date_subscribed
 
 class RegistrationManager(models.Manager):
     def activate_user(self, activation_key):
