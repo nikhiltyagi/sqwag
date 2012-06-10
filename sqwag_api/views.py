@@ -86,7 +86,7 @@ def registerUser(request):
             user.is_active = False
             user.save();
             # create a profile for this user
-            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0)
+            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=uname)
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"

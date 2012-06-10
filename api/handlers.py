@@ -9,6 +9,7 @@ from sqwag_api.constants import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
+import array
 import simplejson
 import time
 
@@ -86,7 +87,20 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
-        squares_all = Square.objects.filter(user=request.user).order_by('-date_created')
+        userSquares = UserSquare.objects.filter(user=request.user).order_by('-date_shared')
+        squares_all = []
+        visited = {}#this won't be required once resawaq for own sqwag is disabled
+        for usrsquare in userSquares:
+            # ignore this userSquare if this has already been entered into squares_all
+            if not usrsquare.square.id in visited:
+                square_obj = {}
+                square_obj['square'] = usrsquare.square
+                square_obj['userSquare'] = usrsquare
+                squares_all.insert(0, square_obj)# optimize
+                visited[usrsquare.square.id]=True
+            else:
+                # do nothing, ignore
+                print 'ignore this square'
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
@@ -106,40 +120,29 @@ class ShareSquareHandler(BaseHandler):
             if request.POST['square_id'].isdigit():
                 squareObj = Square.objects.get(pk=request.POST['square_id'])
                 userObj = request.user
+                is_owner = False
 #                if(squareObj.user==userObj):
 #                    failureResponse['status'] = DUPLICATE
 #                    failureResponse['error'] = "you can not share your own square"
 #                    return failureResponse
-                userSquare = UserSquare(user=userObj, square =squareObj,date_shared=time.time()) 
-                userSquare.save()
-                squareObj.shared_count = squareObj.shared_count + 1
-                squareObj.save()
-                to_email = squareObj.user.email
-                
-                newSquare = Square(user=userObj,content_type=squareObj.content_type,content_src=squareObj.content_src,
-                                   content_data=squareObj.content_data,date_created=time.time(),shared_count=0,
-                                   liked_count=0)
-                #saving copy of this square
-                if 'description' in request.POST:
-                    newSquare.content_description = request.POST['description']
-                try:
-                    #newSquare.full_clean(exclude='content_description')
-                    newSquare.user_account = squareObj.user_account
-                    newSquare.save()
+                userSquareObj = createUserSquare(userObj,squareObj,is_owner)
+                if userSquareObj:
+                    squareObj.shared_count = squareObj.shared_count + 1
+                    squareObj.save()
+                    squareResponse = {}
+                    squareResponse['square'] = squareObj
+                    squareResponse['userSquare'] = userSquareObj
+                    to_email = squareObj.user.email
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
                     mailentry(mailer)
-                    userProfile = UserProfile.objects.get(user=newSquare.user)
-                    userProfile.sqwag_count += 1
-                    userProfile.save()
-                    successResponse['result'] = newSquare
+                    successResponse['result'] = squareResponse 
+                    #successResponse['result'] = newSquare
                     return successResponse
-                except ValidationError, e :
-                    squareObj.shared_count = squareObj.shared_count - 1
-                    squareObj.save()
-                    failureResponse['status'] = BAD_REQUEST
-                    failureResponse['error'] = e.message
-                    return failureResponse
+                else:
+                    failureResponse['status'] = SYSTEM_ERROR
+                    failureResponse['error'] = "some error occurred"
+                    return failureResponse                   
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "square_id should be an integer"
@@ -265,7 +268,7 @@ class GetProducersHandler(BaseHandler):
 
 class HomePageFeedHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+    fields = ('date_shared','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
@@ -280,9 +283,22 @@ class HomePageFeedHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers).order_by('-date_created')
+        userSquares = UserSquare.objects.filter(user__in=producers).order_by('date_shared')
+        squares_all = []
+        visited = {}
+        for usrsquare in userSquares:
+            # ignore this userSquare if this has already been entered into squares_all
+            if not usrsquare.square.id in visited:
+                square_obj = {}
+                square_obj['square'] = usrsquare.square
+                square_obj['userSquare'] = usrsquare
+                squares_all.insert(0, square_obj)# optimize
+                visited[usrsquare.square.id]=True
+            else:
+                # do nothing, ignore
+                print 'ignore this square'
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
-        return resultWrapper
+        return resultWrapper      
 
 class DeleteSquareHandler(BaseHandler):
     methods_allowed = ('POST')
@@ -327,7 +343,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers).order_by('-liked_count','-shared_count','-date_created')
+        squares_all = Square.objects.filter(user__in=producers).order_by('-shared_count','-date_created')
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
