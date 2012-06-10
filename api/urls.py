@@ -18,6 +18,7 @@ top_sqwags_resource = CORSResource(handler=TopSqwagsFeedsHandler)
 public_sqwags_resource = CORSResource(handler=PublicSqwagsFeedsHandler)
 userinfo_resource = CORSResource(handler=UserInfo)
 image_square_resource = CORSResource(handler=ImageSquareHandler)#, **ad)
+square_comments_resource = CORSResource(handler=CommentsSquareHandler)
 
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 
@@ -36,4 +37,6 @@ urlpatterns = patterns('',
     url(r'^userinfo/(?P<id>\d+)$',userinfo_resource,{'emitter_format': 'json'}),
     url(r'^userinfo/',userinfo_resource,{'emitter_format': 'json'}),
     url(r'^imagesquare/create', image_square_resource, {'emitter_format': 'json'}),
+    url(r'^square/getcomments/(?P<id>\d+)',square_comments_resource,{'emitter_format':'json'}),
+    url(r'^square/postcomments',square_comments_resource,{'emitter_format':'json'}),
 )

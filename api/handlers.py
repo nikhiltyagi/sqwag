@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc, throttle, validate
 from sqwag_api.constants import *
-from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm
+from sqwag_api.forms import CreateSquareForm, CreateRelationshipForm, CreateCommentsForm
 from sqwag_api.helper import mailentry, handle_uploaded_file
 from sqwag_api.models import *
 import simplejson
@@ -457,3 +457,68 @@ class UserInfo(BaseHandler):
         Respobj['user_accounts']= useracc_obj
         successResponse['result'] = Respobj
         return successResponse
+
+class CommentsSquareHandler(BaseHandler):
+    methods_allowed = ('GET','POST')
+    fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+             'content_src','content_type','content_data','content_description','date_created',
+             'shared_count','liked_count','comment')
+    def read(self,request,id):
+#        if request.user.is_authenticated():
+#                id = request.user.id
+#        else:
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        comments_info = []
+        count = 0
+        comments = SquareComments.objects.filter(square=id).order_by('date_created')
+        for comment in comments:
+            #user_comment = User.objects.get(comment.user)
+            comment_array = {}
+            comment_array['comment'] = comment
+            comment_array['user'] = comment.user
+            comments_info.append(comment_array)
+            #comments_array['user'+str(count)] = comment.user
+            count = count + 1            
+        #user_account = UserAccount.objects.get(user=request.user)
+        #square_user = User.objects.get(id=request.user.id)
+        square = Square.objects.get(pk=id)
+        #square_user_image = UserProfile.objects.get(user=square.user)
+        square_user_info = {}
+        square_user_info['user'] = square.user
+        square_user_info['user_profile'] = UserProfile.objects.get(user=square.user)
+        #user_comment = User.objects.get(comments.user)
+        result = {}
+        result['comments'] = comments_info
+        result['square_account_info'] = square.user_account
+        result['user_info'] = square_user_info
+        result['square_info'] = square
+        successResponse['result'] = result
+        return successResponse
+    
+    def create(self,request, *args, **kwargs):
+#        if not request.user.is_authenticated():
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"
+#            return failureResponse
+        if request.method == 'POST':
+            commentForm =  CreateCommentsForm(request.POST)
+            if commentForm.is_valid():
+                comment = commentForm.save(commit=False)
+                comment.date_created = time.time()
+                comment.save()
+                if comment:
+                    successResponse['result'] = comment
+                    return successResponse
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['message'] = commentForm.errors
+                return failureResponse                 
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['message'] = 'POST expected'
+            return failureResponse
+            
+        
+        

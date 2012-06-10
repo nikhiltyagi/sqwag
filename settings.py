@@ -10,7 +10,7 @@ ADMINS = (
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'nikhiltyagi.eng@gmail.com'
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'Lucky@nikhil'
 EMAIL_PORT = 587
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -22,7 +22,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'sqwag-dj',                      # Or path to database file if using sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
+        'PASSWORD': 'root',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -171,5 +171,5 @@ LOGGING = {
 
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_USER_ID = 11  #kind of misleading name. this is user's id in auth_user table
+SQWAG_USER_ID = 44  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"
