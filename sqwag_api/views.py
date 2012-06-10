@@ -435,3 +435,141 @@ def getInstaFeed(request):
         return HttpResponse(content,mimetype='application/javascript') 
     #successResponse['result']=media
     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    
+def forgotPwd(request,user):
+    user_obj = User.objects.get(username=user)
+    if user_obj:
+        user_prof = UserProfile.objects.get(user=user_obj)
+        activation_key = user_prof.create_reset_key(user_prof)
+        user_prof.pwd_reset_key = activation_key
+        user_prof.save()
+        #subject = "pwd reset link from sqwag.com"
+        host = request.get_host()
+        if request.is_secure():
+            protocol = 'https://'
+        else:
+            protocol = 'http://'
+        message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
+        mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user_obj.email,date_created=time.time())
+        mailentry(mailer)
+        successResponse['result'] = 'mail sent successfully' 
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = NOT_FOUND
+        failureResponse['message'] = 'invalid username'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def forgotPwdKey(request,id,key):
+    userProf = UserProfile.objects.get(user=id,pwd_reset_key=key)
+    #TODO change http response to rendertoresponse
+    if userProf:
+        successResponse['result'] = 'you can change your pwd'
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = 'username and activation key does not match'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+def newPwd(request):
+    form =  PwdResetForm(request.POST)
+    if form.is_valid():
+        pwd = request.POST['password']
+        user_id = request.POST['id']
+        user_obj = User.objects.get(pk=user_id)
+        user_obj.set_password(pwd)
+        user_obj.save()
+        successResponse['result'] = 'password changes successfully'
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = 'invalid form'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def editEmail(request):
+    form =  EditEmailForm(request.POST)
+    if form.is_valid():
+        email = form.cleaned_data['email']
+        oldpwd = form.cleaned_data['oldPassword']
+        user = request.user
+        if(user.check_password(oldpwd)):
+            if email:
+                user.email = email
+                user.save()
+                successResponse['result'] = 'email changed successfully'
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            else:
+                failureResponse['result'] = BAD_REQUEST
+                failureResponse['message'] = 'blank email'
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')    
+
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def editDisplayName(request):
+    form = EditDisplayName(request.POST)
+    if form.is_valid():
+        user = request.user
+        displayname = form.cleaned_data['displayName']
+        if displayname:
+            user.displayname = displayname
+            user.save()
+            successResponse['result'] = 'dislay name changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'blank display name'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        
+def changePassword(request):
+    form = ChangePasswordForm(request.POST)
+    if form.is_valid():
+        user = request.user
+        oldpwd = form.cleaned_data['oldPassword']
+        newpwd = form.cleaned_data['newPassword']
+        if(user.check_password(oldpwd)):
+            user.set_password(newpwd)
+            user.save()
+            successResponse['result'] = 'password changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'old password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    
+def changeUserName(request):
+    form = ChangeUserNameForm(request.POST)
+    if form.is_valid():
+        user= User.objects.get(pk=45)
+        pwd = form.cleaned_data['password']
+        if(user.check_password(pwd)):
+            username = form.cleaned_data['username']
+            user.username = username
+            user.save()
+            successResponse['result'] = 'username changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            
+            
+           
+        
+    

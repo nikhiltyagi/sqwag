@@ -28,6 +28,14 @@ class UserProfile(models.Model):
     sqwag_count = models.IntegerField()
     following_count = models.IntegerField()
     followed_by_count = models.IntegerField()
+    pwd_reset_key = models.CharField(_('activation key'), max_length=40, null=True)
+    displayname = models.CharField(_('displayname'), max_length=30)
+    def create_reset_key(self, userProfile):
+        salt = sha.new(str(random.random())).hexdigest()[:5]
+        activation_key = sha.new(salt+userProfile.user.username).hexdigest()
+        userProfile.pwd_reset_key = activation_key
+        userProfile.save
+        return activation_key
 
 class Square(models.Model):
     user = models.ForeignKey(User)
@@ -134,3 +142,9 @@ class SyncTwitterFeed(models.Model):
     last_sync_time = models.IntegerField()
     def __unicode__(self):
         return self.last_tweet
+
+class SquareComments(models.Model):
+    user = models.ForeignKey(User,related_name='user')
+    square = models.ForeignKey(Square,related_name='square')
+    date_created = models.IntegerField()
+    comment = models.CharField(max_length=4000,null=False)

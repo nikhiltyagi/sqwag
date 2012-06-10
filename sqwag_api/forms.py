@@ -48,3 +48,53 @@ class CreateRelationshipForm(ModelForm):
     class Meta:
         model = Relationship
         fields = ['id','subscriber','producer']
+
+class CreateCommentsForm(ModelForm):
+    class Meta:
+        model = SquareComments
+        fields = ['user','square','comment']
+
+class PwdResetForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['id','password']
+
+class EditEmailForm(forms.Form):
+    email = forms.EmailField()
+    oldPassword = forms.CharField(max_length=128)
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        
+        if email:
+            try:
+                email_name, domain_part = email.strip().split('@', 1)
+            except ValueError:
+                pass
+            else:
+                email = '@'.join([email_name, domain_part.lower()])
+            username = self.cleaned_data.get('username')
+            if email and User.objects.filter(email=email).exclude(username=username).count():
+                raise forms.ValidationError(u'Email addresses must be unique.')
+            return email
+        else:
+            raise forms.ValidationError(u'Email is a required field')
+
+class EditDisplayName(forms.Form):
+    displayName = forms.CharField(max_length=30)    
+
+class ChangePasswordForm(forms.Form):
+    newPassword = forms.CharField(max_length=128)
+    oldPassword = forms.CharField(max_length=128)   
+    
+class ChangeUserNameForm(forms.Form):
+    password = forms.CharField(max_length=128) 
+    username = forms.CharField(max_length=30)
+    def validateUserName(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            if username and User.objects.filter(username=username).count():
+                raise forms.ValidationError(u'username must be unique.')
+            return username
+        else:
+            raise forms.ValidationError(u'Username is required')
+            
