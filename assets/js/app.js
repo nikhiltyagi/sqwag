@@ -86,7 +86,7 @@ var bb = {
                 result = data.result;
                 if (result.constructor == Array) {
                   $.each(result, function (index, value) {
-                    me.config.collection.add(value);
+                    me.config.collection.add(value.square); // What to do with value.userSquare - [praveen]
                   });
                 }
               }
@@ -110,7 +110,7 @@ var bb = {
           success: function (data, textStatus, jqXHR){
             if(data.status == 1){
               SQ.notify('re-sqwaged successfully!');
-              result =  data.result;
+              result =  data.result.square;
               result.isPrepend = true; // to prepend it to the list. default is append
               me.config.collection.add(result);
             }else{
