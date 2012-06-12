@@ -1,5 +1,5 @@
 create a relationship:
-curl -d "subscriber=1&producer=1" http://localhost:8000/api/subscribe/ > /home/saini/test.html
+curl -d "subscriber=1&producer=1" http://127.0.0.1:8000/api/subscribe/ > /home/saini/test.html
 register a user:
 	 > /home/saini/test.html
 curl -d "content_type=tweet&content_data=thisismytweet&content_description=sfsdfds&user=3" http://0.0.0.0:5000/api/square/create/

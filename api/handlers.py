@@ -400,7 +400,7 @@ class UserInfo(BaseHandler):
     methods_allowed = ('GET')
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_pic','account_handle', 'sqwag_image_url',
-               'sqwag_count','following_count','followed_by_count')
+               'sqwag_count','following_count','followed_by_count','display_name')
     
     def read(self,request,id=None,*args, **kwargs):
         if not id:
@@ -418,7 +418,7 @@ class CommentsSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST')
     fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
-             'shared_count','liked_count','comment')
+             'shared_count','liked_count','comment','display_name')
     def read(self,request,id):
 #        if request.user.is_authenticated():
 #                id = request.user.id
