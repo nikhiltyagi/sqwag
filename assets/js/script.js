@@ -48,18 +48,25 @@ var SQ = {
      var self = this;
 
      $('.sqwag-form form').ajaxForm({
-      url: window.location.href+'api/square/create/',
       dataType: 'json',
       success: function(data) {
+        /* data is NULL don't know why - praveen
         if(data.status == 1) {
           self.refresh();
         }
         else {
           self.notify(data.error);
-          self.close(); // TODO : refactor
         }
+        */
+        self.close();
       }
-    }); 
+    });
+
+    $('#sqwag-image-form form').ajaxForm({
+      success: function(data) {
+        self.refresh();
+      }
+    });
 
      $('#login-form form').ajaxForm({
       url: window.location.href+'sqwag/login/',

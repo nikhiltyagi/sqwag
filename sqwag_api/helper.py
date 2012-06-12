@@ -78,6 +78,9 @@ def saveSquareBoilerPlate(user, square):
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
+    is_owner = True
+    squareResponse = {}
+    userSquare = createUserSquare(user,square,is_owner)
     try:
         userProfile = UserProfile.objects.get(user=square.user)
         userProfile.sqwag_count += 1
@@ -87,8 +90,10 @@ def saveSquareBoilerPlate(user, square):
         resultWrapper['error'] = "user profile does not exist. user is: " + user.first_name
         return resultWrapper
     if square:
+        squareResponse['square'] = square
+        squareResponse['userSquare'] = userSquare
         resultWrapper['status']= SUCCESS_STATUS_CODE
-        resultWrapper['result'] = square
+        resultWrapper['result'] = squareResponse
         return resultWrapper
     else:
         resultWrapper['status'] = SYSTEM_ERROR
@@ -192,3 +197,12 @@ def relationshipPaginator(relationships,itemsPerPage,page,user,userType):
         resultWrapper['status'] = NOT_FOUND
         resultWrapper['error'] = "page is out of bounds"
         return resultWrapper
+
+def createUserSquare(user,square,is_owner):
+    userSquare = UserSquare(user=user,square=square)
+    userSquare.date_shared = time.time()
+    userSquare.is_deleted = False
+    userSquare.content_description = square.content_description
+    userSquare.is_owner = is_owner
+    userSquare.save()
+    return userSquare

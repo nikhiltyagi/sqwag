@@ -45,7 +45,7 @@ class Square(models.Model):
     content_description = models.CharField(max_length=4000,null=True)
     date_created = models.IntegerField('date published',null=True)
     shared_count = models.IntegerField(null=True)
-    liked_count = models.IntegerField(null=True)
+    is_deleted = models.BooleanField(default=False)
     user_account = models.ForeignKey(UserAccount, null=True)
 
     def __unicode__(self):
@@ -55,7 +55,10 @@ class UserSquare(models.Model):
     user = models.ForeignKey(User)
     square = models.ForeignKey(Square)
     date_shared = models.IntegerField('date shared')
-
+    is_deleted = models.BooleanField(default=False)
+    content_description = models.CharField(max_length=4000,null=True)
+    is_owner = models.BooleanField()
+        
     def __unicode__(self):
         return self.date_shared
 
