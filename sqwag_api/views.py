@@ -286,15 +286,13 @@ def syncTwitterFeeds(request):
                 # now create a square of this tweet by this sqwag user
                 square = Square(user= sqwagUser, content_type='tweet',  content_src='twitter.com', 
                                 content_data = feed.GetText(), date_created = feed.GetCreatedAtInSeconds(),
-                                shared_count=0, liked_count=0)
+                                shared_count=0)
                 square.user_account = userAccount
                 try:
                     square.full_clean(exclude='content_description')
                     square.save()
-                    userProfile = UserProfile.objects.get(user=square.user)
-                    userProfile.sqwag_count += 1
-                    userProfile.save()
-                except ValidationError, e:
+                    saveSquareBoilerPlate(square.user, square, square.date_created)
+                except ValidationError:
                     print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
                 print "user account does not exist"

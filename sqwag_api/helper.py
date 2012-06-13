@@ -59,11 +59,13 @@ def crateSquare(request):
         resultWrapper['error'] = squareForm.errors
         return resultWrapper
 
-def saveSquareBoilerPlate(user, square):
+def saveSquareBoilerPlate(user, square, date_created=None):
     resultWrapper = {}
-    square.date_created = time.time()
+    if date_created:
+        square.date_created = date_created
+    else:
+        square.date_created = time.time()
     square.shared_count=0
-    square.liked_count=0
     square.user = user
     if square.content_src == 'twitter.com':
         try:
