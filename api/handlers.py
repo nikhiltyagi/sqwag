@@ -343,7 +343,13 @@ class TopSqwagsFeedsHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        squares_all = Square.objects.filter(user__in=producers).order_by('-shared_count','-date_created')
+        topSquares = Square.objects.filter(user__in=producers).order_by('-shared_count','-date_created')
+        squares_all = []
+        for topsqr in topSquares:
+            square_obj = {}
+            square_obj['square'] = topsqr
+            square_obj['userSquare'] = UserSquare.objects.get(square=topsqr,user=topsqr.user) 
+            squares_all.insert(0, square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
@@ -434,7 +440,7 @@ class CommentsSquareHandler(BaseHandler):
     methods_allowed = ('GET','POST')
     fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
-             'shared_count','liked_count','comment','display_name')
+             'shared_count','liked_count','comment','displayname')
     def read(self,request,id):
 #        if request.user.is_authenticated():
 #                id = request.user.id
@@ -445,29 +451,33 @@ class CommentsSquareHandler(BaseHandler):
         comments_info = []
         count = 0
         comments = SquareComments.objects.filter(square=id).order_by('date_created')
-        for comment in comments:
-            #user_comment = User.objects.get(comment.user)
-            comment_array = {}
-            comment_array['comment'] = comment
-            comment_array['user'] = comment.user
-            comments_info.append(comment_array)
-            #comments_array['user'+str(count)] = comment.user
-            count = count + 1            
-        #user_account = UserAccount.objects.get(user=request.user)
-        #square_user = User.objects.get(id=request.user.id)
-        square = Square.objects.get(pk=id)
-        #square_user_image = UserProfile.objects.get(user=square.user)
-        square_user_info = {}
-        square_user_info['user'] = square.user
-        square_user_info['user_profile'] = UserProfile.objects.get(user=square.user)
-        #user_comment = User.objects.get(comments.user)
-        result = {}
-        result['comments'] = comments_info
-        result['square_account_info'] = square.user_account
-        result['user_info'] = square_user_info
-        result['square_info'] = square
-        successResponse['result'] = result
-        return successResponse
+        if comments:    
+            for comment in comments:
+                #user_comment = User.objects.get(comment.user)
+                comment_array = {}
+                comment_array['comment'] = comment
+                comment_array['user'] = comment.user
+                comment_array['userProfile'] = UserProfile.objects.get(user=comment.user)
+                comments_info.append(comment_array)
+                #comments_array['user'+str(count)] = comment.user
+                count = count + 1            
+            #user_account = UserAccount.objects.get(user=request.user)
+            #square_user = User.objects.get(id=request.user.id)
+            #square = Square.objects.get(pk=id)
+            #square_user_image = UserProfile.objects.get(user=square.user)
+            #square_user_info = {}
+            #square_user_info['user'] = square.user
+            #square_user_info['user_profile'] = UserProfile.objects.get(user=square.user)
+            #user_comment = User.objects.get(comments.user)
+            result = {}
+            result['comments'] = comments_info
+            #result['square_account_info'] = square.user_account
+            #result['user_info'] = square_user_info
+            #result['square_info'] = square
+            successResponse['result'] = result
+            return successResponse
+        else:
+            return successResponse
     
     def create(self,request, *args, **kwargs):
 #        if not request.user.is_authenticated():
@@ -491,3 +501,42 @@ class CommentsSquareHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['message'] = 'POST expected'
             return failureResponse
+
+
+class UserSquareHandler(BaseHandler):
+    methods_allowed = ('GET')
+    model = User
+    fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+             'content_src','content_type','content_data','content_description','date_created',
+             'shared_count','liked_count','comment','displayname')
+    
+    def read(self,request,id):
+#        if request.user.is_authenticated():
+#                id = request.user.id
+#        else:
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        usrsquare = UserSquare.objects.get(pk=id)
+        if usrsquare:
+            result = {}
+            result['square'] = usrsquare.square
+            owner = usrsquare.square.user
+            #owner = User.objects.get(user=usrsquare.user.get('user'))
+            result['owner'] = owner
+            result['owner_profile'] = UserProfile.objects.get(user=owner)
+            result['owner_account'] = usrsquare.square.user_account
+            if  not usrsquare.is_owner:
+                result['sharing_user'] = usrsquare.user
+                result['sharing_user_profile'] = UserProfile.objects.get(user=usrsquare.user)
+            else:
+                result['sharing_user'] = {}
+                result['sharing_user_profile'] = {}
+            successResponse['result'] = result
+            return successResponse
+            
+            
+        
+    
+        
+    

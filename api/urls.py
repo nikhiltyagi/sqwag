@@ -22,6 +22,7 @@ top_people_resource = CORSResource(handler=TopPeopleHandler)
 follower_resource = CORSResource(handler=GetFollowersHandler)
 producer_resource = CORSResource(handler=GetProducersHandler)
 square_comments_resource = CORSResource(handler=CommentsSquareHandler)
+user_square_resource = CORSResource(handler=UserSquareHandler)
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 
 urlpatterns = patterns('',
@@ -44,4 +45,5 @@ urlpatterns = patterns('',
     url(r'^user/producers/(?P<id>\d+)/(?P<page>\d+)$', producer_resource,{ 'emitter_format': 'json' }),
     url(r'^square/getcomments/(?P<id>\d+)',square_comments_resource,{'emitter_format':'json'}),
     url(r'^square/postcomments',square_comments_resource,{'emitter_format':'json'}),
+    url(r'^usersquare/(?P<id>\d+)$', user_square_resource,{ 'emitter_format': 'json' }),
 )
