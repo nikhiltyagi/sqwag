@@ -10,7 +10,7 @@ body {
   font-size: @baseFontSize;
   line-height: @baseLineHeight;
   color: @textColor;
-  background-color: @bodyBackground;
+  background-color: #c0c3c6;
 }
 
 .profile {
@@ -34,6 +34,37 @@ body {
   height: 90px;
   background: #fff;
 } */
+
+.navbar {
+  margin-top: 60px;
+}
+.navbar-inner {
+ background: url('../img/bg-bar.png') repeat-x;
+ border-radius: 6px;
+}
+
+/* sprites */
+.navbar .nav > li a {
+  text-indent: -999999px;
+  background: url('../img/sprite-bar.png') no-repeat center;
+  height: 42px;
+  width: 16px;
+  display: inline-block;
+  margin-right: 10px;
+}
+#create-feed {  background-position: 0 center; border-right: 6px solid #c0c3c6;}
+#home {  background-position: -48px center;}
+#myfeed {  background-position: -90px center;}
+#topsqwags {  background-position: -130px center;}
+
+/* logo */
+.logo {
+  position: relative;
+  left: 180px;
+  padding: 9px 0 2px;
+}
+
+/* square */
 .sqwag {
   height: 200px;
   background: #fff;
@@ -153,18 +184,6 @@ img {
 
 .copyright {
   text-align: center;
-}
-
-.logo {
-  background-color: @white;
-  border: 1px solid #999;
-  font-size: 18px;
-  padding: 10px 6px;
-}
-.logo > b {
-  border: 1px solid #999;
-  color: @blue;
-  padding: 2px;
 }
 
 /* =helpful */

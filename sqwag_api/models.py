@@ -28,6 +28,14 @@ class UserProfile(models.Model):
     sqwag_count = models.IntegerField()
     following_count = models.IntegerField()
     followed_by_count = models.IntegerField()
+    pwd_reset_key = models.CharField(_('activation key'), max_length=40, null=True)
+    displayname = models.CharField(_('displayname'), max_length=30)
+    def create_reset_key(self, userProfile):
+        salt = sha.new(str(random.random())).hexdigest()[:5]
+        activation_key = sha.new(salt+userProfile.user.username).hexdigest()
+        userProfile.pwd_reset_key = activation_key
+        userProfile.save
+        return activation_key
 
 class Square(models.Model):
     user = models.ForeignKey(User)
@@ -37,7 +45,7 @@ class Square(models.Model):
     content_description = models.CharField(max_length=4000,null=True)
     date_created = models.IntegerField('date published',null=True)
     shared_count = models.IntegerField(null=True)
-    liked_count = models.IntegerField(null=True)
+    is_deleted = models.BooleanField(default=False)
     user_account = models.ForeignKey(UserAccount, null=True)
 
     def __unicode__(self):
@@ -47,7 +55,10 @@ class UserSquare(models.Model):
     user = models.ForeignKey(User)
     square = models.ForeignKey(Square)
     date_shared = models.IntegerField('date shared')
-
+    is_deleted = models.BooleanField(default=False)
+    content_description = models.CharField(max_length=4000,null=True)
+    is_owner = models.BooleanField()
+        
     def __unicode__(self):
         return self.date_shared
 
@@ -72,6 +83,9 @@ class Relationship(models.Model):
     producer = models.ForeignKey(User, related_name='producer')
     date_subscribed = models.IntegerField('date subscribed')
     permission = models.BooleanField()
+    
+    def __unicode__(self):
+        return self.date_subscribed
 
 class RegistrationManager(models.Manager):
     def activate_user(self, activation_key):
@@ -131,3 +145,9 @@ class SyncTwitterFeed(models.Model):
     last_sync_time = models.IntegerField()
     def __unicode__(self):
         return self.last_tweet
+
+class SquareComments(models.Model):
+    user = models.ForeignKey(User,related_name='user')
+    square = models.ForeignKey(Square,related_name='square')
+    date_created = models.IntegerField()
+    comment = models.CharField(max_length=4000,null=False)

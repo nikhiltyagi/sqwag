@@ -9,7 +9,7 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from httplib2 import Http
-from instagram.client import InstagramAPI
+#from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
 from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *
@@ -86,7 +86,7 @@ def registerUser(request):
             user.is_active = False
             user.save();
             # create a profile for this user
-            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0)
+            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=uname)
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
@@ -286,15 +286,13 @@ def syncTwitterFeeds(request):
                 # now create a square of this tweet by this sqwag user
                 square = Square(user= sqwagUser, content_type='tweet',  content_src='twitter.com', 
                                 content_data = feed.GetText(), date_created = feed.GetCreatedAtInSeconds(),
-                                shared_count=0, liked_count=0)
+                                shared_count=0)
                 square.user_account = userAccount
                 try:
                     square.full_clean(exclude='content_description')
                     square.save()
-                    userProfile = UserProfile.objects.get(user=square.user)
-                    userProfile.sqwag_count += 1
-                    userProfile.save()
-                except ValidationError, e:
+                    saveSquareBoilerPlate(square.user, square, square.date_created)
+                except ValidationError:
                     print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
                 print "user account does not exist"
@@ -385,51 +383,6 @@ def favTweet(request,tweet_id):
         failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
-def uploadImageSquare(request):
-    if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"
-            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    if request.method == 'POST':
-        form = CreateSquareForm(request.POST, request.FILES)
-        if form.is_valid():
-            if 'content_file' in request.FILES:
-                image_url = handle_uploaded_file(request.FILES['content_file'],request)
-                print type(image_url)
-                square = form.save(commit=False)
-                square.content_type = "image"
-                #square.content_data = image_url
-                square.date_created = time.time()
-                square.shared_count=0
-                square.liked_count=0
-                square.user = request.user
-                square.save()
-                try:
-                    userProfile = UserProfile.objects.get(user=square.user)
-                    userProfile.sqwag_count += 1
-                    userProfile.save()
-                except ObjectDoesNotExist:
-                    print "profile does not exist"
-                if square:
-                    successResponse['result'] = square
-                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-                else:
-                    failureResponse['status'] = SYSTEM_ERROR
-                    failureResponse['error'] = "System Error."
-                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-            else:
-                failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "please select an image to upload"
-                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-        else:
-            failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = form.errors
-            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    else:
-        failureResponse['status'] = BAD_REQUEST
-        failureResponse['message'] = 'POST expected'
-        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-
 def authInsta(request):
     # get authttoken
     authorizationUrl = settings.INSTA_AUTHORIZE_URL+'client_id='+settings.INSTA_CLIENT_ID+'&redirect_uri='+settings.INSTA_CALLBACK_URL+'&response_type=code'
@@ -480,3 +433,141 @@ def getInstaFeed(request):
         return HttpResponse(content,mimetype='application/javascript') 
     #successResponse['result']=media
     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    
+def forgotPwd(request,user):
+    user_obj = User.objects.get(username=user)
+    if user_obj:
+        user_prof = UserProfile.objects.get(user=user_obj)
+        activation_key = user_prof.create_reset_key(user_prof)
+        user_prof.pwd_reset_key = activation_key
+        user_prof.save()
+        #subject = "pwd reset link from sqwag.com"
+        host = request.get_host()
+        if request.is_secure():
+            protocol = 'https://'
+        else:
+            protocol = 'http://'
+        message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
+        mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user_obj.email,date_created=time.time())
+        mailentry(mailer)
+        successResponse['result'] = 'mail sent successfully' 
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = NOT_FOUND
+        failureResponse['message'] = 'invalid username'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def forgotPwdKey(request,id,key):
+    userProf = UserProfile.objects.get(user=id,pwd_reset_key=key)
+    #TODO change http response to rendertoresponse
+    if userProf:
+        successResponse['result'] = 'you can change your pwd'
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = 'username and activation key does not match'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+def newPwd(request):
+    form =  PwdResetForm(request.POST)
+    if form.is_valid():
+        pwd = request.POST['password']
+        user_id = request.POST['id']
+        user_obj = User.objects.get(pk=user_id)
+        user_obj.set_password(pwd)
+        user_obj.save()
+        successResponse['result'] = 'password changes successfully'
+        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = 'invalid form'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def editEmail(request):
+    form =  EditEmailForm(request.POST)
+    if form.is_valid():
+        email = form.cleaned_data['email']
+        oldpwd = form.cleaned_data['oldPassword']
+        user = request.user
+        if(user.check_password(oldpwd)):
+            if email:
+                user.email = email
+                user.save()
+                successResponse['result'] = 'email changed successfully'
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            else:
+                failureResponse['result'] = BAD_REQUEST
+                failureResponse['message'] = 'blank email'
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')    
+
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
+def editDisplayName(request):
+    form = EditDisplayName(request.POST)
+    if form.is_valid():
+        user = request.user
+        displayname = form.cleaned_data['displayName']
+        if displayname:
+            user.displayname = displayname
+            user.save()
+            successResponse['result'] = 'dislay name changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'blank display name'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        
+def changePassword(request):
+    form = ChangePasswordForm(request.POST)
+    if form.is_valid():
+        user = request.user
+        oldpwd = form.cleaned_data['oldPassword']
+        newpwd = form.cleaned_data['newPassword']
+        if(user.check_password(oldpwd)):
+            user.set_password(newpwd)
+            user.save()
+            successResponse['result'] = 'password changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'old password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    
+def changeUserName(request):
+    form = ChangeUserNameForm(request.POST)
+    if form.is_valid():
+        user= User.objects.get(pk=45)
+        pwd = form.cleaned_data['password']
+        if(user.check_password(pwd)):
+            username = form.cleaned_data['username']
+            user.username = username
+            user.save()
+            successResponse['result'] = 'username changed successfully'
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+        else:
+            failureResponse['result'] = BAD_REQUEST
+            failureResponse['message'] = 'password does not match'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['result'] = BAD_REQUEST
+        failureResponse['message'] = form.errors
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            
+            
+           
+        
+    

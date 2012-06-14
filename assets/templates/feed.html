@@ -1,32 +1,32 @@
-<div class="sqwag-list row">
+<div id="sqwag-list-id" class="sqwag-list row">
       <script id="tweet" type="text/html">
       <div class="span3">
-      	<div class="sqwag sq-{{ content_type }}">
+      	<div class="sqwag sq-{{ square.content_type }}">
           <div class="island">
             <div class="mask">
-              <span class="sqwag-count">{{ shared_count }}</span>
+              <span class="sqwag-count">{{ square.shared_count }}</span>
               <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ id }}" class="resqwag">sqwag</button>
+                <button>send</button><button data-id="{{ square.id }}" class="resqwag">sqwag</button>
               </div>
             </div>
           	<div class="hd">
           		<div class="media">
-                <img class="media-obj avatar" src="{{ user_account.account_pic }}" alt=""/>
+                <img class="media-obj avatar" src="{{ square.user_account.account_pic }}" alt=""/>
                 <div class="media-bd">
                   <ul class="no-bullet">
-                    <li class="fullname">{{ user_account.account_handle }}</li>
-                    <li class="twitter-handle"><a href="#">@{{  user_account.account_handle }}</a></li>
+                    <li class="fullname">{{ square.user_account.account_handle }}</li>
+                    <li class="twitter-handle"><a href="#">@{{  square.user_account.account_handle }}</a></li>
                   </ul>
                 </div>
               </div>
           	</div>
           	<div class="bd">
-          	  <p class="tweet-text">{{ content_data }}</p>
+          	  <p class="tweet-text">{{ square.content_data }}</p>
           	</div>
           	<div class="ft">
               <div class="media">
               	<div class="media-bd">
-                  <span class="pub-time" data-time="{{ date_created }}">{{ date_created }}</span>
+                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
                   <ul class="action-links">
                     <li><a href="#">reply</a></li>
                     <li><a href="#">retweet</a></li>
@@ -42,26 +42,26 @@
       
       <script id="text" type="text/html">
       <div class="span3">
-      	<div class="sqwag sq-{{ content_type }}">
+      	<div class="sqwag sq-{{ square.content_type }}">
           <div class="island">
             <div class="mask">
-              <span class="sqwag-count">{{ shared_count }}</span>
+              <span class="sqwag-count">{{ square.shared_count }}</span>
               <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ id }}" class="resqwag">sqwag</button>
+                <button>send</button><button data-id="{{ square.id }}" class="resqwag">sqwag</button>
               </div>
             </div>
           	<div class="hd">
           		<div class="media">
-                <img class="media-obj avatar" src="{{ user_account.account_pic }}" alt=""/>
+                <img class="media-obj avatar" src="{{ square.user_account.account_pic }}" alt=""/>
               </div>
           	</div>
           	<div class="bd">
-          	  <p class="tweet-text">{{ content_data }}</p>
+          	  <p class="tweet-text">{{ square.content_data }}</p>
           	</div>
           	<div class="ft">
               <div class="media">
               	<div class="media-bd">
-                  <span class="pub-time" data-time="{{ date_created }}">{{ date_created }}</span>
+                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
                 </div>
               </div>
             </div>
@@ -72,21 +72,21 @@
 
       <script id="image" type="text/html">
       <div class="span3">
-        <div class="sqwag sq-{{ content_type }}">
+        <div class="sqwag sq-{{ square.content_type }}">
           <div class="island">
             <div class="mask">
-              <span class="sqwag-count">{{ shared_count }}</span>
+              <span class="sqwag-count">{{ square.shared_count }}</span>
               <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ id }}" class="resqwag">sqwag</button>
+                <button>send</button><button data-id="{{ square.id }}" class="resqwag">sqwag</button>
               </div>
             </div>
             <div class="bd">
-              <img class="media-obj image-sqwag" src="{{ content_data }}" alt="" width="220"/>
+              <img class="media-obj image-sqwag" src="{{ square.content_data }}" alt="" width="220"/>
             </div>
             <div class="ft">
               <div class="media">
                 <div class="media-bd">
-                  <span class="pub-time" data-time="{{ date_created }}">{{ date_created }}</span>
+                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
                 </div>
               </div>
             </div>
@@ -94,11 +94,4 @@
         </div>
       </div>
       </script>
-       
 	  </div>
-    <script>      
-      if(!ich.sqwag) {
-        ich.grabTemplates();
-      }
-    SQ.backbone.feedHandler.getFeed();
-    </script>
