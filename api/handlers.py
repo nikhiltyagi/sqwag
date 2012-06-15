@@ -125,7 +125,7 @@ class ShareSquareHandler(BaseHandler):
 #                    failureResponse['status'] = DUPLICATE
 #                    failureResponse['error'] = "you can not share your own square"
 #                    return failureResponse
-                userSquareObj = createUserSquare(userObj,squareObj,is_owner)
+                userSquareObj = createUserSquare(request,userObj,squareObj,is_owner)
                 if userSquareObj:
                     squareObj.shared_count = squareObj.shared_count + 1
                     squareObj.save()
@@ -349,7 +349,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
             square_obj = {}
             square_obj['square'] = topsqr
             square_obj['userSquare'] = UserSquare.objects.get(square=topsqr,user=topsqr.user) 
-            squares_all.insert(0, square_obj)#optimize
+            squares_all.append(square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
@@ -441,7 +441,7 @@ class CommentsSquareHandler(BaseHandler):
     fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
-    def read(self,request,id):
+    def read(self,request,id,page=1):
 #        if request.user.is_authenticated():
 #                id = request.user.id
 #        else:
@@ -453,28 +453,16 @@ class CommentsSquareHandler(BaseHandler):
         comments = SquareComments.objects.filter(square=id).order_by('date_created')
         if comments:    
             for comment in comments:
-                #user_comment = User.objects.get(comment.user)
                 comment_array = {}
                 comment_array['comment'] = comment
                 comment_array['user'] = comment.user
                 comment_array['userProfile'] = UserProfile.objects.get(user=comment.user)
                 comments_info.append(comment_array)
-                #comments_array['user'+str(count)] = comment.user
                 count = count + 1            
-            #user_account = UserAccount.objects.get(user=request.user)
-            #square_user = User.objects.get(id=request.user.id)
-            #square = Square.objects.get(pk=id)
-            #square_user_image = UserProfile.objects.get(user=square.user)
-            #square_user_info = {}
-            #square_user_info['user'] = square.user
-            #square_user_info['user_profile'] = UserProfile.objects.get(user=square.user)
-            #user_comment = User.objects.get(comments.user)
-            result = {}
-            result['comments'] = comments_info
-            #result['square_account_info'] = square.user_account
-            #result['user_info'] = square_user_info
-            #result['square_info'] = square
-            successResponse['result'] = result
+            resultWrapper = paginate(request, page, comments_info, NUMBER_OF_SQUARES)
+            return resultWrapper
+#            result['comments'] = comments_info
+#            successResponse['result'] = result
             return successResponse
         else:
             return successResponse
@@ -529,14 +517,13 @@ class UserSquareHandler(BaseHandler):
             if  not usrsquare.is_owner:
                 result['sharing_user'] = usrsquare.user
                 result['sharing_user_profile'] = UserProfile.objects.get(user=usrsquare.user)
+                result['sharing_user_description'] = usrsquare.content_description
             else:
                 result['sharing_user'] = {}
                 result['sharing_user_profile'] = {}
             successResponse['result'] = result
             return successResponse
             
-            
-        
     
         
     

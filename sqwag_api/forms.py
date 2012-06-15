@@ -84,7 +84,10 @@ class EditDisplayName(forms.Form):
 
 class ChangePasswordForm(forms.Form):
     newPassword = forms.CharField(max_length=128)
-    oldPassword = forms.CharField(max_length=128)   
+    oldPassword = forms.CharField(max_length=128)
+
+class ContentDescriptionForm(forms.Form):
+    content_desc = forms.CharField(max_length=4000,required=False)   
     
 class ChangeUserNameForm(forms.Form):
     password = forms.CharField(max_length=128) 

@@ -82,7 +82,7 @@ def saveSquareBoilerPlate(user, square, date_created=None):
     square.save()
     is_owner = True
     squareResponse = {}
-    userSquare = createUserSquare(user,square,is_owner)
+    userSquare = createUserSquare(None,user,square,is_owner)
     try:
         userProfile = UserProfile.objects.get(user=square.user)
         userProfile.sqwag_count += 1
@@ -133,15 +133,20 @@ def paginate(request, page, inputList, itemsPerPage):
         resultWrapper['error'] = "page is out of bounds"
     return resultWrapper
 
-def getCompleteUserInfo(user):
+def getCompleteUserInfo(user,flag=None):
     resultWrapper = {}
     userInfo = {}
     if user:
         try:
-            useracc_obj = UserAccount.objects.filter(user=user)
             userProfile = UserProfile.objects.get(user=user)
             userInfo['user'] = user
             userInfo['user_profile'] = userProfile
+            if not flag:
+                useracc_obj = UserAccount.objects.filter(user=user)
+            elif flag=='NA':
+                useracc_obj = {}
+            else:    
+                useracc_obj = UserAccount.objects.get(pk=flag)
             userInfo['user_accounts']= useracc_obj
             resultWrapper['status']=SUCCESS_STATUS_CODE
             resultWrapper['result']=userInfo
@@ -200,11 +205,19 @@ def relationshipPaginator(relationships,itemsPerPage,page,user,userType):
         resultWrapper['error'] = "page is out of bounds"
         return resultWrapper
 
-def createUserSquare(user,square,is_owner):
+def createUserSquare(request,user,square,is_owner):
     userSquare = UserSquare(user=user,square=square)
     userSquare.date_shared = time.time()
     userSquare.is_deleted = False
-    userSquare.content_description = square.content_description
+    if is_owner:
+        userSquare.content_description = square.content_description
+    else:
+        if 'content_desc' in request.POST:
+            form = ContentDescriptionForm(request.POST)
+            if form.is_valid():
+                userSquare.content_description = request.POST['content_desc']
+        else:
+            userSquare.content_description = ""        
     userSquare.is_owner = is_owner
     userSquare.save()
     return userSquare
