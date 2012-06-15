@@ -44,7 +44,8 @@ body {
 }
 
 /* sprites */
-.navbar .nav > li a {
+
+.sprite > li a {
   text-indent: -999999px;
   background: url('../img/sprite-bar.png') no-repeat center;
   height: 42px;
@@ -52,17 +53,18 @@ body {
   display: inline-block;
   margin-right: 10px;
 }
-#create-feed {  background-position: 0 center; border-right: 6px solid #c0c3c6;}
+
+#create-feed {  background-position: 0 center;}
 #home {  background-position: -48px center;}
 #myfeed {  background-position: -90px center;}
 #topsqwags {  background-position: -130px center;}
 
 /* logo */
-.logo {
+/*.logo {
   position: relative;
   left: 180px;
   padding: 9px 0 2px;
-}
+}*/
 
 /* square */
 .sqwag {
@@ -148,7 +150,10 @@ button {
   margin-left: 10px;
   margin-top: 6px;
 }
-.media-bd {}
+.media-bd {
+  float: left;
+  text-align: right;
+}
 
 .action-links {
   .no-bullet();
@@ -181,6 +186,7 @@ img {
 .modal form {
   margin-bottom: 0;
 }
+.navbar .nav>li>a { line-height: 34px;}
 
 .copyright {
   text-align: center;

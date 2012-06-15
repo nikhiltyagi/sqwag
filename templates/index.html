@@ -25,7 +25,7 @@
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container">
-        <ul class="nav">
+        <ul class="sprite nav pull-left">
           {% if loggedIn %}
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="create-feed">Create <b class="caret"></b></a>
@@ -34,6 +34,7 @@
               <li><a href="#sqwag-image-form" data-toggle="modal">image</a></li>
             </ul>
           </li>
+          <li class="divider-vertical"></li>
           <li>
             <a class="js-load" href="#feed" id="home">Feed</a>
           </li>
@@ -43,10 +44,16 @@
           <li>
             <a class="js-load" href="#topsqwags" id="topsqwags">Top Sqwags</a>
           </li>
+        </ul>
+        <ul class="nav pull-right">
           <li>
-            <a class="js-load" href="#settings">Settings</a><li>
-          <li>
-            <a class="js-link" href="/sqwag/logout/">Logout</a>
+            <div class="media user-card">
+              <a class="media-obj-alt"><img src="http://graph.facebook.com/apnerve/picture/" /></a>
+              <div class="media-bd">
+                <h2>Florent F.</h2>
+                <div class=""><span class="profile-link">@florentf</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
+              </div>
+            </div>
           </li>
           
           {% else %}
@@ -59,7 +66,7 @@
           </li>
           {% endif %}
         </ul>
-        <img class="logo" src="assets/img/logo.png" />
+        <div class="logo"><img src="assets/img/logo.png" /></div>
       </div>
     </div>
   </div>
