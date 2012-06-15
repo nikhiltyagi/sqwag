@@ -59,18 +59,14 @@ var bb = {
               && model.attributes.user_accounts.length){
               // its a connected account user_object
               if(model.attributes.user_accounts[0].account=='twitter'){
-                alert(model.attributes.user_accounts[0].account)
               }
               else if(model.attributes.user_accounts[0].account=='facebook'){
-                alert(model.attributes.user_accounts[0].account)
               }
               else if(model.attributes.user_accounts[0].account=='insta'){
-                alert(model.attributes.user_accounts[0].account)
               }
 
             }else{
               // it's a sqwag user object
-              alert("its a sqwag user");
             }
             var sq = ich.text(model.attributes)
           }
