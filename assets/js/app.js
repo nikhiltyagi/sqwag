@@ -39,21 +39,49 @@ var bb = {
         self.feedHandler.nextFeed();
       },
       addSquare: function (model) {
-        if(model.attributes.square.content_type == 'tweet') {
-          var sq = ich.tweet(model.attributes);
+        if(model.attributes.square){
+          if(model.attributes.square.content_type == 'tweet') {
+            var sq = ich.tweet(model.attributes);
+          }
+          else if(model.attributes.square.content_type == 'text'){
+            var sq = ich.text(model.attributes);
+          } 
+          else if(model.attributes.square.content_type == 'image'){
+            var sq = ich.image(model.attributes);
+          }
         }
-        else if(model.attributes.square.content_type == 'text'){
-          var sq = ich.text(model.attributes);
-        } 
         else {
-          var sq = ich.image(model.attributes);
+          // decide which ich.template to call... how?
+          if(SQ.router.currentRoute=='toppeople'){
+            // we have object of a user
+            // now check the type of user object
+            if(model.attributes.user_accounts && model.attributes.user_accounts.constructor==Array 
+              && model.attributes.user_accounts.length){
+              // its a connected account user_object
+              if(model.attributes.user_accounts[0].account=='twitter'){
+                alert(model.attributes.user_accounts[0].account)
+              }
+              else if(model.attributes.user_accounts[0].account=='facebook'){
+                alert(model.attributes.user_accounts[0].account)
+              }
+              else if(model.attributes.user_accounts[0].account=='insta'){
+                alert(model.attributes.user_accounts[0].account)
+              }
+
+            }else{
+              // it's a sqwag user object
+              alert("its a sqwag user");
+            }
+            var sq = ich.text(model.attributes)
+          }
+          
         }
+        
         if(model.attributes.isPrepend){
           $('.sqwag-list').prepend(sq);
         }else{
           $('.sqwag-list').append(sq);
         }
-        
       }
     });
     self.feedHandler = {
@@ -86,12 +114,18 @@ var bb = {
                 result = data.result;
                 if (result.constructor == Array) {
                   $.each(result, function (index, value) {
-                    me.config.collection.add(value); // What to do with value.userSquare - [praveen]
+                    me.config.collection.add(value); 
                   });
                 }
               }
               else {
                 SQ.notify(data.error);
+                if(data.status == 404){
+                  if(SQ.router.currentRoute == 'home' || SQ.router.currentRoute=='feed'){
+                    // no feeds for this user, suggest him some user to follow. later we will refactor
+                    SQ.router.routeTo('toppeople');
+                  }
+                }
               }
             },
             complete: function(jqXHR, textStatus){
