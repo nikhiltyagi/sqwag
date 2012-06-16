@@ -15,6 +15,22 @@ var router = {
 				SQ.backbone.feedHandler.getFeed();
 			}
 		};
+		self.profileTemplate = {
+			"url":"/assets/templates/profile.html",
+			"targetElement":"#main",
+			"templateRoot":"#sqwag-list-id",
+			"isLoaded":false,
+
+			getData: function(){
+				$(self.profileTemplate.targetElement).load(self.profileTemplate.url, function() {
+					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
+					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+					var config = SQ.router.routes[router.currentRoute];
+					SQ.backbone.init(config.bb_config);
+					SQ.backbone.feedHandler.getFeed();
+				});				
+			}
+		};
 		self.settingsTemplate = {
 			"url":"/assets/templates/settings.html",
 			"targetElement":"#content",
@@ -66,7 +82,7 @@ var router = {
 				}
 			},
 			"myfeed" :  {
-				"template":self.feedTemplate,
+				"template":self.profileTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/feeds/"
 				}

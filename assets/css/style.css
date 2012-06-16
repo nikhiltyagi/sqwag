@@ -109,6 +109,11 @@ body {
   border: 0;
   height: 220px;
 }
+.sq-profile {
+  height: 260px;
+  margin-top: -40px;
+}
+
 .avatar {
   border-radius: 5px;
 }
@@ -244,4 +249,18 @@ img {
 }
 .hidden {
   display: none;
+}
+#main {
+  margin-top: 80px;
+  position:relative;
+}
+#sqwag-bar {
+  height: 40px;
+  background: rgba(0,0,0,0.4);
+  position: absolute;
+  width: 100%;
+  top: -40px;
+}
+#profile {
+  margin-left:-20px;
 }
