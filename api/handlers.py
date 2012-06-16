@@ -24,7 +24,7 @@ class SquareHandler(BaseHandler):
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
-    model = Square
+#    model = Square
     def create(self, request, *args, **kwargs):
         '''
         api to create square.
@@ -41,7 +41,7 @@ class ImageSquareHandler(BaseHandler):
     fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
-    model = Square
+#    model = Square
     def create(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -81,7 +81,7 @@ class UserSelfFeedsHandler(BaseHandler):
               'date_created',('user', ('id','first_name','last_name','email','username',)),(
               'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
     #exclude = ('id', re.compile(r'^private_'))
-    model = Square
+#    model = Square
     def read(self, request, page=1):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -107,7 +107,7 @@ class UserSelfFeedsHandler(BaseHandler):
 class ShareSquareHandler(BaseHandler):
     methods_allowed = ('POST',)
     successResponse = {}
-    model = Square
+#    model = Square
     successResponse['status'] = SUCCESS_STATUS_CODE
     successResponse['message'] = SUCCESS_MSG
     failureResponse = {}
@@ -221,7 +221,7 @@ class GetFollowersHandler(BaseHandler):
         try:
             relationships =  Relationship.objects.filter(producer=user)
             if relationships.count() > 1:
-                resultWrapper = relationshipPaginator(relationships, NUMBER_OF_SQUARES, page, user, 'subscriber')
+                resultWrapper = relationshipPaginator(request,relationships, NUMBER_OF_SQUARES, page, user, 'subscriber')
                 return resultWrapper
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -254,7 +254,7 @@ class GetProducersHandler(BaseHandler):
         try:
             relationships =  Relationship.objects.filter(subscriber=user)
             if relationships.count() > 1:
-                resultWrapper = relationshipPaginator(relationships, NUMBER_OF_SQUARES, page, user, 'producer')
+                resultWrapper = relationshipPaginator(request,relationships, NUMBER_OF_SQUARES, page, user, 'producer')
                 return resultWrapper
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -268,11 +268,10 @@ class GetProducersHandler(BaseHandler):
 
 class HomePageFeedHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('date_shared','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    fields = ('id','complete_user','date_shared','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created')
     #exclude = ('id', re.compile(r'^private_'))
-    model = Square
+#    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
@@ -290,7 +289,13 @@ class HomePageFeedHandler(BaseHandler):
             # ignore this userSquare if this has already been entered into squares_all
             if not usrsquare.square.id in visited:
                 square_obj = {}
+                if not usrsquare.square.user_account:
+                    accountType = 'NA'
+                else:
+                    accountType = usrsquare.square.user_account.id
+                usrsquare.square.complete_user = getCompleteUserInfo(request,usrsquare.square.user,accountType)['result']
                 square_obj['square'] = usrsquare.square
+                usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
                 square_obj['userSquare'] = usrsquare
                 squares_all.insert(0, square_obj)# optimize
                 visited[usrsquare.square.id]=True
@@ -329,26 +334,31 @@ class DeleteSquareHandler(BaseHandler):
 
 class TopSqwagsFeedsHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
-    #exclude = ('id', re.compile(r'^private_'))
-    model = Square
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count',
+              'date_created')
+#    exclude = ('username')
+#    model = Square
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
-        user = request.user
-        relationships = Relationship.objects.filter(subscriber=user)
-        producers =  [relationship.producer for relationship in relationships]
-        topSquares = Square.objects.filter(user__in=producers).order_by('-shared_count','-date_created')
+        topSquares = Square.objects.all().order_by('-shared_count','-date_created')
         squares_all = []
         for topsqr in topSquares:
             square_obj = {}
+            if not topsqr.user_account:
+                accountType = 'NA'
+            else:
+                accountType = topsqr.user_account.id                
+            usr = getCompleteUserInfo(request,topsqr.user,accountType)
+            topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
-            square_obj['userSquare'] = UserSquare.objects.get(square=topsqr,user=topsqr.user) 
+            usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
+            square_obj['userSquare'] = usrSqur
+            #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
@@ -380,11 +390,7 @@ class TopPeopleHandler(BaseHandler):
                 users = []
                 for profile in profiles.object_list:
                     userObj = profile.user
-                    useracc_obj = UserAccount.objects.filter(user=userObj)
-                    userInfo = {}
-                    userInfo['user'] = userObj
-                    userInfo['user_profile'] = profile
-                    userInfo['user_accounts']= useracc_obj
+                    userInfo = getCompleteUserInfo(request,userObj)
                     users.append(userInfo)
                 successResponse['result'] = users
                 successResponse['isNext'] = isNext
@@ -407,14 +413,28 @@ class TopPeopleHandler(BaseHandler):
 
 class PublicSqwagsFeedsHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
     #exclude = ('id', re.compile(r'^private_'))
-    model = Square
+#    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
-        squares_all = Square.objects.all().order_by('-date_created')
+        topSquares = Square.objects.all().order_by('-date_created')
+        squares_all = []
+        for topsqr in topSquares:
+            square_obj = {}
+            if not topsqr.user_account:
+                accountType = 'NA'
+            else:
+                accountType = topsqr.user_account.id                
+            usr = getCompleteUserInfo(request,topsqr.user,accountType)
+            topsqr.complete_user = usr['result']
+            square_obj['square'] = topsqr
+            usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
+            square_obj['userSquare'] = usrSqur
+            #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
+            squares_all.append(square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
@@ -433,7 +453,7 @@ class UserInfo(BaseHandler):
                 failureResponse['error'] = "Login Required"#rc.FORBIDDEN
                 return failureResponse
         user_obj = User.objects.get(pk=id)
-        userInfo = getCompleteUserInfo(user_obj)
+        userInfo = getCompleteUserInfo(request,user_obj)['result']
         return userInfo
 
 class CommentsSquareHandler(BaseHandler):
@@ -449,20 +469,15 @@ class CommentsSquareHandler(BaseHandler):
 #            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
 #            return failureResponse
         comments_info = []
-        count = 0
         comments = SquareComments.objects.filter(square=id).order_by('date_created')
         if comments:    
             for comment in comments:
                 comment_array = {}
                 comment_array['comment'] = comment
-                comment_array['user'] = comment.user
-                comment_array['userProfile'] = UserProfile.objects.get(user=comment.user)
-                comments_info.append(comment_array)
-                count = count + 1            
+                comment_array['user'] = getCompleteUserInfo(request,comment.user,'NA')['result']
+                comments_info.append(comment_array)            
             resultWrapper = paginate(request, page, comments_info, NUMBER_OF_SQUARES)
             return resultWrapper
-#            result['comments'] = comments_info
-#            successResponse['result'] = result
             return successResponse
         else:
             return successResponse
@@ -493,8 +508,7 @@ class CommentsSquareHandler(BaseHandler):
 
 class UserSquareHandler(BaseHandler):
     methods_allowed = ('GET')
-    model = User
-    fields = ('id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+    fields = ('sharing_user','owner','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
     
@@ -508,19 +522,21 @@ class UserSquareHandler(BaseHandler):
         usrsquare = UserSquare.objects.get(pk=id)
         if usrsquare:
             result = {}
-            result['square'] = usrsquare.square
+            square = usrsquare.square
             owner = usrsquare.square.user
-            #owner = User.objects.get(user=usrsquare.user.get('user'))
-            result['owner'] = owner
-            result['owner_profile'] = UserProfile.objects.get(user=owner)
-            result['owner_account'] = usrsquare.square.user_account
-            if  not usrsquare.is_owner:
-                result['sharing_user'] = usrsquare.user
-                result['sharing_user_profile'] = UserProfile.objects.get(user=usrsquare.user)
-                result['sharing_user_description'] = usrsquare.content_description
+            if not usrsquare.square.user_account.id:
+                accountType = 'NA'
             else:
-                result['sharing_user'] = {}
-                result['sharing_user_profile'] = {}
+                accountType = usrsquare.square.user_account.id
+            square.owner = getCompleteUserInfo(request,owner,accountType)['result']
+            if  not usrsquare.is_owner:
+                accountType = 'NA'
+                usrsquare.sharing_user = getCompleteUserInfo(request,usrsquare.user,accountType)['result']
+                #square.sharing_user_content_description = usrsquare.content_description 
+            else:
+                usrsquare.sharing_user = {}
+            result['square'] = square
+            result['userSquare'] = usrsquare    
             successResponse['result'] = result
             return successResponse
             
