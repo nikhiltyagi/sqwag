@@ -26,7 +26,7 @@
     <div class="navbar-inner">
       <div class="container">
         <ul class="sprite nav pull-left">
-          {% if loggedIn %}
+          {% if complete_user %}
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="create-feed">Create <b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -48,14 +48,20 @@
         <ul class="nav pull-right">
           <li>
             <div class="media user-card">
-              <a class="media-obj-alt"><img src="http://graph.facebook.com/apnerve/picture/" /></a>
+              <a class="media-obj-alt"><img src="{{user_image_url }}" /></a>
               <div class="media-bd">
-                <h2>Florent F.</h2>
-                <div class=""><span class="profile-link">@florentf</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
+                {% if complete_user.user_profile.displayname %}
+                <h2>{{complete_user.user_profile.displayname }}</h2>
+                {% else %}
+                <h2>{{complete_user.user.username }}</h2>
+                {% endif %}
+                <div class=""><span class="profile-link">@{{complete_user.user.username }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
               </div>
             </div>
           </li>
-          
+
+
+
           {% else %}
           
           <li>
@@ -202,7 +208,8 @@ $(document).ready(function() {
       "route": "home",
       "backbone": bb,
   };
-  {% if loggedIn %}
+
+  {% if complete_user %}
     options = {
       "route":"home",
     };
