@@ -54,6 +54,7 @@ def crateSquare(request):
     if squareForm.is_valid():
         square = squareForm.save(commit=False)
         resultWrapper = saveSquareBoilerPlate(request.user, square)
+        return resultWrapper
     else:
         resultWrapper['status'] = BAD_REQUEST
         resultWrapper['error'] = squareForm.errors

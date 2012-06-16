@@ -1,2 +1,266 @@
-/* This beautiful CSS-File has been crafted with LESS (lesscss.org) and compiled by simpLESS (wearekiss.com/simpless) */
-.clearfix{*zoom:1}.clearfix:before,.clearfix:after{display:table;content:""}.clearfix:after{clear:both}.no-bullet{margin:0;padding:0}.no-bullet li{list-style:none}body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;color:#333;background-color:#c0c3c6}.profile{background:#069}.navbar{margin-top:60px}.navbar-inner{background:url('../img/bg-bar.png') repeat-x;border-radius:6px}.navbar .nav>li a{text-indent:-999999px;background:url('../img/sprite-bar.png') no-repeat center;height:42px;width:16px;display:inline-block;margin-right:10px}#create-feed{background-position:0 center;border-right:6px solid #c0c3c6}#home{background-position:-48px center}#myfeed{background-position:-90px center}#topsqwags{background-position:-130px center}.logo{position:relative;left:180px;padding:9px 0 2px}.sqwag{height:200px;background:#fff;border:1px solid #999;padding:9px;margin-top:20px}.sq-text{background-color:#dff0d8;border-color:#cde8c2}.sq-tweet{background-color:#9ae4e8;border-color:#81dde2}.sq-spottify{background-color:#4da400;border-color:#3f8500}.sq-image{padding:0;border:0;height:220px}.avatar{border-radius:5px}.island{position:relative;height:100%}.island>.bd{margin:16px 0}.island>.ft{font-size:11px;position:absolute;bottom:0;width:100%}.sq-image .ft{bottom:10px;left:10px}.mask{position:absolute;top:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;margin:-10px;padding:6px;display:none}.sq-image .mask{margin:0}.buttons-group{position:relative;bottom:-10px}button{background:#f2f2f2;border:1px solid #ccc}.media{*zoom:1}.media:before,.media:after{display:table;content:""}.media:after{clear:both}.media-obj{float:left;margin-right:10px}.media-obj-alt{float:right;margin-left:10px;margin-top:6px}.action-links{margin:0;padding:0}.action-links li{list-style:none}.action-links li{display:inline-block}.action-links a{color:#fff;text-decoration:none}.action-links li:after{content:" ·";color:#fff}.action-links li:last-child:after{content:""}p{font:11px/1.2 verdana,arial;margin:0}img{max-width:100%}.modal form{margin-bottom:0}.copyright{text-align:center}.fl{float:left}.fr{float:right}.align-right{text-align:right}.align-center{text-align:center}.hidden{display:none}
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before, .clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+.no-bullet {
+  margin: 0;
+  padding: 0;
+}
+.no-bullet li {
+  list-style: none;
+}
+/* ===== Primary Styles ========================================================
+   Author: @apnerve
+   ========================================================================== */
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: #777;
+  background-color: #c0c3c6;
+}
+.profile {
+  background: #069;
+}
+/*
+.brief {
+  background: rgba(0,0,0,0.6);
+  height: 60px;
+  z-index: 2;
+  position: relative;
+  margin-bottom: 0;
+}
+.cover {
+  height: 380px;
+  background: #fff;
+  margin-top: -60px;
+}
+.bio {
+  height: 90px;
+  background: #fff;
+} */
+.navbar {
+  margin-top: 60px;
+}
+.navbar-inner {
+  background: url('../img/bg-bar.png') repeat-x;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+/* sprites */
+.sprite > li > a {
+  text-indent: -999999px;
+  background: url('../img/sprite-bar.png') no-repeat center;
+  height: 42px;
+  width: 16px;
+  display: inline-block;
+  margin-right: 10px;
+}
+#create-feed {
+  background-position: 0 center;
+  margin: 0;
+}
+#home {
+  background-position: -48px center;
+}
+#myfeed {
+  background-position: -90px center;
+}
+#topsqwags {
+  background-position: -130px center;
+}
+/* logo */
+.logo {
+  width: 150px;
+  padding: 6px 0;
+  margin: auto;
+}
+
+/* square */
+.sqwag {
+  height: 200px;
+  background: #fff;
+  border: 1px solid #999;
+  padding: 9px;
+  margin-top: 20px;
+}
+/* sqwags */
+.sq-text {
+  background-color: #dff0d8;
+  border-color: #cde8c2;
+}
+.sq-tweet {
+  background-color: #9ae4e8;
+  border-color: #81dde2;
+}
+.sq-spottify {
+  background-color: #4da400;
+  border-color: #3f8500;
+}
+.sq-image {
+  padding: 0;
+  border: 0;
+  height: 220px;
+}
+.sq-profile {
+  height: 260px;
+  margin-top: -40px;
+}
+
+.avatar {
+  border-radius: 5px;
+}
+/* =island */
+.island {
+  position: relative;
+  height: 100%;
+}
+.island > .bd {
+  margin: 16px 0;
+}
+.island > .ft {
+  font-size: 11px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+.sq-image .ft {
+  bottom: 10px;
+  left: 10px;
+}
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  margin: -10px;
+  padding: 6px;
+  display: none;
+}
+.sq-image .mask {
+  margin: 0;
+}
+.buttons-group {
+  position: relative;
+  bottom: -10px;
+}
+button {
+  background: #f2f2f2;
+  border: 1px solid #ccc;
+}
+/* =media */
+.media {
+  *zoom: 1;
+}
+.media:before, .media:after {
+  display: table;
+  content: "";
+}
+.media:after {
+  clear: both;
+}
+.media-obj {
+  float: left;
+  margin-right: 10px;
+}
+.media-obj-alt {
+  float: right;
+  margin-left: 10px;
+  margin-top: 6px;
+}
+.media-bd {
+  float: left;
+  text-align: right;
+}
+
+.user-card img {
+  box-shadow: 0 0 10px #000 inset;
+}
+.action-links {
+  margin: 0;
+  padding: 0;
+}
+.action-links li {
+  list-style: none;
+}
+.action-links li {
+  display: inline-block;
+}
+.action-links a {
+  color: #fff;
+  text-decoration: none;
+}
+.action-links li:after {
+  content: " ·";
+  color: #fff;
+}
+.action-links li:last-child:after {
+  content: "";
+}
+/* =elements */
+p {
+  font: 11px/1.2 verdana, arial;
+  margin: 0;
+}
+img {
+  max-width: 100%;
+}
+/* =overrides */
+.modal form {
+  margin-bottom: 0;
+}
+.navbar .nav > li > a {
+  line-height: 34px;
+}
+.navbar .divider-vertical {
+  height: 63px;
+  background-color: rgba(0,0,0,0.4);
+  border: 0;
+  width: 6px;
+}
+.navbar .nav.pull-right {
+  margin-right: 26px;
+}
+.dropdown.open .dropdown-toggle { background: url("../img/sprite-bar.png") no-repeat scroll center center transparent;}
+.copyright {
+  text-align: center;
+}
+/* =helpful */
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.align-right {
+  text-align: right;
+}
+.align-center {
+  text-align: center;
+}
+.hidden {
+  display: none;
+}
+#main {
+  margin-top: 80px;
+  position:relative;
+}
+#sqwag-bar {
+  height: 40px;
+  background: rgba(0,0,0,0.4);
+  position: absolute;
+  width: 100%;
+  top: -40px;
+}
+#profile {
+  margin-left:-20px;
+}

@@ -388,6 +388,7 @@ class TopPeopleHandler(BaseHandler):
                 else:
                     isNext=True
                 users = []
+                
                 for profile in profiles.object_list:
                     userObj = profile.user
                     userInfo = getCompleteUserInfo(request,userObj)

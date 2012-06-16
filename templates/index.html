@@ -25,8 +25,8 @@
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container">
-        <ul class="nav">
-          {% if loggedIn %}
+        <ul class="sprite nav pull-left">
+          {% if complete_user %}
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="create-feed">Create <b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -34,6 +34,7 @@
               <li><a href="#sqwag-image-form" data-toggle="modal">image</a></li>
             </ul>
           </li>
+          <li class="divider-vertical"></li>
           <li>
             <a class="js-load" href="#feed" id="home">Feed</a>
           </li>
@@ -43,23 +44,36 @@
           <li>
             <a class="js-load" href="#topsqwags" id="topsqwags">Top Sqwags</a>
           </li>
+        </ul>
+        <ul class="nav pull-right">
           <li>
-            <a class="js-load" href="#settings">Settings</a><li>
-          <li>
-            <a class="js-link" href="/sqwag/logout/">Logout</a>
+            <div class="media user-card">
+              <a class="media-obj-alt"><img src="{{user_image_url }}" /></a>
+              <div class="media-bd">
+                {% if complete_user.user_profile.displayname %}
+                <h2>{{complete_user.user_profile.displayname }}</h2>
+                {% else %}
+                <h2>{{complete_user.user.username }}</h2>
+                {% endif %}
+                <div class=""><span class="profile-link">@{{complete_user.user.username }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
+              </div>
+            </div>
           </li>
-          
+
+
+
           {% else %}
-          
+          <ul class="nav">
           <li>
             <a href="#register-form" data-toggle="modal">Register</a>
           </li>
           <li>
             <a href="#login-form" data-toggle="modal">Login</a>
           </li>
+        </ul>
           {% endif %}
         </ul>
-        <img class="logo" src="assets/img/logo.png" />
+        <div class="logo"><a class="js-load" href="#feed"><img src="assets/img/logo.png" /></a></div>
       </div>
     </div>
   </div>
@@ -165,7 +179,9 @@
     
     <p id="console" class="alert alert-info hidden"></p>
     
-    <div id="content">
+    <div id="main">      
+      <div id="content">
+      </div>
     </div>
     
 	</div>
@@ -195,7 +211,8 @@ $(document).ready(function() {
       "route": "home",
       "backbone": bb,
   };
-  {% if loggedIn %}
+
+  {% if complete_user %}
     options = {
       "route":"home",
     };
