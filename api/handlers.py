@@ -307,7 +307,7 @@ class DeleteSquareHandler(BaseHandler):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-            return failureResponseuser
+            return failureResponse
         if "square_id" in request.POST:
             sq_id = request.POST['square_id']
             sq_obj = Square.objects.get(pk=sq_id, user = request.user)
@@ -349,7 +349,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
             square_obj = {}
             square_obj['square'] = topsqr
             square_obj['userSquare'] = UserSquare.objects.get(square=topsqr,user=topsqr.user) 
-            squares_all.append(square_obj)
+            squares_all.append(square_obj)  #insert(0, square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
         return resultWrapper
 
@@ -378,6 +378,7 @@ class TopPeopleHandler(BaseHandler):
                 else:
                     isNext=True
                 users = []
+                
                 for profile in profiles.object_list:
                     userObj = profile.user
                     useracc_obj = UserAccount.objects.filter(user=userObj)

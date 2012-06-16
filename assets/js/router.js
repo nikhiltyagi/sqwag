@@ -21,7 +21,24 @@ var router = {
 			"isLoaded":true,
 
 			getData : function(){
-				$(self.settingsTemplate.targetElement).load(self.settingsTemplate.url);
+				$(self.formTemplate.targetElement).load(self.settingsTemplate.url, function(){
+					// bind events
+					$("#twitter-connect").bind("click",function(){
+						$.ajax({
+				            url: "/sqwag/authtwitter",
+				            dataType: "json",
+				            success: function (data, textStatus, jqXHR) {
+				              alert("received: "+data);
+				            },
+				            complete: function(jqXHR, textStatus){
+				              smartDate.refresh();
+				            },
+				            error: function(jqXHR, textStatus, errorThrown){
+				            	alert(textStatus+" : "+errorThrown);
+				            }
+			          	});
+					})
+				});
 			}
 		};
 		self.formTemplate = {
@@ -34,35 +51,48 @@ var router = {
 			}
 		};
 		self.routes = {
-			"settings":{"template":self.settingsTemplate},
-			"home" :{"template":self.feedTemplate,
+			"settings":{
+				"template":self.settingsTemplate},
+			"home" :{
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/homefeeds/"
 				}
 			},
-			"feed" : {"template":self.feedTemplate,
+			"feed" : {
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/homefeeds/"
 				}
 			},
-			"myfeed" :  {"template":self.feedTemplate,
+			"myfeed" :  {
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/feeds/"
 				}
 			},
-			"publicfeed" :  {"template":self.feedTemplate,
+			"publicfeed" :  {
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/publicsqwagfeed/"
 				}
 			},
-			"topsqwags" :  {"template":self.feedTemplate,
+			"topsqwags" :  {
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/topsqwagsfeeds/"
 				}
 			},
-			"userprofile" :  {"template":self.feedTemplate,
+			"userprofile" :  {
+				"template":self.feedTemplate,
 				"bb_config":{
 					"feedUrl":"/api/user/feeds/"
+				}
+			},
+			"toppeople" : {
+				"template":self.feedTemplate,
+				"bb_config":{
+					"feedUrl":"/api/user/topusersfeeds/"
 				}
 			},
 			"logout" : {},
