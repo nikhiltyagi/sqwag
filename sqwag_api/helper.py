@@ -153,9 +153,9 @@ def getCompleteUserInfo(request,user,accountType=None):
             if not request.user.is_anonymous():
                 try:
                     Relationship.objects.get(subscriber=request.user,producer=user)
-                    userInfo['is_following'] = True
+                    userInfo['is_following'] = {}
                 except Relationship.DoesNotExist:
-                    userInfo['is_following'] = False
+                    userInfo['is_following'] = {}
             resultWrapper['status']=SUCCESS_STATUS_CODE
             resultWrapper['result']=userInfo
             return resultWrapper

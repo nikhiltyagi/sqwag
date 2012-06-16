@@ -8,15 +8,16 @@ def index (request):
         print "logged out"
         return render_to_response('index.html')
     print "logged in"
-    complete_user = getCompleteUserInfo(request.user)
+    complete_user = getCompleteUserInfo(request,request.user)
     if complete_user['status']==1:
         complete_user = complete_user['result']
-        if complete_user['user_profile'].sqwag_image_url:
-            user_image_url = complete_user['user_profile'].sqwag_image_url
+        user_profile = complete_user['user_profile']
+        if user_profile['sqwag_image_url']:
+            user_image_url = complete_user['user_profile']['sqwag_image_url']
         elif complete_user['user_accounts']:
             for user_account in complete_user['user_accounts']:
-                if user_account.account_pic:
-                    user_image_url = user_account.account_pic
+                if user_account['account_pic']:
+                    user_image_url = user_account['account_pic']
                     break
         else:
             user_image_url = "http://graph.facebook.com/apnerve/picture/"
