@@ -9,6 +9,7 @@ var router = {
 			"isLoaded":false,
 
 			getData: function(){
+				$("#main").html('<div id="content"></div>');
 				$(self.feedTemplate.targetElement).html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
 				var config = SQ.router.routes[router.currentRoute];
 				SQ.backbone.init(config.bb_config);
