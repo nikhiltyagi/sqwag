@@ -43,7 +43,7 @@ urlpatterns = patterns('',
     url(r'^user/topusersfeeds/(?P<page>\d+)$', top_people_resource,{ 'emitter_format': 'json' }),
     url(r'^user/followers/(?P<id>\d+)/(?P<page>\d+)$', follower_resource,{ 'emitter_format': 'json' }),
     url(r'^user/producers/(?P<id>\d+)/(?P<page>\d+)$', producer_resource,{ 'emitter_format': 'json' }),
-    url(r'^square/getcomments/(?P<id>\d+)',square_comments_resource,{'emitter_format':'json'}),
+    url(r'^square/getcomments/(?P<id>\d+)/(?P<page>\d+)$',square_comments_resource,{'emitter_format':'json'}),
     url(r'^square/postcomments',square_comments_resource,{'emitter_format':'json'}),
     url(r'^usersquare/(?P<id>\d+)$', user_square_resource,{ 'emitter_format': 'json' }),
 )

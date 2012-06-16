@@ -83,7 +83,7 @@ def saveSquareBoilerPlate(user, square, date_created=None):
     square.save()
     is_owner = True
     squareResponse = {}
-    userSquare = createUserSquare(user,square,is_owner)
+    userSquare = createUserSquare(None,user,square,is_owner)
     try:
         userProfile = UserProfile.objects.get(user=square.user)
         userProfile.sqwag_count += 1
@@ -134,16 +134,28 @@ def paginate(request, page, inputList, itemsPerPage):
         resultWrapper['error'] = "page is out of bounds"
     return resultWrapper
 
-def getCompleteUserInfo(user):
+def getCompleteUserInfo(request,user,accountType=None):
     resultWrapper = {}
     userInfo = {}
     if user:
         try:
-            useracc_obj = UserAccount.objects.filter(user=user)
-            userProfile = UserProfile.objects.get(user=user)
-            userInfo['user'] = user
+            userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
+                                                     "sqwag_image_url").get(user=user)
+            userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             userInfo['user_profile'] = userProfile
+            if not accountType:
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user)
+            elif accountType=='NA':
+                useracc_obj = {}
+            else:    
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType)
             userInfo['user_accounts']= useracc_obj
+            if not request.user.is_anonymous():
+                try:
+                    Relationship.objects.get(subscriber=request.user,producer=user)
+                    userInfo['is_following'] = True
+                except Relationship.DoesNotExist:
+                    userInfo['is_following'] = False
             resultWrapper['status']=SUCCESS_STATUS_CODE
             resultWrapper['result']=userInfo
             return resultWrapper
@@ -156,7 +168,7 @@ def getCompleteUserInfo(user):
         resultWrapper['error']='user object is null'
         return resultWrapper;
 
-def relationshipPaginator(relationships,itemsPerPage,page,user,userType):
+def relationshipPaginator(request,relationships,itemsPerPage,page,user,userType):
     resultWrapper = {}
     paginator = Paginator(relationships,itemsPerPage)
     try:
@@ -176,7 +188,7 @@ def relationshipPaginator(relationships,itemsPerPage,page,user,userType):
                 if userObj==user:
                     print "ignore self" # log it
                 else:
-                    userInfo = getCompleteUserInfo(userObj)
+                    userInfo = getCompleteUserInfo(request,userObj)
                     if userInfo['status'] == SUCCESS_STATUS_CODE:
                         users.append(userInfo['result'])
                         resultWrapper['status'] = SUCCESS_STATUS_CODE
@@ -201,11 +213,28 @@ def relationshipPaginator(relationships,itemsPerPage,page,user,userType):
         resultWrapper['error'] = "page is out of bounds"
         return resultWrapper
 
-def createUserSquare(user,square,is_owner):
+def createUserSquare(request,user,square,is_owner):
     userSquare = UserSquare(user=user,square=square)
     userSquare.date_shared = time.time()
     userSquare.is_deleted = False
-    userSquare.content_description = square.content_description
+    if is_owner:
+        userSquare.content_description = square.content_description
+    else:
+        if 'content_desc' in request.POST:
+            form = ContentDescriptionForm(request.POST)
+            if form.is_valid():
+                userSquare.content_description = request.POST['content_desc']
+        else:
+            userSquare.content_description = ""        
     userSquare.is_owner = is_owner
     userSquare.save()
     return userSquare
+
+def getRelationship(producer,subscriber):
+    user = Relationship.objects.get(producer=producer,subscriber=subscriber)
+    if user:
+        is_following = True
+    else:
+        is_following = False
+    return is_following
+        
