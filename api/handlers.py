@@ -20,9 +20,8 @@ failureResponse = {}
 
 class SquareHandler(BaseHandler):
     allowed_methods = ('POST',)
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
     #exclude = ('id', re.compile(r'^private_'))
 #    model = Square
     def create(self, request, *args, **kwargs):
@@ -38,9 +37,8 @@ class SquareHandler(BaseHandler):
 
 class ImageSquareHandler(BaseHandler):
     allowed_methods = ('POST')
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
 #    model = Square
     def create(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
@@ -59,7 +57,7 @@ class ImageSquareHandler(BaseHandler):
                     square = form.save(commit=False)
                     square.content_type = "image"
                     square.content_data = image_url
-                    resultWrapper = saveSquareBoilerPlate(request.user, square)
+                    resultWrapper = saveSquareBoilerPlate(request, square)
                     return resultWrapper
                 else:
                     failureResponse['status'] = BAD_REQUEST
@@ -77,9 +75,8 @@ class ImageSquareHandler(BaseHandler):
 
 class UserSelfFeedsHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',('user', ('id','first_name','last_name','email','username',)),(
-              'user_account',('id','account_id','date_created','account_pic','account_handle','account')))
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
     #exclude = ('id', re.compile(r'^private_'))
 #    model = Square
     def read(self, request, page=1):
@@ -87,14 +84,20 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
-        userSquares = UserSquare.objects.filter(user=request.user).order_by('-date_shared')
+        userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False).order_by('-date_shared')
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
             # ignore this userSquare if this has already been entered into squares_all
             if not usrsquare.square.id in visited:
                 square_obj = {}
+                if not usrsquare.square.user_account:
+                    account_type = 'NA'
+                else:
+                    account_type = usrsquare.square.user_account.id
+                usrsquare.square.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
                 square_obj['square'] = usrsquare.square
+                usrsquare.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
                 square_obj['userSquare'] = usrsquare
                 squares_all.insert(0, square_obj)# optimize
                 visited[usrsquare.square.id]=True
@@ -106,6 +109,8 @@ class UserSelfFeedsHandler(BaseHandler):
 
 class ShareSquareHandler(BaseHandler):
     methods_allowed = ('POST',)
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
     successResponse = {}
 #    model = Square
     successResponse['status'] = SUCCESS_STATUS_CODE
@@ -118,7 +123,12 @@ class ShareSquareHandler(BaseHandler):
             return failureResponse
         if 'square_id' in request.POST:
             if request.POST['square_id'].isdigit():
-                squareObj = Square.objects.get(pk=request.POST['square_id'])
+                try:
+                    squareObj = Square.objects.get(pk=request.POST['square_id'])
+                except Square.DoesNotExist:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = 'square does not exist'
+                    return failureResponse
                 userObj = request.user
                 is_owner = False
 #                if(squareObj.user==userObj):
@@ -130,7 +140,21 @@ class ShareSquareHandler(BaseHandler):
                     squareObj.shared_count = squareObj.shared_count + 1
                     squareObj.save()
                     squareResponse = {}
+                    if not squareObj.user_account:
+                        accountType = 'NA'
+                    else:
+                        accountType = squareObj.user_account.id
+                    try:
+                        usrprofile = UserProfile.objects.get(user=request.user)
+                    except UserProfile.DoesNotExist:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = 'UserProfile does not exist'
+                        return failureResponse
+                    usrprofile.sqwag_count = usrprofile.sqwag_count + 1
+                    usrprofile.save()
+                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
                     squareResponse['square'] = squareObj
+                    userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
                     squareResponse['userSquare'] = userSquareObj
                     to_email = squareObj.user.email
                     # inform the owner 
@@ -154,8 +178,7 @@ class ShareSquareHandler(BaseHandler):
 
 class RelationshipHandler(BaseHandler):
     methods_allowed = ('GET','POST',)
-    fields = ('id','date_subscribed','permission',('subscriber', ('id','first_name','last_name','email','username',)),
-              ('producer', ('id','first_name','last_name','email','username',)))
+    fields = ('subscriber_complete_user','producer_complete_user','id','date_subscribed','permission',)
     def create(self, request, *args, **kwargs):
         relationshipForm = CreateRelationshipForm(request.POST)
         #relationshipForm.user = request.user
@@ -187,7 +210,8 @@ class RelationshipHandler(BaseHandler):
                 userProfile = UserProfile.objects.get(user=relationship.subscriber)
                 userProfile.following_count += 1 
                 userProfile.save()
-                
+                relationship.producer_complete_user = getCompleteUserInfo(request,prod)
+                relationship.subscriber_complete_user = getCompleteUserInfo(request,sub)
                 to_email = relationship.producer.email
                 # notify producer user
                 mailer = Emailer(subject=SUBJECT_SUBSCRIBED,body=BODY_SUBSCRIBED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
@@ -204,7 +228,7 @@ class GetFollowersHandler(BaseHandler):
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_pic','account_handle','account_pic', 'sqwag_image_url',
                'sqwag_count','following_count','followed_by_count')
-    def read(self, request,id,page=1, *args, **kwargs):
+    def read(self,request,page=1,id=None, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
@@ -237,7 +261,7 @@ class GetProducersHandler(BaseHandler):
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_pic','account_handle','account_pic', 'sqwag_image_url',
                'sqwag_count','following_count','followed_by_count')
-    def read(self, request,id,page=1, *args, **kwargs):
+    def read(self, request,id=None,page=1, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
@@ -282,7 +306,7 @@ class HomePageFeedHandler(BaseHandler):
         user = request.user
         relationships = Relationship.objects.filter(subscriber=user)
         producers =  [relationship.producer for relationship in relationships]
-        userSquares = UserSquare.objects.filter(user__in=producers).order_by('date_shared')
+        userSquares = UserSquare.objects.filter(user__in=producers,is_deleted=False).order_by('date_shared')
         squares_all = []
         visited = {}
         for usrsquare in userSquares:
@@ -309,18 +333,45 @@ class DeleteSquareHandler(BaseHandler):
     methods_allowed = ('POST')
     
     def create(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-            return failureResponse
+#        if not request.user.is_authenticated():
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
         if "square_id" in request.POST:
             sq_id = request.POST['square_id']
-            sq_obj = Square.objects.get(pk=sq_id, user = request.user)
-            if sq_obj:
-                userProfile = UserProfile.objects.get(user=sq_obj.user)
-                userProfile.sqwag_count = userProfile.sqwag_count - 1
-                userProfile.save()
-                sq_obj.delete()  # TODO: SOFT DELETE REQUIRED. NOT HARD DELETE
+            try:
+                user_sq_obj = UserSquare.objects.get(pk=sq_id, user = request.user)
+            except UserSquare.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'user square does not exist'
+            if user_sq_obj:
+                if not user_sq_obj.is_owner:
+                    try:
+                        userProfile = UserProfile.objects.get(user=user_sq_obj.user)
+                    except UserProfile.DoesNotExist:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = "user profile does not exists"
+                        return failureResponse
+                    userProfile.sqwag_count = userProfile.sqwag_count - 1
+                    userProfile.save()
+                    user_sq_obj.is_deleted = True
+                    user_sq_obj.save()  # TODO: SOFT DELETE REQUIRED. NOT HARD DELETE
+                else:
+                    squares_all = UserSquare.objects.filter(square=user_sq_obj.square)
+                    try:
+                        square = Square.objects.get(pk=user_sq_obj.square.id,is_deleted=False)
+                    except Square.DoesNotExist:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = 'square does not exist'
+                        return failureResponse
+                    square.is_deleted = True
+                    square.save()
+                    for sqrs in squares_all:
+                        userProfile = UserProfile.objects.get(user=sqrs.user)
+                        userProfile.sqwag_count = userProfile.sqwag_count - 1
+                        userProfile.save()
+                        sqrs.is_deleted = True
+                        sqrs.save()
                 successResponse['result'] = "square deleted"
                 return successResponse
             else:
@@ -344,7 +395,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
-        topSquares = Square.objects.all().order_by('-shared_count','-date_created')
+        topSquares = Square.objects.filter(is_deleted=False).order_by('-shared_count','-date_created')
         squares_all = []
         for topsqr in topSquares:
             square_obj = {}
@@ -355,7 +406,12 @@ class TopSqwagsFeedsHandler(BaseHandler):
             usr = getCompleteUserInfo(request,topsqr.user,accountType)
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
-            usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            try:
+                usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            except UserSquare.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'User square not found'
+                return failureResponse
             usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
             square_obj['userSquare'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
@@ -420,7 +476,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
 #    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
-        topSquares = Square.objects.all().order_by('-date_created')
+        topSquares = Square.objects.filter(is_deleted=False).order_by('-date_created')
         squares_all = []
         for topsqr in topSquares:
             square_obj = {}
@@ -431,7 +487,12 @@ class PublicSqwagsFeedsHandler(BaseHandler):
             usr = getCompleteUserInfo(request,topsqr.user,accountType)
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
-            usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            try:
+                usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+            except UserSquare.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'User square not found'
+                return failureResponse
             usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
             square_obj['userSquare'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
@@ -453,7 +514,11 @@ class UserInfo(BaseHandler):
                 failureResponse['status'] = AUTHENTICATION_ERROR
                 failureResponse['error'] = "Login Required"#rc.FORBIDDEN
                 return failureResponse
-        user_obj = User.objects.get(pk=id)
+        try:
+            user_obj = User.objects.get(pk=id)
+        except User.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user does not exist'
         userInfo = getCompleteUserInfo(request,user_obj)['result']
         return userInfo
 
@@ -508,8 +573,8 @@ class CommentsSquareHandler(BaseHandler):
 
 
 class UserSquareHandler(BaseHandler):
-    methods_allowed = ('GET',)
-    fields = ('sharing_user','owner','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+    methods_allowed = ('GET')
+    fields = ('complet_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
     
@@ -520,7 +585,11 @@ class UserSquareHandler(BaseHandler):
 #            failureResponse['status'] = AUTHENTICATION_ERROR
 #            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
 #            return failureResponse
-        usrsquare = UserSquare.objects.get(pk=id)
+        try:
+            usrsquare = UserSquare.objects.get(pk=id,is_deleted=False)
+        except UserSquare.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user square does not exist'
         if usrsquare:
             result = {}
             square = usrsquare.square
@@ -529,13 +598,13 @@ class UserSquareHandler(BaseHandler):
                 accountType = 'NA'
             else:
                 accountType = usrsquare.square.user_account.id
-            square.owner = getCompleteUserInfo(request,owner,accountType)['result']
+            square.complete_user = getCompleteUserInfo(request,owner,accountType)['result']
             if  not usrsquare.is_owner:
                 accountType = 'NA'
-                usrsquare.sharing_user = getCompleteUserInfo(request,usrsquare.user,accountType)['result']
+                usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,accountType)['result']
                 #square.sharing_user_content_description = usrsquare.content_description 
             else:
-                usrsquare.sharing_user = {}
+                usrsquare.complete_user = square.complete_user
             result['square'] = square
             result['userSquare'] = usrsquare    
             successResponse['result'] = result
@@ -544,7 +613,6 @@ class UserSquareHandler(BaseHandler):
 class FeedbackHandler(BaseHandler):
     methods_allowed = ('GET','POST')
     fields = ('id', 'username','feedback','date_created')
-    
     def create(self,request):
         if request.method =='POST':
             feedbackForm = FeedbackForm(request.POST)
@@ -564,3 +632,62 @@ class FeedbackHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = 'Expecting a POST request'
             return failureResponse
+
+class restUserSquareHandler(BaseHandler):
+    methods_allowed = ('GET')
+    fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+             'content_src','content_type','content_data','content_description','date_created',
+             'shared_count','liked_count','comment','displayname')
+    def read(self,request,id):
+#        if request.user.is_authenticated():
+#                id = request.user.id
+#        else:
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        try:
+            usrsquare = UserSquare.objects.get(pk=id)
+        except UserSquare.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user square does not exist'        
+        #print usrsquare.user
+        usrsquares = UserSquare.objects.filter(square=usrsquare.square,is_deleted=False).order_by('-date_shared')
+        result = {}
+        squares_all = []
+        for usrsqr in usrsquares:
+            #print usrsqr.user
+            if usrsqr.is_owner:
+                print "ignore the owner"
+            elif usrsqr == usrsquare:
+                print "ignore the sharing user"
+            else:
+                usrsqr.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
+                squares_all.append(usrsqr)
+        successResponse['result'] = squares_all
+        return successResponse
+    
+class unfollowHandler(BaseHandler):
+    methods_allowed = ('GET')
+    fields = fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+             'content_src','content_type','content_data','content_description','date_created',
+             'shared_count','liked_count','comment','displayname')
+    def read(self,request,id,*args,**kwargs):
+        try:
+            user = User.objects.get(pk=id)
+        except User.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user to unfollow does not exist'
+            return failureResponse
+        try:
+            RelationshipObj = Relationship.objects.get(subscriber=request.user,producer=user)
+        except Relationship.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'you are not following this user'
+            return failureResponse
+        RelationshipObj.delete()
+        successResponse['status'] = SUCCESS_STATUS_CODE
+        successResponse['message'] = SUCCESS_MSG
+        successResponse['result'] = 'successfully unfollowed the user'
+        return successResponse
+    
+    
