@@ -151,7 +151,66 @@ var bb = {
             smartDate.refresh();
           }
         });
-      }
+      },
+      reTweet : function(dataObject){
+        var me =this;
+        $.ajax({
+          url:"/sqwag/retweet/"+dataObject.square_id,
+          dataType: "json",
+          type: "POST",
+          data: {},
+          success: function (data, textStatus, jqXHR){
+            if(data.status == 1){
+              SQ.notify('re-tweeted successfully!');
+            }else{
+              SQ.notify(data.error);
+            }
+          },
+          complete: function(jqXHR, textStatus){
+            smartDate.refresh();
+          }
+        });
+      },
+      replyTweet : function(dataObject){
+        var me =this;
+        var queryString = dataObject.square_id+"/"+dataObject.message+"/"+dataObject.user_handle;
+        $.ajax({
+          url:"/sqwag/replytweet/"+queryString,
+          dataType: "json",
+          type: "POST",
+          data: {},
+          success: function (data, textStatus, jqXHR){
+            if(data.status == 1){
+              SQ.notify('replied successfully!');
+            }else{
+              SQ.notify(data.error);
+            }
+          },
+          complete: function(jqXHR, textStatus){
+            smartDate.refresh();
+          }
+        });
+      },
+      favTweet : function(dataObject){
+        var me =this;
+        $.ajax({
+          url:"/sqwag/favouritetweet/"+dataObject.square_id,
+          dataType: "json",
+          type: "POST",
+          data: {},
+          success: function (data, textStatus, jqXHR){
+            if(data.status == 1){
+              SQ.notify('tweet added to favourite successfully!');
+            }else{
+              SQ.notify(data.error);
+            }
+          },
+          complete: function(jqXHR, textStatus){
+            smartDate.refresh();
+          }
+        });
+      },
+
     };
     new self.AppView;
   }

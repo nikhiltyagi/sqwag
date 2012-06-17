@@ -18,6 +18,7 @@ class UserAccount(models.Model):
     account_data = models.TextField(null=True)
     account_pic = models.URLField(null=True)
     account_handle = models.CharField(max_length=200, null=True)
+    is_active = models.BooleanField(default=True)
     
     def __unicode__(self):
         return self.account
@@ -25,6 +26,8 @@ class UserAccount(models.Model):
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
     sqwag_image_url = models.URLField(null=True)
+    sqwag_cover_image_url = models.URLField(null=True)
+    personal_message = models.TextField(null=True)
     sqwag_count = models.IntegerField()
     following_count = models.IntegerField()
     followed_by_count = models.IntegerField()
@@ -39,6 +42,7 @@ class UserProfile(models.Model):
 
 class Square(models.Model):
     user = models.ForeignKey(User)
+    content_id = models.CharField(max_length=400, null=True)
     content_src = models.CharField(max_length=200)
     content_type = models.CharField(max_length=50)
     content_data = models.CharField(max_length=4000)
@@ -151,3 +155,8 @@ class SquareComments(models.Model):
     square = models.ForeignKey(Square,related_name='square')
     date_created = models.IntegerField()
     comment = models.CharField(max_length=4000,null=False)
+
+class Feedback(models.Model):
+    user = models.ForeignKey(User, null=True)
+    date_created = models.IntegerField()
+    feedback = models.TextField()

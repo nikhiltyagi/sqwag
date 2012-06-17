@@ -71,13 +71,13 @@ def saveSquareBoilerPlate(request, square, date_created=None):
     square.user = user
     if square.content_src == 'twitter.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='twitter.com')
+            userAccount = UserAccount.objects.get(user=user,account='twitter.com',is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account twitter does not exist"
     elif square.content_src == 'instagram.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='instagram.com')
+            userAccount = UserAccount.objects.get(user=user,account='instagram.com',is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
@@ -151,11 +151,11 @@ def getCompleteUserInfo(request,user,accountType=None):
             userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             userInfo['user_profile'] = userProfile
             if not accountType:
-                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user)
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user,is_active=True)
             elif accountType=='NA':
                 useracc_obj = {}
             else:    
-                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType)
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType,is_active=True)
             userInfo['user_accounts']= useracc_obj
             if not request.user.is_anonymous():
                 try:
@@ -244,4 +244,7 @@ def getRelationship(producer,subscriber):
     else:
         is_following = False
     return is_following
+
+def getActiveUserAccount(user, account):
+    return UserAccount.objects.get(user=user, account=account,is_active=True)
         

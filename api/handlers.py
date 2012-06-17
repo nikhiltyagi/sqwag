@@ -69,7 +69,7 @@ class ImageSquareHandler(BaseHandler):
                 return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['message'] = 'POST expected'
+            failureResponse['error'] = 'POST expected'
             return failureResponse
 
 
@@ -564,11 +564,11 @@ class CommentsSquareHandler(BaseHandler):
                     return successResponse
             else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['message'] = commentForm.errors
-                return failureResponse                 
+                failureResponse['error'] = commentForm.errors
+                return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['message'] = 'POST expected'
+            failureResponse['error'] = 'POST expected'
             return failureResponse
 
 
@@ -609,7 +609,30 @@ class UserSquareHandler(BaseHandler):
             result['userSquare'] = usrsquare    
             successResponse['result'] = result
             return successResponse
-        
+
+class FeedbackHandler(BaseHandler):
+    methods_allowed = ('GET','POST')
+    fields = ('id', 'username','feedback','date_created')
+    def create(self,request):
+        if request.method =='POST':
+            feedbackForm = FeedbackForm(request.POST)
+            if feedbackForm.is_valid():
+                feedback =  feedbackForm.cleaned_data['feedback']
+                feedbackObj = Feedback(feedback=feedback, date_created = time.time())
+                if not request.user.is_anonymous():
+                    feedbackObj.user = request.user
+                feedbackObj.save()
+                successResponse['result']=feedbackObj
+                return successResponse
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = feedbackForm.errors
+                return failureResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'Expecting a POST request'
+            return failureResponse
+
 class restUserSquareHandler(BaseHandler):
     methods_allowed = ('GET')
     fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
@@ -666,12 +689,5 @@ class unfollowHandler(BaseHandler):
         successResponse['message'] = SUCCESS_MSG
         successResponse['result'] = 'successfully unfollowed the user'
         return successResponse
-                
-                
-                
-     
     
-            
-    
-        
     
