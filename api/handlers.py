@@ -574,7 +574,7 @@ class CommentsSquareHandler(BaseHandler):
 
 class UserSquareHandler(BaseHandler):
     methods_allowed = ('GET')
-    fields = ('complet_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+    fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
     
