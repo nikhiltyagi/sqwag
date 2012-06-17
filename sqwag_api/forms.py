@@ -100,4 +100,6 @@ class ChangeUserNameForm(forms.Form):
             return username
         else:
             raise forms.ValidationError(u'Username is required')
-            
+
+class FeedbackForm(forms.Form):
+    feedback = forms.CharField(max_length=4000)

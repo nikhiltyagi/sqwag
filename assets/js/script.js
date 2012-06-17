@@ -102,6 +102,27 @@ var SQ = {
       var square_id = $(this).data('id');
       self.backbone.feedHandler.reSqwag({'square_id' : square_id});
     });
+
+    $(".action-retweet").live('click',function(){
+      var square_id = $(this).data('id');
+      self.backbone.feedHandler.reTweet({'square_id' : square_id});
+
+    });
+
+    $(".action-reply").live('click',function(){  // this needs a form. TODO for praveen :)
+      var square_id = $(this).data('id');
+      self.backbone.feedHandler.replyTweet(
+        {
+          'square_id' : square_id,
+          'message': 'test',
+          'user_handle' : 'saini_vaibhav'
+        });
+    });
+
+    $(".action-favourite").live('click',function(){
+      var square_id = $(this).data('id');
+      self.backbone.feedHandler.favTweet({'square_id' : square_id});
+    });
     
     $(window).scroll(function () {
       if ($(window).height() + $(window).scrollTop() == $(document).height()) {

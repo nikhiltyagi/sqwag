@@ -71,7 +71,7 @@ class ImageSquareHandler(BaseHandler):
                 return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['message'] = 'POST expected'
+            failureResponse['error'] = 'POST expected'
             return failureResponse
 
 
@@ -499,16 +499,16 @@ class CommentsSquareHandler(BaseHandler):
                     return successResponse
             else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['message'] = commentForm.errors
-                return failureResponse                 
+                failureResponse['error'] = commentForm.errors
+                return failureResponse
         else:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['message'] = 'POST expected'
+            failureResponse['error'] = 'POST expected'
             return failureResponse
 
 
 class UserSquareHandler(BaseHandler):
-    methods_allowed = ('GET')
+    methods_allowed = ('GET',)
     fields = ('sharing_user','owner','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
@@ -540,7 +540,27 @@ class UserSquareHandler(BaseHandler):
             result['userSquare'] = usrsquare    
             successResponse['result'] = result
             return successResponse
-            
+
+class FeedbackHandler(BaseHandler):
+    methods_allowed = ('GET','POST')
+    fields = ('id', 'username','feedback','date_created')
     
-        
-    
+    def create(self,request):
+        if request.method =='POST':
+            feedbackForm = FeedbackForm(request.POST)
+            if feedbackForm.is_valid():
+                feedback =  feedbackForm.cleaned_data['feedback']
+                feedbackObj = Feedback(feedback=feedback, date_created = time.time())
+                if not request.user.is_anonymous():
+                    feedbackObj.user = request.user
+                feedbackObj.save()
+                successResponse['result']=feedbackObj
+                return successResponse
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = feedbackForm.errors
+                return failureResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'Expecting a POST request'
+            return failureResponse
