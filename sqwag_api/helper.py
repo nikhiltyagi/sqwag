@@ -53,19 +53,20 @@ def crateSquare(request):
     squareForm =  CreateSquareForm(request.POST)
     if squareForm.is_valid():
         square = squareForm.save(commit=False)
-        resultWrapper = saveSquareBoilerPlate(request.user, square)
+        resultWrapper = saveSquareBoilerPlate(request, square)
         return resultWrapper
     else:
         resultWrapper['status'] = BAD_REQUEST
         resultWrapper['error'] = squareForm.errors
         return resultWrapper
 
-def saveSquareBoilerPlate(user, square, date_created=None):
+def saveSquareBoilerPlate(request, square, date_created=None):
     resultWrapper = {}
     if date_created:
         square.date_created = date_created
     else:
         square.date_created = time.time()
+    user =request.user
     square.shared_count=0
     square.user = user
     if square.content_src == 'twitter.com':
@@ -93,6 +94,12 @@ def saveSquareBoilerPlate(user, square, date_created=None):
         resultWrapper['error'] = "user profile does not exist. user is: " + user.first_name
         return resultWrapper
     if square:
+        if not square.user_account:
+            accountType = 'NA'
+        else:
+            accountType = square.user_account.id
+        square.complete_user =  getCompleteUserInfo(request,user,accountType)['result']
+        userSquare.complete_user = square.complete_user
         squareResponse['square'] = square
         squareResponse['userSquare'] = userSquare
         resultWrapper['status']= SUCCESS_STATUS_CODE
@@ -153,9 +160,9 @@ def getCompleteUserInfo(request,user,accountType=None):
             if not request.user.is_anonymous():
                 try:
                     Relationship.objects.get(subscriber=request.user,producer=user)
-                    userInfo['is_following'] = {}
+                    userInfo['is_following'] = True
                 except Relationship.DoesNotExist:
-                    userInfo['is_following'] = {}
+                    userInfo['is_following'] = False
             resultWrapper['status']=SUCCESS_STATUS_CODE
             resultWrapper['result']=userInfo
             return resultWrapper
