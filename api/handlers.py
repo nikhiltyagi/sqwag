@@ -642,6 +642,30 @@ class restUserSquareHandler(BaseHandler):
                 squares_all.append(usrsqr)
         successResponse['result'] = squares_all
         return successResponse
+    
+class unfollowHandler(BaseHandler):
+    methods_allowed = ('GET')
+    fields = fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
+             'content_src','content_type','content_data','content_description','date_created',
+             'shared_count','liked_count','comment','displayname')
+    def read(self,request,id,*args,**kwargs):
+        try:
+            user = User.objects.get(pk=id)
+        except User.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user to unfollow does not exist'
+            return failureResponse
+        try:
+            RelationshipObj = Relationship.objects.get(subscriber=request.user,producer=user)
+        except Relationship.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'you are not following this user'
+            return failureResponse
+        RelationshipObj.delete()
+        successResponse['status'] = SUCCESS_STATUS_CODE
+        successResponse['message'] = SUCCESS_MSG
+        successResponse['result'] = 'successfully unfollowed the user'
+        return successResponse
                 
                 
                 
