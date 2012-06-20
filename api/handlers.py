@@ -84,7 +84,7 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
-        userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False).order_by('-date_shared')
+        userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False).order_by('date_shared')
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
