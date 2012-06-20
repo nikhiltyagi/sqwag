@@ -26,6 +26,12 @@ user_square_resource = CORSResource(handler=UserSquareHandler)
 feedback_resource = CORSResource(handler=FeedbackHandler)
 rest_user_square_resource = CORSResource(handler=restUserSquareHandler)
 unfollow_resource = CORSResource(handler=unfollowHandler)
+notification_resource = CORSResource(handler=notificationHandler)
+uploadCoverHandler_resource = CORSResource(handler=uploadCoverHandler)
+uploadProfilePictureHandler_resource = CORSResource(handler=uploadProfilePictureHandler)
+uploadPersonalMessage_resource = CORSResource(handler=uploadPersonalMessage)
+sendSqwag_resource = CORSResource(handler=sendSqwag)
+recieveSqwag_resource = CORSResource(handler=recieveSqwag)
 #arbitrary_resource = Resource(handler=ArbitraryDataHandler)#, **ad)
 urlpatterns = patterns('',
     url(r'^square/(?P<id>\d+)$', square_resource,{ 'emitter_format': 'json' }),
@@ -53,4 +59,10 @@ urlpatterns = patterns('',
     url(r'^feedback', feedback_resource,{ 'emitter_format': 'json' }),
     url(r'^restusersquare/(?P<id>\d+)$', rest_user_square_resource,{ 'emitter_format': 'json' }),
     url(r'^unfollowuser/(?P<id>\d+)$', unfollow_resource,{ 'emitter_format': 'json' }),
+    url(r'^getnotifications/(?P<page>\d+)$', notification_resource,{ 'emitter_format': 'json' }),
+    url(r'^uploadCover/', uploadCoverHandler_resource,{ 'emitter_format': 'json' }),
+    url(r'^uploadProfilepic/', uploadProfilePictureHandler_resource,{ 'emitter_format': 'json' }),
+    url(r'^uploadPersonalmsg/', uploadPersonalMessage_resource,{ 'emitter_format': 'json' }),
+    url(r'^sendSqwag/', sendSqwag_resource,{ 'emitter_format': 'json' }),
+    url(r'^recieveSqwag/', recieveSqwag_resource,{ 'emitter_format': 'json' }),
 )

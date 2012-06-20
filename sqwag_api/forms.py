@@ -103,3 +103,8 @@ class ChangeUserNameForm(forms.Form):
 
 class FeedbackForm(forms.Form):
     feedback = forms.CharField(max_length=4000)
+
+class SendSqwagForm(forms.Form):
+    username = forms.CharField(max_length=30)
+    userSquare = forms.IntegerField()
+    message = forms.CharField(max_length=2000,required=False)
