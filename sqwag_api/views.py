@@ -312,7 +312,7 @@ def syncTwitterFeeds(request):
                     try:
                         square.full_clean(exclude='content_description')
                         square.save()
-                        saveSquareBoilerPlate(square.user, square, square.date_created)
+                        saveSquareBoilerPlate(request, square.user, square, square.date_created)
                     except ValidationError:
                         print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
