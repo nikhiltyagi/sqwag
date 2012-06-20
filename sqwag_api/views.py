@@ -11,7 +11,6 @@ from django.template.loader import render_to_string
 from httplib2 import Http
 #from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
-from sqwag.sqwag_api.constants import *
 from sqwag_api.constants import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
@@ -300,18 +299,22 @@ def syncTwitterFeeds(request):
             twitterUser = feed.GetUser()
             try:
                 userAccount = UserAccount.objects.get(account_id = twitterUser.GetId(), account='twitter',is_active=True)
-                sqwagUser = userAccount.user
-                # now create a square of this tweet by this sqwag user
-                square = Square(user= sqwagUser, content_type='tweet',  content_src='twitter.com', content_id=feed.GetId(),
-                                content_data = feed.GetText(), date_created = feed.GetCreatedAtInSeconds(),
-                                shared_count=0)
-                square.user_account = userAccount
+                #check if square exists for this feed
                 try:
-                    square.full_clean(exclude='content_description')
-                    square.save()
-                    saveSquareBoilerPlate(square.user, square, square.date_created)
-                except ValidationError:
-                    print  "error in saving square"# TODO: log this
+                    sqwagUser = userAccount.user
+                    Square.objects.get(user=sqwagUser, content_id=feed.GetId())
+                except Square.DoesNotExist:
+                    # now create a square of this tweet by this sqwag user
+                    square = Square(user= sqwagUser, content_type='tweet',  content_src='twitter.com', content_id=feed.GetId(),
+                                    content_data = feed.GetText(), date_created = feed.GetCreatedAtInSeconds(),
+                                    shared_count=0)
+                    square.user_account = userAccount
+                    try:
+                        square.full_clean(exclude='content_description')
+                        square.save()
+                        saveSquareBoilerPlate(square.user, square, square.date_created)
+                    except ValidationError:
+                        print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
                 print "user account does not exist"
         lastFeed = feeds[0]
