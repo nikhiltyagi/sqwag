@@ -1,0 +1,15 @@
+../virtualenv.py
+../virtualenv_support/__init__.py
+../virtualenv_support/setuptools-0.6c11-py2.7.egg
+../virtualenv_support/distribute-0.6.24.tar.gz
+../virtualenv_support/pip-1.1.tar.gz
+../virtualenv.pyc
+../virtualenv_support/__init__.pyc
+./
+SOURCES.txt
+entry_points.txt
+PKG-INFO
+dependency_links.txt
+not-zip-safe
+top_level.txt
+../../../../bin/virtualenv

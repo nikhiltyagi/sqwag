@@ -1,0 +1,2 @@
+python-openid
+Django
