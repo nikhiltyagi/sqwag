@@ -25,7 +25,7 @@ def mailentry(mailer):
     except ValidationError, e :
         dummy = e.message() #TODO log error
 
-def handle_uploaded_file(content_image,request):
+def handle_uploaded_file(content_image,request,imageType=None):
     resultWrapper = {}
     try:
         time_created = time.time()
@@ -40,9 +40,20 @@ def handle_uploaded_file(content_image,request):
         default_storage.save(tempPath+'medium.jpg', ContentFile(medium_image.read()))
         large_image = get_thumbnail(image, '500x500', crop='center', quality=99)
         default_storage.save(tempPath+'large.jpg', ContentFile(large_image.read()))
-        resultWrapper['status']=SUCCESS_STATUS_CODE
-        resultWrapper['result']= 'assets/media/'+tempPath+'medium.jpg'
-        return resultWrapper
+        if imageType == 'COVER':
+            cover_image = get_thumbnail(image, '220x440', crop='center', quality=99)
+            default_storage.save(tempPath+'cover.jpg', ContentFile(cover_image.read()))
+            resultWrapper['status']=SUCCESS_STATUS_CODE
+            resultWrapper['result']= 'assets/media/'+tempPath+'cover.jpg'
+            return resultWrapper
+        elif imageType == 'PROFILE':
+            resultWrapper['status']=SUCCESS_STATUS_CODE
+            resultWrapper['result']= 'assets/media/'+tempPath+'small.jpg'
+            return resultWrapper
+        else:
+            resultWrapper['status']=SUCCESS_STATUS_CODE
+            resultWrapper['result']= 'assets/media/'+tempPath+'medium.jpg'
+            return resultWrapper
     except IOError, e:
         resultWrapper['status']='file error'
         resultWrapper['error']= e.message
@@ -220,7 +231,7 @@ def relationshipPaginator(request,relationships,itemsPerPage,page,user,userType)
         resultWrapper['error'] = "page is out of bounds"
         return resultWrapper
 
-def createUserSquare(request,user,square,is_owner):
+def createUserSquare(request,user,square,is_owner,is_private=False):
     userSquare = UserSquare(user=user,square=square)
     userSquare.date_shared = time.time()
     userSquare.is_deleted = False
@@ -234,6 +245,8 @@ def createUserSquare(request,user,square,is_owner):
         else:
             userSquare.content_description = ""        
     userSquare.is_owner = is_owner
+    if is_private:
+        userSquare.is_private = True
     userSquare.save()
     return userSquare
 

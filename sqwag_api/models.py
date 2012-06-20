@@ -62,6 +62,7 @@ class UserSquare(models.Model):
     is_deleted = models.BooleanField(default=False)
     content_description = models.CharField(max_length=4000,null=True)
     is_owner = models.BooleanField()
+    is_private = models.BooleanField(default=False)
         
     def __unicode__(self):
         return self.date_shared
@@ -160,3 +161,17 @@ class Feedback(models.Model):
     user = models.ForeignKey(User, null=True)
     date_created = models.IntegerField()
     feedback = models.TextField()
+    
+class Notifications(models.Model):
+    user = models.ForeignKey(User,related_name='recievinguser')
+    date_created = models.IntegerField()
+    userSquare = models.ForeignKey(UserSquare)
+    sendingUser = models.ForeignKey(User,related_name='sendingUser')
+    is_seen = models.BooleanField(default=False)
+    notification_type = models.CharField(max_length=100)
+    notification_message = models.CharField(max_length=4000,null=True)
+
+class PrivateSquare(models.Model):
+    user = models.ForeignKey(User,related_name='recieving_user')
+    userSquare = models.ForeignKey(UserSquare,related_name='shared_square')
+    

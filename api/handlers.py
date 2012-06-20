@@ -124,18 +124,29 @@ class ShareSquareHandler(BaseHandler):
         if 'square_id' in request.POST:
             if request.POST['square_id'].isdigit():
                 try:
-                    squareObj = Square.objects.get(pk=request.POST['square_id'])
-                except Square.DoesNotExist:
+                    usrSquare = UserSquare.objects.get(pk=request.POST['square_id'],is_deleted=False)
+                except UserSquare.DoesNotExist:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = 'square does not exist'
                     return failureResponse
+                try:
+                    squareObj = Square.objects.get(pk=usrSquare.square.id,is_deleted=False)
+                except Square.DoesNotExist:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = 'square to be reshared does not exist'
                 userObj = request.user
                 is_owner = False
-#                if(squareObj.user==userObj):
-#                    failureResponse['status'] = DUPLICATE
-#                    failureResponse['error'] = "you can not share your own square"
-#                    return failureResponse
+                if(squareObj.user==userObj):
+                    failureResponse['status'] = DUPLICATE
+                    failureResponse['error'] = "you can not share your own square"
+                    return failureResponse
                 userSquareObj = createUserSquare(request,userObj,squareObj,is_owner)
+                notification = Notifications(user=usrSquare.user,sendingUser=request.user,userSquare=usrSquare)
+                notification.notification_type = 'Reshare'
+                notification.is_seen = False
+                notification.date_created = time.time()
+                notification.notification_message = ''
+                notification.save()
                 if userSquareObj:
                     squareObj.shared_count = squareObj.shared_count + 1
                     squareObj.save()
@@ -156,7 +167,7 @@ class ShareSquareHandler(BaseHandler):
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
                     squareResponse['userSquare'] = userSquareObj
-                    to_email = squareObj.user.email
+                    to_email = usrSquare.user.email
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
                     mailentry(mailer)
@@ -672,6 +683,12 @@ class unfollowHandler(BaseHandler):
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
     def read(self,request,id,*args,**kwargs):
+        #        if request.user.is_authenticated():
+        #                id = request.user.id
+        #        else:
+        #            failureResponse['status'] = AUTHENTICATION_ERROR
+        #            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+        #            return failureResponse
         try:
             user = User.objects.get(pk=id)
         except User.DoesNotExist:
@@ -689,5 +706,258 @@ class unfollowHandler(BaseHandler):
         successResponse['message'] = SUCCESS_MSG
         successResponse['result'] = 'successfully unfollowed the user'
         return successResponse
+
+class notificationHandler(BaseHandler):
+    methods_allowed = ('GET')
+    fields = ('complete_user','sending_user','id','date_created','notification_type','notification_message')
+    def read(self,request,page=1,*args,**kwargs):
+        if request.user.is_authenticated():
+            id = request.user.id
+        else:
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        notifications = Notifications.objects.filter(user=request.user,is_seen=False)
+        userNotifications = []
+        for noti in notifications:
+            noti.complete_user = getCompleteUserInfo(request,request.user,'NA')['result']
+            noti.sending_user = getCompleteUserInfo(request,noti.sendingUser,'NA')['result']
+            userNotifications.append(noti)
+        resultWrapper = paginate(request, page, userNotifications, NUMBER_OF_SQUARES)
+        if resultWrapper['status'] == SUCCESS_STATUS_CODE:
+            seenNotifications = resultWrapper['result']
+            for noti in seenNotifications:
+                noti.is_seen = True
+                noti.save()
+        else:
+            resultWrapper['status'] = SUCCESS_STATUS_CODE
+            resultWrapper['message'] = 'No new notifications' #TODO : currently returning error message also need to remove this somehow
+        return resultWrapper
+    
+class uploadCoverHandler(BaseHandler):
+    methods_allowed = ('POST')
+    fields = ('id','sqwag_image_url','sqwag_cover_image_url','personal_message','sqwag_count','following_count',
+              'followed_by_count','displayname','username','first_name','last_name','email',)
+    def create(self,request,*args,**kwargs):
+        if request.user.is_authenticated():
+            user=request.user
+        else:
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        try:
+            userProfile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user profile does not exist'
+            return failureResponse
+        if 'content_file' in request.FILES:
+            wrapper = handle_uploaded_file(request.FILES['content_file'],request,'COVER')
+            if wrapper['status']==SUCCESS_STATUS_CODE:
+                userProfile.sqwag_cover_image_url = wrapper['result']
+            else:
+                return wrapper
+            userProfile.save()
+            successResponse['status'] = SUCCESS_STATUS_CODE
+            successResponse['message'] = 'cover photo updated successfully'
+            successResponse['result'] = userProfile
+            return successResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "please select an image to upload"
+            return failureResponse
+        
+class uploadProfilePictureHandler(BaseHandler):
+    methods_allowed = ('POST')
+    fields = ('id','sqwag_image_url','sqwag_cover_image_url','personal_message','sqwag_count','following_count',
+              'followed_by_count','displayname',('user',('username','first_name','last_name','email',)))
+    def create(self,request,*args,**kwargs):
+        if request.user.is_authenticated():
+            user=request.user
+        else:
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        try:
+            userProfile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user profile does not exist'
+            return failureResponse
+        if 'content_file' in request.FILES:
+            wrapper = handle_uploaded_file(request.FILES['content_file'],request,'PROFILE')
+            if wrapper['status']==SUCCESS_STATUS_CODE:
+                userProfile.sqwag_image_url = wrapper['result']
+            else:
+                return wrapper
+            userProfile.save()
+            successResponse['status'] = SUCCESS_STATUS_CODE
+            successResponse['message'] = 'profile pic updated successfully'
+            successResponse['result'] = userProfile
+            return successResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "please select an image to upload"
+            return failureResponse
+            
+class uploadPersonalMessage(BaseHandler):
+    methods_allowed = ('POST')
+    fields = ('id','sqwag_image_url','sqwag_cover_image_url','personal_message','sqwag_count','following_count',
+              'followed_by_count','displayname',('user',('username','first_name','last_name','email',)))
+    def create(self,request,*args,**kwargs):
+        if request.user.is_authenticated():
+            user=request.user
+        else:
+            failureResponse['status'] = AUTHENTICATION_ERROR
+            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+            return failureResponse
+        try:
+            userProfile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = 'user profile does not exist'
+            return failureResponse
+        if 'message' in request.POST:
+            userProfile.personal_message = request.POST['message']
+            userProfile.save()
+            successResponse['status'] = SUCCESS_STATUS_CODE
+            successResponse['message'] = 'personal message updated successfully'
+            successResponse['result'] = userProfile
+            return successResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "please set the message to be uploaded"
+            return failureResponse
+
+class sendSqwag(BaseHandler):
+    methods_allowed = ('POST')
+    def create(self,request,*args,**kwargs):
+#        if request.user.is_authenticated():
+#            user=request.user
+#        else:
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        user = User.objects.get(pk=49)
+        form = SendSqwagForm(request.POST)
+        if form.is_valid():
+            usrSquareId = form.cleaned_data['userSquare']
+            userName = form.cleaned_data['username']
+            message = form.cleaned_data['message']
+            try:
+                usrSquare = UserSquare.objects.get(pk=usrSquareId)
+            except UserSquare.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'user square to be sent does not exist'
+                return failureResponse
+            originalSquare = usrSquare.square
+            try: 
+                recievingUser = User.objects.get(username=userName)
+            except User.DoesNotExist:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'user to whom sqwag needs to be sent does not exist'
+                return failureResponse
+            try:
+                UsrSqr = UserSquare.objects.get(user=recievingUser,square=originalSquare)
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = 'you can not send this sqwag to the user as he has already sqwagged/resqwagged it'
+                return failureResponse
+            except UserSquare.DoesNotExist:
+                try:
+                    privateusrsqr = UserSquare.objects.get(user=user,square=originalSquare,is_private=True)
+                except UserSquare.DoesNotExist:
+                    is_owner = False
+                    is_private = True
+                    privateusrsqr = createUserSquare(request,user,originalSquare,is_owner,is_private)
+                    privateusrsqr.date_shared = time.time()
+                    privateusrsqr.content_description = message
+                    privateusrsqr.save()
+                noti = Notifications(user=recievingUser,userSquare=privateusrsqr,sendingUser=user,notification_type='square')
+                noti.date_created = time.time()
+                #noti.notification_message = message
+                originalSquare.shared_count = originalSquare.shared_count + 1
+                originalSquare.save()
+                noti.save()
+                privateSquare = PrivateSquare(user=recievingUser,userSquare=privateusrsqr)
+                privateSquare.save()
+                successResponse['status'] = SUCCESS_STATUS_CODE
+                successResponse['message'] = 'square successfully sent'
+                return successResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = form.errors
+            return failureResponse
+        
+class recieveSqwag(BaseHandler):
+    methods_allowed = ('POST')
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+              'date_created',)
+    def create(self,request,*args,**kwargs):
+#        if request.user.is_authenticated():
+#            user=request.user
+#        else:
+#            failureResponse['status'] = AUTHENTICATION_ERROR
+#            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+#            return failureResponse
+        if 'square_id' in request.POST:
+            if request.POST['square_id'].isdigit():
+                try:
+                    usrSquare = UserSquare.objects.get(pk=request.POST['square_id'],is_deleted=False,is_private=True)
+                except UserSquare.DoesNotExist:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = 'square does not exist'
+                    return failureResponse
+                try:
+                    squareObj = Square.objects.get(pk=usrSquare.square.id,is_deleted=False)
+                except Square.DoesNotExist:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = 'square to be reshared does not exist'
+                userObj = request.user
+                is_owner = False
+                if(squareObj.user==userObj):
+                    failureResponse['status'] = DUPLICATE
+                    failureResponse['error'] = "you can not share your own square"
+                    return failureResponse
+                userSquareObj = createUserSquare(request,userObj,squareObj,is_owner)
+                if userSquareObj:
+                    squareObj.shared_count = squareObj.shared_count + 1
+                    squareObj.save()
+                    squareResponse = {}
+                    if not squareObj.user_account:
+                        accountType = 'NA'
+                    else:
+                        accountType = squareObj.user_account.id
+                    try:
+                        usrprofile = UserProfile.objects.get(user=request.user)
+                    except UserProfile.DoesNotExist:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = 'UserProfile does not exist'
+                        return failureResponse
+                    usrprofile.sqwag_count = usrprofile.sqwag_count + 1
+                    usrprofile.save()
+                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
+                    squareResponse['square'] = squareObj
+                    userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
+                    squareResponse['userSquare'] = userSquareObj    
+                    to_email = usrSquare.user.email
+                    # inform the owner 
+                    mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
+                    mailentry(mailer)
+                    successResponse['result'] = squareResponse 
+                    #successResponse['result'] = newSquare
+                    return successResponse
+                else:
+                    failureResponse['status'] = SYSTEM_ERROR
+                    failureResponse['error'] = "some error occurred"
+                    return failureResponse                   
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "square_id should be an integer"
+                return failureResponse
+        else:
+            failureResponse['status'] = BAD_REQUEST
+            failureResponse['error'] = "square_id is required"
+            return failureResponse
+        
     
     
