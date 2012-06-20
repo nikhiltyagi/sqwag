@@ -64,20 +64,20 @@ def crateSquare(request):
     squareForm =  CreateSquareForm(request.POST)
     if squareForm.is_valid():
         square = squareForm.save(commit=False)
-        resultWrapper = saveSquareBoilerPlate(request, square)
+        resultWrapper = saveSquareBoilerPlate(request,request.user, square)
         return resultWrapper
     else:
         resultWrapper['status'] = BAD_REQUEST
         resultWrapper['error'] = squareForm.errors
         return resultWrapper
 
-def saveSquareBoilerPlate(request, square, date_created=None):
+def saveSquareBoilerPlate(request,user, square, date_created=None):
     resultWrapper = {}
     if date_created:
         square.date_created = date_created
     else:
         square.date_created = time.time()
-    user =request.user
+    #user =request.user
     square.shared_count=0
     square.user = user
     if square.content_src == 'twitter.com':

@@ -57,7 +57,7 @@ class ImageSquareHandler(BaseHandler):
                     square = form.save(commit=False)
                     square.content_type = "image"
                     square.content_data = image_url
-                    resultWrapper = saveSquareBoilerPlate(request, square)
+                    resultWrapper = saveSquareBoilerPlate(request,request.user, square)
                     return resultWrapper
                 else:
                     failureResponse['status'] = BAD_REQUEST
