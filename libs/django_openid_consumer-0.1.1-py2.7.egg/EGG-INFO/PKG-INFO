@@ -1,0 +1,21 @@
+Metadata-Version: 1.0
+Name: django-openid-consumer
+Version: 0.1.1
+Summary: django-openid-consumer is a simple consumer only openid implementation for django
+Home-page: http://code.google.com/p/django-openid-consumer/
+Author: Matjaz Crnko
+Author-email: matjaz.crnko@gmail.com
+License: BSD
+Description: 
+            django-openid-consumer aims to do only one thing, simple OpenID auth (with all the extension s python-openid supports) for comments on blogs and similar. It doesen't aim to provide any further integration (like for example tighter integration with auth) with Django. 
+            
+Keywords: django openid consumer
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Intended Audience :: Developers
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
