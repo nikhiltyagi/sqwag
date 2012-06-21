@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+</head>
+<body>
+<div class="container">
+    <div class="modal hide" id="filetest">
+      <form enctype="multipart/form-data" method="post" action="http://127.0.0.1:8000/api/uploadProfilepic/">
+		<div class="modal-header">
+          <h1>create square</h1>
+        </div>
+        	<div class="form-controls">
+        	  <label for="imagefile">chose Image</label>
+        	  <input id "imagefile" type="file" name="content_file" />
+        	</div>
+        	<div class="form-controls">
+            <label for="sq-data">data</label>
+            <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?"></textarea>
+          </div>
+          <div class="form-controls">
+            <label for="sq-data">description</label>
+            <input type="text" id="sq-data" name="content_description" />
+          </div>
+          <div class="form-controls">
+            <label>square type</label>
+            <div class="controls">
+              <label class="radio">
+                <input type="radio" name="content_type" value="tweet" />
+                tweet
+              </label>
+            </div>
+            <div class="controls">
+              <label class="radio">
+                <input type="radio" name="content_type" value="text" />
+                text
+              </label>
+            </div>
+          </div>
+          <input type="hidden" name="content_src" value="twitter"/>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="Add sqwag" />
+        </div>
+      </form>
+    </div>
+</div>
+</body>
+</html>
