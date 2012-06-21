@@ -112,7 +112,7 @@ def saveSquareBoilerPlate(request,user, square, date_created=None):
         square.complete_user =  getCompleteUserInfo(request,user,accountType)['result']
         userSquare.complete_user = square.complete_user
         squareResponse['square'] = square
-        squareResponse['userSquare'] = userSquare
+        squareResponse['user_square'] = userSquare
         resultWrapper['status']= SUCCESS_STATUS_CODE
         resultWrapper['result'] = squareResponse
         return resultWrapper

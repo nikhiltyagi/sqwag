@@ -98,7 +98,7 @@ class UserSelfFeedsHandler(BaseHandler):
                 usrsquare.square.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
                 square_obj['square'] = usrsquare.square
                 usrsquare.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
-                square_obj['userSquare'] = usrsquare
+                square_obj['user_square'] = usrsquare
                 squares_all.insert(0, square_obj)# optimize
                 visited[usrsquare.square.id]=True
             else:
@@ -166,7 +166,7 @@ class ShareSquareHandler(BaseHandler):
                     squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
-                    squareResponse['userSquare'] = userSquareObj
+                    squareResponse['user_square'] = userSquareObj
                     to_email = usrSquare.user.email
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
@@ -331,7 +331,7 @@ class HomePageFeedHandler(BaseHandler):
                 usrsquare.square.complete_user = getCompleteUserInfo(request,usrsquare.square.user,accountType)['result']
                 square_obj['square'] = usrsquare.square
                 usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
-                square_obj['userSquare'] = usrsquare
+                square_obj['user_square'] = usrsquare
                 squares_all.insert(0, square_obj)# optimize
                 visited[usrsquare.square.id]=True
             else:
@@ -424,7 +424,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
                 failureResponse['error'] = 'User square not found'
                 return failureResponse
             usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
-            square_obj['userSquare'] = usrSqur
+            square_obj['user_square'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
@@ -505,7 +505,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
                 failureResponse['error'] = 'User square not found'
                 return failureResponse
             usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
-            square_obj['userSquare'] = usrSqur
+            square_obj['user_square'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
@@ -617,7 +617,7 @@ class UserSquareHandler(BaseHandler):
             else:
                 usrsquare.complete_user = square.complete_user
             result['square'] = square
-            result['userSquare'] = usrsquare    
+            result['user_square'] = usrsquare    
             successResponse['result'] = result
             return successResponse
 
@@ -938,7 +938,7 @@ class recieveSqwag(BaseHandler):
                     squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
-                    squareResponse['userSquare'] = userSquareObj    
+                    squareResponse['user_square'] = userSquareObj    
                     to_email = usrSquare.user.email
                     # inform the owner 
                     mailer = Emailer(subject=SUBJECT_SQUARE_ACTION_SHARED,body=BODY_SQUARE_ACTION_SHARED,from_email='coordinator@sqwag.com',to=to_email,date_created=time.time())
