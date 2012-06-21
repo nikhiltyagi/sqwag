@@ -25,7 +25,7 @@ class RegisterationForm(forms.Form):
 class CreateSquareForm(ModelForm):
     class Meta:
         model = Square
-        fields = ['id','content_src','content_type','content_data','content_description']
+        fields = ['id','content_src','content_type','content_data']
 
 class CreateImageSquareForm(ModelForm):
     class Meta:

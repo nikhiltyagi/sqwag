@@ -34,7 +34,7 @@ def handle_uploaded_file(content_image,request,imageType=None):
         path = default_storage.save(tempPath+'original.jpg', ContentFile(content_image.read()))
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         image = open(tmp_file)
-        small_image = get_thumbnail(image, '100x100', crop='center', quality=99)
+        small_image = get_thumbnail(image, '52x52', crop='center', quality=99)
         default_storage.save(tempPath+'small.jpg', ContentFile(small_image.read()))
         medium_image = get_thumbnail(image, '220x220', crop='center', quality=99)
         default_storage.save(tempPath+'medium.jpg', ContentFile(medium_image.read()))
@@ -64,20 +64,20 @@ def crateSquare(request):
     squareForm =  CreateSquareForm(request.POST)
     if squareForm.is_valid():
         square = squareForm.save(commit=False)
-        resultWrapper = saveSquareBoilerPlate(request, square)
+        resultWrapper = saveSquareBoilerPlate(request,request.user, square)
         return resultWrapper
     else:
         resultWrapper['status'] = BAD_REQUEST
         resultWrapper['error'] = squareForm.errors
         return resultWrapper
 
-def saveSquareBoilerPlate(request, square, date_created=None):
+def saveSquareBoilerPlate(request,user, square, date_created=None):
     resultWrapper = {}
     if date_created:
         square.date_created = date_created
     else:
         square.date_created = time.time()
-    user =request.user
+    #user =request.user
     square.shared_count=0
     square.user = user
     if square.content_src == 'twitter.com':
@@ -112,7 +112,7 @@ def saveSquareBoilerPlate(request, square, date_created=None):
         square.complete_user =  getCompleteUserInfo(request,user,accountType)['result']
         userSquare.complete_user = square.complete_user
         squareResponse['square'] = square
-        squareResponse['userSquare'] = userSquare
+        squareResponse['user_square'] = userSquare
         resultWrapper['status']= SUCCESS_STATUS_CODE
         resultWrapper['result'] = squareResponse
         return resultWrapper

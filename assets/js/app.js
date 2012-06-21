@@ -140,9 +140,11 @@ var bb = {
           success: function (data, textStatus, jqXHR){
             if(data.status == 1){
               SQ.notify('re-sqwaged successfully!');
-              result =  data.result.square;
-              result.isPrepend = true; // to prepend it to the list. default is append
-              me.config.collection.add(result);
+              if(SQ.router.currentRoute=='myfeed'){
+                result =  data.result;
+                result.isPrepend = true; // to prepend it to the list. default is append
+                me.config.collection.add(result);
+              }
             }else{
               SQ.notify(data.error);
             }
