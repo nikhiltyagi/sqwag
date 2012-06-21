@@ -251,11 +251,12 @@ img {
   display: none;
 }
 .slide-out-div {
-    padding: 20px;
-    width: 250px;
+    padding: 16px;
+    width: 280px;
+    height: 116px;
     background: #ccc;
-    border: 1px solid #29216d;
-} 
+    border: 1px solid #999;
+}      
 
 #main {
   margin-top: 80px;
@@ -270,4 +271,7 @@ img {
 }
 #profile {
   margin-left:-20px;
+}
+#feedback {
+  height: 100px;
 }
