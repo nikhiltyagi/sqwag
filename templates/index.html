@@ -60,8 +60,6 @@
             </div>
           </li>
 
-
-
           {% else %}
           <ul class="nav">
           <li>
@@ -189,8 +187,21 @@
     <p class="copyright">&copy; 2012. Sqwag inc.</p>
 	</footer>
 </div>
+<div class="slide-out-div">
+    <a class="handle" href="http://link-for-non-js-users.html">Content</a>
+    
+      <form action="/api/feedback" method="post">
+          <div class="form-controls">
+            <textarea style="width:240;height:104"type="text" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
+          </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="Add sqwag" />
+        </div>
+      </form>
+</div>
 
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
+<script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
 <script src="assets/js/libs/bootstrap-dropdown.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
@@ -201,6 +212,7 @@
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
 <script src="assets/js/script.js"></script>
+<script src="assets/js/tabslideout.js"></script>
 
 <script>
 
@@ -226,5 +238,8 @@ $(document).ready(function() {
 
 });
 </script>
+
+
+
 </body>
 </html>
