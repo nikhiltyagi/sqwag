@@ -50,14 +50,15 @@ var SQ = {
      $('.sqwag-form form').ajaxForm({
       dataType: 'json',
       success: function(data) {
-        /* data is NULL don't know why - praveen
         if(data.status == 1) {
+          /*result =  data.result;
+          result.isPrepend = true; // to prepend it to the list. default is append
+          SQ.backbone.feedHandler.config.collection.add(result);*/
           self.refresh();
         }
         else {
           self.notify(data.error);
         }
-        */
         self.close();
       }
     });
@@ -99,29 +100,29 @@ var SQ = {
   bindButtons: function() {
     var self = this;
     $('.resqwag').live('click', function() {
-      var square_id = $(this).data('id');
-      self.backbone.feedHandler.reSqwag({'square_id' : square_id});
+      var user_square_id = $(this).data('id');
+      self.backbone.feedHandler.reSqwag({'square_id' : user_square_id});
     });
 
     $(".action-retweet").live('click',function(){
-      var square_id = $(this).data('id');
-      self.backbone.feedHandler.reTweet({'square_id' : square_id});
+      var user_square_id = $(this).data('id');
+      self.backbone.feedHandler.reTweet({'square_id' : user_square_id});
 
     });
 
     $(".action-reply").live('click',function(){  // this needs a form. TODO for praveen :)
-      var square_id = $(this).data('id');
+      var user_square_id = $(this).data('id');
       self.backbone.feedHandler.replyTweet(
         {
-          'square_id' : square_id,
+          'square_id' : user_square_id,
           'message': 'test',
           'user_handle' : 'saini_vaibhav'
         });
     });
 
     $(".action-favourite").live('click',function(){
-      var square_id = $(this).data('id');
-      self.backbone.feedHandler.favTweet({'square_id' : square_id});
+      var user_square_id = $(this).data('id');
+      self.backbone.feedHandler.favTweet({'square_id' : user_square_id});
     });
     
     $(window).scroll(function () {

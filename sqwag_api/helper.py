@@ -34,7 +34,7 @@ def handle_uploaded_file(content_image,request,imageType=None):
         path = default_storage.save(tempPath+'original.jpg', ContentFile(content_image.read()))
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         image = open(tmp_file)
-        small_image = get_thumbnail(image, '100x100', crop='center', quality=99)
+        small_image = get_thumbnail(image, '52x52', crop='center', quality=99)
         default_storage.save(tempPath+'small.jpg', ContentFile(small_image.read()))
         medium_image = get_thumbnail(image, '220x220', crop='center', quality=99)
         default_storage.save(tempPath+'medium.jpg', ContentFile(medium_image.read()))
