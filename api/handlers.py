@@ -163,9 +163,9 @@ class ShareSquareHandler(BaseHandler):
                         return failureResponse
                     usrprofile.sqwag_count = usrprofile.sqwag_count + 1
                     usrprofile.save()
-                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
+                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)['result']
                     squareResponse['square'] = squareObj
-                    userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
+                    userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')['result']
                     squareResponse['user_square'] = userSquareObj
                     to_email = usrSquare.user.email
                     # inform the owner 
