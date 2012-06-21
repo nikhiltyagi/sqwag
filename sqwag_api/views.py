@@ -39,6 +39,16 @@ def loginUser(request):
         if 'password' in request.POST:
             uname = request.POST['username']
             pword = request.POST['password']
+            try:
+                User.objects.get(username=uname)
+            except User.DoesNotExist:
+                try:
+                    usrprf = UserProfile.objects.get(username=uname)
+                    uname = usrprf.user.username
+                except UserProfile.DoesNotExist:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = 'invalid username'
+                    return failureResponse
             user = authenticate(username=uname, password=pword)
             if user is not None:
                 if user.is_active:
@@ -73,19 +83,20 @@ def registerUser(request):
     if request.method == "POST":
         form =  RegisterationForm(request.POST)
         if form.is_valid():
-            fname = form.cleaned_data['first_name']
-            lname = form.cleaned_data['last_name']
-            email = form.cleaned_data['email']
+            #fname = form.cleaned_data['first_name']
+            #lname = form.cleaned_data['last_name']
             pwd = form.cleaned_data['password']
-            uname = form.cleaned_data['username']
-            user = User.objects.create_user(uname, email, pwd)
-            user.first_name = fname
-            user.last_name = lname
+            fullname = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            #uname = form.cleaned_data['username']
+            user = User.objects.create_user(email, email, pwd)
+            #user.first_name = fname
+            #user.last_name = lname
             user.date_joined = datetime.datetime.now()
             user.is_active = False
             user.save();
             # create a profile for this user
-            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=uname)
+            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"

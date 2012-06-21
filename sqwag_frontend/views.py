@@ -8,6 +8,7 @@ def index (request):
         print "logged out"
         return render_to_response('index.html')
     print "logged in"
+    user_image_url = None
     complete_user = getCompleteUserInfo(request,request.user)
     if complete_user['status']==1:
         complete_user = complete_user['result']

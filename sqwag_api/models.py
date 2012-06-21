@@ -25,6 +25,7 @@ class UserAccount(models.Model):
 
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
+    username = models.CharField(_('username'), max_length=100, unique=True,null=True)
     sqwag_image_url = models.URLField(null=True)
     sqwag_cover_image_url = models.URLField(null=True)
     personal_message = models.TextField(null=True)
@@ -33,6 +34,7 @@ class UserProfile(models.Model):
     followed_by_count = models.IntegerField()
     pwd_reset_key = models.CharField(_('activation key'), max_length=40, null=True)
     displayname = models.CharField(_('displayname'), max_length=30)
+    fullname = models.CharField(max_length=30)
     def create_reset_key(self, userProfile):
         salt = sha.new(str(random.random())).hexdigest()[:5]
         activation_key = sha.new(salt+userProfile.user.username).hexdigest()

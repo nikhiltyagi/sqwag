@@ -499,7 +499,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
             try:
-                usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user)
+                usrSqur = UserSquare.objects.get(square=topsqr,user=topsqr.user,is_private=False)
             except UserSquare.DoesNotExist:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = 'User square not found'

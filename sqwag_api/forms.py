@@ -5,16 +5,18 @@ from django.forms import ModelForm
 from sqwag_api.models import *
 
 
-class RegisterationForm(ModelForm):
-    class Meta:
-        model = User
-        fields = ['username','password','first_name','last_name','email']
+class RegisterationForm(forms.Form):
+    username = forms.CharField(max_length=50,required=True)
+    password = forms.CharField(max_length=128)
+    #first_name = forms.CharField(max_length=30, required=False)
+    #last_name = forms.CharField(max_length=30, required=False)
+    email = forms.EmailField(required=True)
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
-            username = self.cleaned_data.get('username')
-            if email and User.objects.filter(email=email).exclude(username=username).count():
+            #username = self.cleaned_data.get('username')
+            if email and User.objects.filter(email=email):
                 raise forms.ValidationError(u'Email addresses must be unique.')
             return email
         else:
