@@ -53,6 +53,12 @@
           	<div class="hd">
           		<div class="media">
                 <img class="media-obj avatar" src="{{ square.complete_user.user_profile.sqwag_image_url}}" alt=""/>
+                <div class="media-bd">
+                  <ul class="no-bullet">
+                    <li class="fullname">{{ square.complete_user.user_profile.displayname }}</li>
+                    <li class="sqwag-handle"><a href="#">@{{  square.complete_user.user.username }}</a></li>
+                  </ul>
+                </div>
               </div>
           	</div>
           	<div class="bd">
