@@ -490,28 +490,31 @@ def getInstaFeed(request):
     #successResponse['result']=media
     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     
-def forgotPwd(request,user):
-    user_obj = User.objects.get(username=user)
-    if user_obj:
-        user_prof = UserProfile.objects.get(user=user_obj)
-        activation_key = user_prof.create_reset_key(user_prof)
-        user_prof.pwd_reset_key = activation_key
-        user_prof.save()
-        #subject = "pwd reset link from sqwag.com"
-        host = request.get_host()
-        if request.is_secure():
-            protocol = 'https://'
+def forgotPwd(request):
+    form = forgotPwdForm(request.POST)
+    if form.is_valid():
+        user = form.cleaned_data['username']
+        user_obj = User.objects.get(username=user)
+        if user_obj:
+            user_prof = UserProfile.objects.get(user=user_obj)
+            activation_key = user_prof.create_reset_key(user_prof)
+            user_prof.pwd_reset_key = activation_key
+            user_prof.save()
+            #subject = "pwd reset link from sqwag.com"
+            host = request.get_host()
+            if request.is_secure():
+                protocol = 'https://'
+            else:
+                protocol = 'http://'
+            message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
+            mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user_obj.email,date_created=time.time())
+            mailentry(mailer)
+            successResponse['result'] = 'mail sent successfully' 
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
-            protocol = 'http://'
-        message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
-        mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user_obj.email,date_created=time.time())
-        mailentry(mailer)
-        successResponse['result'] = 'mail sent successfully' 
-        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-    else:
-        failureResponse['result'] = NOT_FOUND
-        failureResponse['message'] = 'invalid username'
-        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            failureResponse['result'] = NOT_FOUND
+            failureResponse['message'] = 'invalid username'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def forgotPwdKey(request,id,key):
     userProf = UserProfile.objects.get(user=id,pwd_reset_key=key)
