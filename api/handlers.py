@@ -136,7 +136,7 @@ class ShareSquareHandler(BaseHandler):
                     failureResponse['error'] = 'square to be reshared does not exist'
                 userObj = request.user
                 is_owner = False
-                if(squareObj.user==userObj):
+                if(usrSquare.user==userObj):
                     failureResponse['status'] = DUPLICATE
                     failureResponse['error'] = "you can not share your own square"
                     return failureResponse
