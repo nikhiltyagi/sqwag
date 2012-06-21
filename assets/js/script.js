@@ -125,6 +125,25 @@ var SQ = {
       self.backbone.feedHandler.favTweet({'square_id' : user_square_id});
     });
     
+    $("#submit-feedback").bind('click',function(){
+      $.ajax({
+        url:"/api/feedback",
+        dataType: "json",
+        type: "POST",
+        data: {'feedback': $("#feedback").val()},
+        success: function (data, textStatus, jqXHR){
+          if(data.status == 1){
+            $("#resp-feedback").html("THANKS :)");
+          }else{
+            SQ.notify(data.error);
+          }
+        },
+        complete: function(jqXHR, textStatus){
+          smartDate.refresh();
+        }
+      });
+    });
+
     $(window).scroll(function () {
       if ($(window).height() + $(window).scrollTop() == $(document).height()) {
         self.backbone.feedHandler.getFeed();
