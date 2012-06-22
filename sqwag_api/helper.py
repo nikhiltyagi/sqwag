@@ -158,7 +158,7 @@ def getCompleteUserInfo(request,user,accountType=None):
     if user:
         try:
             userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
-                                                     "sqwag_image_url").get(user=user)
+                                                     "sqwag_image_url","sqwag_cover_image_url","username","fullname").get(user=user)
             userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             userInfo['user_profile'] = userProfile
             if not accountType:

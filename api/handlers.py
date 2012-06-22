@@ -84,7 +84,7 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
-        userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False).order_by('date_shared')
+        userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False,is_private=False).order_by('date_shared')
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
@@ -238,7 +238,7 @@ class GetFollowersHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_pic','account_handle','account_pic', 'sqwag_image_url',
-               'sqwag_count','following_count','followed_by_count')
+               'sqwag_count','following_count','followed_by_count','displayname','fullname')
     def read(self,request,page=1,id=None, *args, **kwargs):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
@@ -434,7 +434,7 @@ class TopPeopleHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_data','account_pic','account_handle','account_pic', 'sqwag_image_url',
-               'sqwag_count','following_count','followed_by_count')
+               'sqwag_count','following_count','followed_by_count','fullname','displayname')
     #exclude = ('id', re.compile(r'^private_'))
     def read(self, request, page=1, *args, **kwargs):
         # only authenticated user can get it's own feed
@@ -481,7 +481,7 @@ class TopPeopleHandler(BaseHandler):
 
 class PublicSqwagsFeedsHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
+    fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count',
               'date_created',)
     #exclude = ('id', re.compile(r'^private_'))
 #    model = Square
@@ -515,7 +515,7 @@ class UserInfo(BaseHandler):
     methods_allowed = ('GET')
     fields = ('id','first_name','last_name','email','username','account','account_id',
               'account_pic','account_handle', 'sqwag_image_url',
-               'sqwag_count','following_count','followed_by_count','display_name')
+               'sqwag_count','following_count','followed_by_count','display_name','fullname')
     
     def read(self,request,id=None,*args, **kwargs):
         if not id:
@@ -662,7 +662,7 @@ class restUserSquareHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = 'user square does not exist'        
         #print usrsquare.user
-        usrsquares = UserSquare.objects.filter(square=usrsquare.square,is_deleted=False).order_by('-date_shared')
+        usrsquares = UserSquare.objects.filter(square=usrsquare.square,is_deleted=False,is_private=False).order_by('-date_shared')
         result = {}
         squares_all = []
         for usrsqr in usrsquares:
