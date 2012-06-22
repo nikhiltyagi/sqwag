@@ -188,20 +188,19 @@
 	</footer>
 </div>
 <div class="slide-out-div">
-    <a class="handle" href="http://link-for-non-js-users.html">Content</a>
+    <a class="handle">feedback</a>
       <div id="resp-feedback"> </div>
       <form action="/api/feedback" method="post">
           <div class="form-controls">
-            <textarea style="width:240;height:104"type="text" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
+            <textarea class="input-xlarge" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
           </div>
-        <div class="modal-footer">
-          <input id="submit-feedback" type="button" class="btn btn-primary" value="submit" />
-        </div>
+          <input id="submit-feedback" type="button" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
 
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
 <script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
+<script src="assets/js/tabslideout.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
 <script src="assets/js/libs/bootstrap-dropdown.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
@@ -212,8 +211,6 @@
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
 <script src="assets/js/script.js"></script>
-<script src="assets/js/tabslideout.js"></script>
-
 <script>
 
 $(document).ready(function() {
