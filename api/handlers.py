@@ -801,7 +801,7 @@ class uploadProfilePictureHandler(BaseHandler):
             return failureResponse
             
 class uploadPersonalMessage(BaseHandler):
-    methods_allowed = ('POST')
+    methods_allowed = ('POST',)
     fields = ('id','sqwag_image_url','sqwag_cover_image_url','personal_message','sqwag_count','following_count',
               'followed_by_count','displayname',('user',('username','first_name','last_name','email',)))
     def create(self,request,*args,**kwargs):
