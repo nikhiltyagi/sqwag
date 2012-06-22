@@ -66,9 +66,9 @@ var bb = {
               }
 
             }else{
-              // it's a sqwag user object
+              var sq = ich.user(model.attributes)
             }
-            var sq = ich.text(model.attributes)
+            
           }
           
         }
