@@ -114,6 +114,34 @@ body {
   margin-top: -40px;
 }
 
+.sq-user {
+  padding: 0;
+  height: 220px;
+  width: 220px;
+}
+.sq-user > .island > .hd,
+.sq-user > .island > .bd,
+.sq-user > .island > .ft {
+  padding: 9px;
+}
+.sq-user > .island > .hd {
+  background: #ccc;
+}
+
+.username {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.handle {
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.sqwag-info .value {
+  display: block;
+}
+
 .avatar {
   border-radius: 5px;
 }
@@ -146,7 +174,8 @@ body {
   padding: 6px;
   display: none;
 }
-.sq-image .mask {
+.sq-image .mask,
+.sq-user .mask {
   margin: 0;
 }
 .buttons-group {
@@ -274,4 +303,7 @@ img {
 }
 #feedback {
   height: 100px;
+}
+.handle {
+  cursor: pointer;
 }
