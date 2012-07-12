@@ -48,6 +48,7 @@ body {
 } */
 .navbar {
   margin-top: 60px;
+  margin-bottom: 88px;
 }
 .navbar-inner {
   background: url('../img/bg-bar.png') repeat-x;
@@ -208,6 +209,9 @@ button {
 }
 .media-bd {
   float: left;
+}
+
+.user-card .media-bd {
   text-align: right;
 }
 
@@ -263,6 +267,36 @@ img {
 .copyright {
   text-align: center;
 }
+
+/* =lists */
+.inline-list {
+  list-style: none;
+  overflow: hidden;
+  margin: 0;
+}
+.inline-list li {
+  float: left;
+  margin-right: 54px;
+}
+.inline-list li:last-child {
+  margin-right: 0;
+}
+
+/* =profile */
+.profile-pic {
+  margin-top: -30px;
+}
+.profile-hd {
+  margin-top: -10px;
+}
+
+.sqwag-count-wrap {
+  color: #fff;
+}
+.sqwag-count {
+  display: block;
+}
+
 /* =helpful */
 .fl {
   float: left;
@@ -306,4 +340,7 @@ img {
 }
 .handle {
   cursor: pointer;
+}
+.tagline {
+  display: block;
 }
