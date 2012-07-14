@@ -26,7 +26,6 @@ import settings
 import sha
 import simplejson
 import time
-import jsonpickle
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -45,17 +44,14 @@ def loginUser(request):
                 if user.is_active:
                     login(request, user)
                     user = User.objects.get(username=uname)
-                    
-                    
-#                    respObj = {}
-#                    respObj['username'] = user.username
-#                    respObj['id'] = user.id
-#                    respObj['first_name'] = user.first_name
-#                    respObj['last_name'] = user.last_name
-#                    respObj['email'] =  user.email
-                    successResponse['result'] = user
-                    resp = jsonpickle.encode(successResponse)
-                    return HttpResponse(resp, mimetype='application/javascript')
+                    respObj = {}
+                    respObj['username'] = user.username
+                    respObj['id'] = user.id
+                    respObj['first_name'] = user.first_name
+                    respObj['last_name'] = user.last_name
+                    respObj['email'] =  user.email
+                    successResponse['result'] = respObj
+                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 else:
                     failureResponse['status'] = ACCOUNT_INACTIVE
                     failureResponse['error'] = "your account is not active"
@@ -93,7 +89,7 @@ def registerUser(request):
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
-            host = request.get_host()
+            host = request.get_host()betadev1.sqwag.com
             if request.is_secure():
                 protocol = 'https://'
             else:
