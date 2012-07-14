@@ -89,7 +89,7 @@ def registerUser(request):
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
-            host = request.get_host()betadev1.sqwag.com
+            host = request.get_host()
             if request.is_secure():
                 protocol = 'https://'
             else:
