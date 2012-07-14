@@ -13,7 +13,7 @@ from httplib2 import Http
 from oauth.oauth import OAuthToken
 from sqwag_api.constants import *
 from sqwag_api.forms import *
-from sqwag_api.helper import *
+from sqwag_api.helper import *, mailentry
 from sqwag_api.models import *
 from sqwag_api.twitterConnect import *
 from time import gmtime, strftime
@@ -623,7 +623,10 @@ def instaSubsCallback(request):
             failureResponse['message'] = "some error at instagram server"
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     elif request.method == "POST":
-        return HttpResponse('donno what to do here :(',mimetype='application/javascript')
+        resp = request.body.read()
+        mailer = Emailer(subject="insta realtime feed", body=resp, from_email='coordinator@sqwag.com', to='vaibps17@gmail.com', date_created=time.time())
+        mailentry(mailer)
+        return HttpResponse('thankyou!',mimetype='application/javascript')
 
 def createInstaSubscription(request):
     h = Http()
