@@ -24,11 +24,39 @@ var router = {
 				$(self.profileTemplate.targetElement).load(self.profileTemplate.url, function() {
 					// bind events
 
-					this.bindEvents();
+					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
+					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+					var config = SQ.router.routes[router.currentRoute];
+					SQ.backbone.init(config.bb_config);
+					SQ.backbone.feedHandler.getFeed();
+
+					// get userinfo
+					$.ajax({
+						url:'api/userinfo/',
+						datatype:"json",
+						type:"GET",
+						data:{
+						},
+						success:function(data,textStatus,jqXHR){
+							if(data.status==1){
+								// populte html elements
+								var user_profile = data.result.user_profile;
+								$("#sqwag").text(user_profile.sqwag_count);
+								$("#sqwagging").text(user_profile.following_count);
+								$("#sqwaggers").text(user_profile.followed_by_count);
+								$("#displayname_cover").text(user_profile.displayname);
+								$("#username_cover").text("@"+user_profile.displayname); //TODO: later change it to username
+							}else{
+								SQ.notify(data.error);
+							}
+						}
+					});
+
+					
 
 					function bindEvents(){
 
-						$("#sub-msg-btn").bind('click',function(){
+						$("#sub-msg-btn").live('click',function(){
 							$.ajax({
 								url:"/api/uploadPersonalmsg/"+producer_id,
 								datatype:"json",
@@ -46,14 +74,8 @@ var router = {
 							});
 
 						});
-
 					};
-
-					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
-					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
-					var config = SQ.router.routes[router.currentRoute];
-					SQ.backbone.init(config.bb_config);
-					SQ.backbone.feedHandler.getFeed();
+					bindEvents();
 				});				
 			}
 		};

@@ -179,9 +179,25 @@ var SQ = {
         }
       });
     });
-
-    
-
+// open the popup and get usersquare
+    $("").live('click',function(){
+      // code to open the modal window/ fancybox
+      // once the modal window opens. hit a ajax call to get userSquare info
+      var usersquare_id = $(this).data('id')
+      $.ajax({
+        url:"/api/usersquare/"+usersquare_id,
+        datatype:"json",
+        type:"GET",
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            // populate data
+            
+          }else{
+            SQ.notify(data.error);
+          }
+        }
+      });
+    });
 
 
     $(window).scroll(function () {

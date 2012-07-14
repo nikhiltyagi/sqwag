@@ -530,7 +530,7 @@ class UserInfo(BaseHandler):
         except User.DoesNotExist:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = 'user does not exist'
-        userInfo = getCompleteUserInfo(request,user_obj)['result']
+        userInfo = getCompleteUserInfo(request,user_obj)
         return userInfo
 
 class CommentsSquareHandler(BaseHandler):
