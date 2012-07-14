@@ -13,7 +13,7 @@ from httplib2 import Http
 from oauth.oauth import OAuthToken
 from sqwag_api.constants import *
 from sqwag_api.forms import *
-from sqwag_api.helper import *, mailentry
+from sqwag_api.helper import *
 from sqwag_api.models import *
 from sqwag_api.twitterConnect import *
 from time import gmtime, strftime
