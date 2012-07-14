@@ -623,9 +623,12 @@ def instaSubsCallback(request):
             failureResponse['message'] = "some error at instagram server"
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     elif request.method == "POST":
+        print "inside insta call back post"
         resp = request.body.read()
+        print "resp received is :" + resp
         mailer = Emailer(subject="insta realtime feed", body=resp, from_email='coordinator@sqwag.com', to='vaibps17@gmail.com', date_created=time.time())
         mailentry(mailer)
+        print "mailer entry done"
         return HttpResponse('thankyou!',mimetype='application/javascript')
 
 def createInstaSubscription(request):

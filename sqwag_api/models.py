@@ -75,6 +75,7 @@ class RequestInvitation(models.Model):
         return self.email
 
 class Emailer(models.Model):
+    print "inside emailer"
     to = models.EmailField(max_length=254,null=False)
     from_email = models.EmailField(max_length=254, null=False)
     body = models.TextField()
@@ -82,6 +83,7 @@ class Emailer(models.Model):
     date_created = models.IntegerField()
     is_sent = models.BooleanField(default=False)
     status = models.TextField(null=True)
+    print "returning from Emailer"
 
 class Relationship(models.Model):
     subscriber = models.ForeignKey(User,related_name='subscriber')
