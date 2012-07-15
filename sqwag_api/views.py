@@ -26,6 +26,8 @@ import settings
 import sha
 import simplejson
 import time
+from sqwag_api.elsaticsearch import *
+from sqwag_api.InstaService import *
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -104,6 +106,12 @@ def registerUser(request):
             relationShip.date_subscribed = time.time()
             relationShip.permission = True
             relationShip.save()
+            CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+            userdata = {}
+            userdata['user_auth'] = user
+            userdata['user_profile'] = UserProfile
+            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            
             
             #respObj['url'] = current_site
             successResponse['result'] = "Activation link is sent to the registration mail"
@@ -172,7 +180,7 @@ def authTwitter(request):
 def accessTweeter(request):
     key = request.GET['oauth_token']
     tokenString = request.session.get(key, False)
-    if(tokenString):
+    if tokenString:
         pOauthRequestToken = OAuthToken.from_string(tokenString)
         pPin = request.GET['oauth_verifier']
         oauthAccess = OauthAccess(pOauthRequestToken, pPin)
@@ -312,7 +320,7 @@ def syncTwitterFeeds(request):
                     try:
                         square.full_clean(exclude='content_description')
                         square.save()
-                        saveSquareBoilerPlate(request, square.user, square, square.date_created)
+                        saveSquareBoilerPlate(request=request,user=square.user, square=square, date_created=square.date_created)
                     except ValidationError:
                         print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
@@ -628,7 +636,14 @@ def instaSubsCallback(request):
         print "resp received is :" + resp
         mailer = Emailer(subject="insta realtime feed", body=resp, from_email='coordinator@sqwag.com', to='vaibps17@gmail.com', date_created=time.time())
         mailentry(mailer)
+        respObj = jsonpickle.decode(resp)
+        # now we have the user and user id of instagram user.
+        # fetch the user insta feed.
+        # get the useraccount tuple for this user using insta user id.
+        # store the media id in user account table
+        # create square for each object in the feed.
         print "mailer entry done"
+        syncInstaFeed(insta_user_id=respObj['id'])
         return HttpResponse('thankyou!',mimetype='application/javascript')
 
 def createInstaSubscription(request):
@@ -640,3 +655,17 @@ def createInstaSubscription(request):
     if resp.status == 200:
         print "resp.status is 200, printing content"
     return HttpResponse(content, mimetype='application/javascript')
+
+def test(request):
+    fields = ["user_auth.username","user_auth.email"]
+    query = {}
+    term = {}
+    term['user_auth.username'] = "nikhil1231"
+    query['term'] = term
+    r = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET)
+
+def pocInsta(request):
+    x = syncInstaFeed(insta_user_id=52192801)
+    #x= getUserRecentFeed(count=10, min_id=40, access_token='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09', user_id=52192801);
+    return HttpResponse(x, mimetype='application/javascript')
+    

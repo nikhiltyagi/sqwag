@@ -31,4 +31,18 @@ BODY_SUBSCRIBED = "A user has subscribed for you feeds."
 #Accounts
 ACCOUNT_TWITTER = "twitter"
 ACCOUNT_INSTAGRAM = "instagram"
+ELASTIC_SEARCH_USER_POST = "http://localhost:9200/sqwag/user/"
+ELASTIC_SEARCH_USER_GET = "http://localhost:9200/sqwag/user/_search?"
+ELASTIC_SEARCH_RELATIONSHIP_POST = "http://localhost:9200/sqwag/relationship/"
+ELASTIC_SEARCH_RELATIONSHIP_GET = "http://localhost:9200/sqwag/relationship/_search?"
+ELASTIC_SEARCH_SQUARE_POST = "http://localhost:9200/sqwag/square/"
+ELATIC_SEARCH_SQUARE_GET = "http://localhost:9200/sqwag/square/_search?"
+ELASTIC_SEARCH_USERSQUARE_POST = "http://localhost:9200/sqwag/usersquare/"
+ELASTIC_SEARCH_USERSQUARE_GET = "http://localhost:9200/sqwag/usersquare/_search?"
+
+
+#INSTAGRAM URLS
+INSTAGRAM_HOST_URL = "https://api.instagram.com/v1/"
+INSTAGRAM_USER_API_URL = INSTAGRAM_HOST_URL+"users/"
+
 

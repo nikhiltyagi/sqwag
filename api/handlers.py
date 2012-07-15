@@ -57,7 +57,7 @@ class ImageSquareHandler(BaseHandler):
                     square = form.save(commit=False)
                     square.content_type = "image"
                     square.content_data = image_url
-                    resultWrapper = saveSquareBoilerPlate(request,request.user, square)
+                    resultWrapper = saveSquareBoilerPlate(request=request,user=request.user,square=square)
                     return resultWrapper
                 else:
                     failureResponse['status'] = BAD_REQUEST
@@ -85,6 +85,21 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False).order_by('date_shared')
+        query ={}
+        term = {}
+        term["user_id"] = request.user.id
+        query['term'] = term
+        print "calling GET"
+        result = GetDocument(query,ELASTIC_SEARCH_USERSQUARE_GET)
+        print "Done"
+        js = simplejson.loads(result)
+        print "simple json"
+        print js['hits']['hits']
+        jsoncontent = jsonpickle.decode(result)
+        print "json pickle"
+        print jsoncontent['hits']['hits']
+        for i in jsoncontent['hits']['hits']:
+            print i['_source'].id
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
