@@ -275,22 +275,27 @@ def getActiveUserAccount(user, account):
     return UserAccount.objects.get(user=user, account=account,is_active=True)
 
 def syncInstaFeed(insta_user_id=None ):
-    access_token ='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09'
+    #access_token ='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09'
+    print("inside syncINstaFeed")
     if insta_user_id is not None:
+        print("getting userAccount")
         userAccount = UserAccount.objects.get(account_id=insta_user_id,
                                                             account='instagram', is_active=True)
+        print("userAccount obtained")
         if userAccount.last_object_id:
             min_id = userAccount.last_object_id
             print "last min_id was: "+ str(min_id)
         else:
             min_id=1
+        print("min id is "+str(min_id))
+        print("calling insta api for recent user feed")
         content = getUserRecentFeed(min_id=min_id,
-                                    access_token=access_token,
+                                    access_token=userAccount.access_token,
                                     user_id=insta_user_id);
         #content is an Object
         objects =  content['data']
         added_last_id = False
-        for object in objects:
+        for object in reversed(objects):
             if not added_last_id:
                 #store the first object's id as the last_object_id in userAccount table
                 userAccount.last_object_id = object['id']
@@ -312,7 +317,6 @@ def createInstaSquare(object=None, insta_user_id=None):
             wrapper = handle_uploaded_file(img,user=userAccount.user)
             if wrapper['status']==SUCCESS_STATUS_CODE:
                 image_url = wrapper['result']
-            return
             #check if square exists for this feed
             try:
                 sqwagUser = userAccount.user

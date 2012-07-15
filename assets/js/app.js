@@ -49,6 +49,9 @@ var bb = {
           else if(model.attributes.square.content_type == 'image'){
             var sq = ich.image(model.attributes);
           }
+          else if(model.attributes.square.content_type == 'insta_image'){
+            var sq = ich.image(model.attributes);
+          }
         }
         else {
           // decide which ich.template to call... how?
