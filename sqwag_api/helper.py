@@ -294,15 +294,12 @@ def syncInstaFeed(insta_user_id=None ):
                                     user_id=insta_user_id);
         #content is an Object
         objects =  content['data']
-        added_last_id = False
         for object in reversed(objects):
-            if not added_last_id:
-                #store the first object's id as the last_object_id in userAccount table
-                userAccount.last_object_id = object['id']
-                userAccount.save()
-                added_last_id=True
-                print "new min_id is: "+ str(object['id'])
             createInstaSquare(object=object, insta_user_id=object['user']['id'])
+        #store the first object's id as the last_object_id in userAccount table
+        userAccount.last_object_id = objects[0]['id']
+        userAccount.save()
+        print "new min_id is: "+ str(object['id'])
     else:
         print ("user is none, syncInstaFeed not possible")
     return content
