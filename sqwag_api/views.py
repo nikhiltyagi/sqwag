@@ -637,13 +637,9 @@ def instaSubsCallback(request):
         mailer = Emailer(subject="insta realtime feed", body=resp, from_email='coordinator@sqwag.com', to='vaibps17@gmail.com', date_created=time.time())
         mailentry(mailer)
         respObj = jsonpickle.decode(resp)
-        # now we have the user and user id of instagram user.
-        # fetch the user insta feed.
-        # get the useraccount tuple for this user using insta user id.
-        # store the media id in user account table
-        # create square for each object in the feed.
         print "mailer entry done"
         syncInstaFeed(insta_user_id=respObj['id'])
+        print "sync insta feed done"
         return HttpResponse('thankyou!',mimetype='application/javascript')
 
 def createInstaSubscription(request):
