@@ -337,7 +337,7 @@ def syncTwitterFeeds(request):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = NOT_FOUND
-        failureResponse['message'] = 'no new feeds found'
+        failureResponse['error'] = 'no new feeds found'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def retweet(request, square_id):
@@ -363,7 +363,7 @@ def retweet(request, square_id):
             #return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript') 
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
-        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        failureResponse['error'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def replyTweet(request, square_id, message, user_handle):
@@ -387,7 +387,7 @@ def replyTweet(request, square_id, message, user_handle):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
-        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        failureResponse['error'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def postTweet(request, message):
@@ -409,7 +409,7 @@ def postTweet(request, message):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
-        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        failureResponse['error'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     
 def favTweet(request, square_id):
@@ -433,7 +433,7 @@ def favTweet(request, square_id):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     except UserAccount.DoesNotExist:
         failureResponse['status'] = TWITTER_ACCOUNT_NOT_CONNECTED
-        failureResponse['message'] = 'your twitter account in not connected. Please connect twitter'
+        failureResponse['error'] = 'your twitter account in not connected. Please connect twitter'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def authInsta(request):
@@ -456,7 +456,7 @@ def accessInsta(request):
             userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
                                       access_token=contentJson['access_token'], date_created=time.time(),
                                       account_data=content, account_pic=contentJson['user']['profile_picture'],
-                                      account_handle=contentJson['user']['username'], is_active=True)
+                                      account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
             try:
                 userAccount.full_clean()
                 userAccount.save()
@@ -464,16 +464,16 @@ def accessInsta(request):
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
                 failureResponse['status'] = SYSTEM_ERROR
-                failureResponse['error'] = "some error occured, please try later" + e.message
+                failureResponse['error'] = "some error occured :(, please try later" + e.message
                 #TODO: log it
                 return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = resp.status
-            failureResponse['message'] = 'INSTA ERROR'
+            failureResponse['error'] = 'INSTA ERROR'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
-        failureResponse['message'] = 'GET parameter missing'
+        failureResponse['error'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def getInstaFeed(request):
@@ -507,7 +507,7 @@ def forgotPwd(request, user):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = NOT_FOUND
-        failureResponse['message'] = 'invalid username'
+        failureResponse['error'] = 'invalid username'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def forgotPwdKey(request, id, key):
@@ -518,7 +518,7 @@ def forgotPwdKey(request, id, key):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = 'username and activation key does not match'
+        failureResponse['error'] = 'username and activation key does not match'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 def newPwd(request):
     form = PwdResetForm(request.POST)
@@ -532,7 +532,7 @@ def newPwd(request):
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = 'invalid form'
+        failureResponse['error'] = 'invalid form'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def editEmail(request):
@@ -549,16 +549,16 @@ def editEmail(request):
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             else:
                 failureResponse['result'] = BAD_REQUEST
-                failureResponse['message'] = 'blank email'
+                failureResponse['error'] = 'blank email'
                 return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = BAD_REQUEST
-            failureResponse['message'] = 'password does not match'
+            failureResponse['error'] = 'password does not match'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')    
 
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = form.errors
+        failureResponse['error'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def editDisplayName(request):
@@ -573,11 +573,11 @@ def editDisplayName(request):
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = BAD_REQUEST
-            failureResponse['message'] = 'blank display name'
+            failureResponse['error'] = 'blank display name'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = form.errors
+        failureResponse['error'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         
 def changePassword(request):
@@ -593,11 +593,11 @@ def changePassword(request):
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = BAD_REQUEST
-            failureResponse['message'] = 'old password does not match'
+            failureResponse['error'] = 'old password does not match'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = form.errors
+        failureResponse['error'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     
 def changeUserName(request):
@@ -613,11 +613,11 @@ def changeUserName(request):
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = BAD_REQUEST
-            failureResponse['message'] = 'password does not match'
+            failureResponse['error'] = 'password does not match'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['result'] = BAD_REQUEST
-        failureResponse['message'] = form.errors
+        failureResponse['error'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def instaSubsCallback(request):
@@ -628,7 +628,7 @@ def instaSubsCallback(request):
             return HttpResponse(challenge,mimetype='application/javascript')
         else:
             failureResponse['result'] = SYSTEM_ERROR
-            failureResponse['message'] = "some error at instagram server"
+            failureResponse['error'] = "some error at instagram server"
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     elif request.method == "POST":
         print "inside insta call back post"
