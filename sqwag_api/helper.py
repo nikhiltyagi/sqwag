@@ -104,7 +104,7 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
-    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
+    #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     is_owner = True
     squareResponse = {}
     userSquare = createUserSquare(None,user,square,is_owner)
