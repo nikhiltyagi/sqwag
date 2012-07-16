@@ -638,7 +638,7 @@ def instaSubsCallback(request):
         mailentry(mailer)
         respObj = jsonpickle.decode(resp)
         print "mailer entry done"
-        syncInstaFeed(insta_user_id=respObj['id'])
+        syncInstaFeed(insta_user_id=respObj['object_id'])
         print "sync insta feed done"
         return HttpResponse('thankyou!',mimetype='application/javascript')
 
@@ -661,7 +661,7 @@ def test(request):
     r = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET)
 
 def pocInsta(request):
-    x = syncInstaFeed(insta_user_id=52192801)
+    x = syncInstaFeed(insta_user_id=8314228)
     #x= getUserRecentFeed(count=10, min_id=40, access_token='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09', user_id=52192801);
     return HttpResponse(x, mimetype='application/javascript')
     
