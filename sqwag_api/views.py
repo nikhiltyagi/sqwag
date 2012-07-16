@@ -637,7 +637,8 @@ def instaSubsCallback(request):
         mailer = Emailer(subject="insta realtime feed", body=resp, from_email='coordinator@sqwag.com', to='vaibps17@gmail.com', date_created=time.time())
         mailentry(mailer)
         respObj = jsonpickle.decode(resp)
-        print "mailer entry done"
+        print respObj['object_id']
+        print "mailer entry done, insta_user_id is"+ respObj['object_id']
         syncInstaFeed(insta_user_id=respObj['object_id'])
         print "sync insta feed done"
         return HttpResponse('thankyou!',mimetype='application/javascript')
