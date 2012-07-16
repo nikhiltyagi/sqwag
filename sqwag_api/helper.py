@@ -260,7 +260,7 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
-    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+    #CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
     return userSquare
 
 def getRelationship(producer,subscriber):
