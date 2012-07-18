@@ -453,13 +453,27 @@ def accessInsta(request):
         #respJson = json.loads(resp)
         if resp.status == 200:
             contentJson = simplejson.loads(content)
-            userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
-                                      access_token=contentJson['access_token'], date_created=time.time(),
-                                      account_data=content, account_pic=contentJson['user']['profile_picture'],
-                                      account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
+            try:
+                print "check is insta account already exists for this user"
+                userAccount = getActiveUserAccount(request.user, ACCOUNT_INSTAGRAM)
+                print "insta account already present, update account info"
+                userAccount.access_token = contentJson['access_token']
+                userAccount.date_created=time.time()
+                userAccount.account_data=content
+                userAccount.account_pic=contentJson['user']['profile_picture']
+                userAccount.account_handle=contentJson['user']['username']
+                userAccount.is_active=True
+            except UserAccount.DoesNotExist:
+                print "insta account does not exist, creating fresh account"
+                userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
+                                          access_token=contentJson['access_token'], date_created=time.time(),
+                                          account_data=content, account_pic=contentJson['user']['profile_picture'],
+                                          account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
             try:
                 userAccount.full_clean()
+                print "saving account details"
                 userAccount.save()
+                print "returning"
                 successResponse['result'] = contentJson;
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
