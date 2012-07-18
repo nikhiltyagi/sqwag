@@ -93,13 +93,13 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
     square.user = user
     if square.content_src == 'twitter.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='twitter.com',is_active=True)
+            userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_TWITTER,is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account twitter does not exist"
     elif square.content_src == 'instagram.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='instagram.com',is_active=True)
+            userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_INSTAGRAM,is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
@@ -280,7 +280,7 @@ def syncInstaFeed(insta_user_id=None ):
     if insta_user_id is not None:
         print("getting userAccount")
         userAccount = UserAccount.objects.get(account_id=insta_user_id,
-                                                            account='instagram', is_active=True)
+                                                            account=ACCOUNT_INSTAGRAM, is_active=True)
         print("userAccount obtained")
         if userAccount.last_object_id:
             min_id = userAccount.last_object_id
@@ -310,7 +310,7 @@ def createInstaSquare(object=None, insta_user_id=None):
         print img_url
         img = urllib.urlopen(img_url)
         try:
-            userAccount = UserAccount.objects.get(account_id=insta_user_id, account='instagram', is_active=True)
+            userAccount = UserAccount.objects.get(account_id=insta_user_id, account=ACCOUNT_INSTAGRAM, is_active=True)
             wrapper = handle_uploaded_file(img,user=userAccount.user)
             if wrapper['status']==SUCCESS_STATUS_CODE:
                 image_url = wrapper['result']
