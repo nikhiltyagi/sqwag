@@ -23,6 +23,7 @@ class UserAccount(models.Model):
     account_data = models.TextField(null=True)
     account_pic = models.URLField(null=True)
     account_handle = models.CharField(max_length=200, null=True)
+    last_object_id = models.CharField(max_length=240, null=True)
     is_active = models.BooleanField(default=True)
     
     def __unicode__(self):
@@ -71,8 +72,6 @@ class UserSquare(models.Model):
     is_owner = models.BooleanField()
     is_private = models.BooleanField(default=False)
         
-    def __unicode__(self):
-        return self.date_shared
 
 class RequestInvitation(models.Model):
     email = models.EmailField(max_length=254)
@@ -95,9 +94,6 @@ class Relationship(models.Model):
     producer = models.ForeignKey(User, related_name='producer')
     date_subscribed = models.IntegerField('date subscribed')
     permission = models.BooleanField()
-    
-#    def __unicode__(self):
-#        return self.date_subscribed
 
 class RegistrationManager(models.Manager):
     def activate_user(self, activation_key):

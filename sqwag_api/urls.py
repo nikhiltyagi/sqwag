@@ -34,7 +34,10 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^editDisplayName/$','editDisplayName',name='editDisplayName'),
     url(r'^changePassword/$','changePassword',name='changePassword'),
     url(r'^changeUserName/$','changeUserName',name='changeUserName'),
-    url(r'^test/$','GetElasticSearch',name='GetElasticSearch'),
+    url(r'^instacb/$','instaSubsCallback',name='instaSubsCallback'),
+    url(r'^instasubscriptioncreate/$','createInstaSubscription',name='createInstaSubscription'),
+    url(r'^test/$','test',name='test'),
+    url(r'^pocinsta/$','pocInsta',name='pocInsta'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

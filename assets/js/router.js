@@ -5,7 +5,6 @@ var router = {
 		self.feedTemplate = {
 			"url":"/assets/templates/feed.html",
 			"targetElement":"#content",
-			"templateRoot":"#sqwag-list-id",
 			"isLoaded":false,
 
 			getData: function(){
@@ -19,16 +18,64 @@ var router = {
 		self.profileTemplate = {
 			"url":"/assets/templates/profile.html",
 			"targetElement":"#main",
-			"templateRoot":"#sqwag-list-id",
 			"isLoaded":false,
 
 			getData: function(){
 				$(self.profileTemplate.targetElement).load(self.profileTemplate.url, function() {
+					// bind events
+
 					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
 					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
 					var config = SQ.router.routes[router.currentRoute];
 					SQ.backbone.init(config.bb_config);
 					SQ.backbone.feedHandler.getFeed();
+
+					// get userinfo
+					$.ajax({
+						url:'api/userinfo/',
+						datatype:"json",
+						type:"GET",
+						data:{
+						},
+						success:function(data,textStatus,jqXHR){
+							if(data.status==1){
+								// populte html elements
+								var user_profile = data.result.user_profile;
+								$("#sqwag").text(user_profile.sqwag_count);
+								$("#sqwagging").text(user_profile.following_count);
+								$("#sqwaggers").text(user_profile.followed_by_count);
+								$("#displayname_cover").text(user_profile.displayname);
+								$("#username_cover").text("@"+user_profile.displayname); //TODO: later change it to username
+							}else{
+								SQ.notify(data.error);
+							}
+						}
+					});
+
+					
+
+					function bindEvents(){
+
+						$("#sub-msg-btn").live('click',function(){
+							$.ajax({
+								url:"/api/uploadPersonalmsg/"+producer_id,
+								datatype:"json",
+								type:"POST",
+								data:{
+									'message':$("#personal-msg").val()
+								},
+								success:function(data,textStatus,jqXHR){
+									if(data.status==1){
+										SQ.notify("success");
+									}else{
+										SQ.notify(data.error);
+									}
+								}
+							});
+
+						});
+					};
+					bindEvents();
 				});				
 			}
 		};
@@ -39,7 +86,7 @@ var router = {
 
 			getData : function(){
 				$(self.formTemplate.targetElement).load(self.settingsTemplate.url, function(){
-					// bind events
+
 					$("#twitter-connect").bind("click",function(){
 						$.ajax({
 				            url: "/sqwag/authtwitter",
@@ -56,6 +103,48 @@ var router = {
 			          	});
 					})
 				});
+			}
+		};
+		self.topFeedTemplate = {
+			"url":"/assets/templates/topfeeds.html",
+			"targetElement":"#main",
+			"isLoaded":false,
+
+			getData: function(){
+				$(self.topFeedTemplate.targetElement).load(self.topFeedTemplate.url, function() {
+					// bind events
+
+					this.bindEvents();
+
+					function bindEvents(){
+
+						$("#top-sqwag").bind('click',function(){
+							$.ajax({
+								url:"/api/uploadPersonalmsg/"+producer_id,
+								datatype:"json",
+								type:"POST",
+								data:{
+									'message':$("#personal-msg").val()
+								},
+								success:function(data,textStatus,jqXHR){
+									if(data.status==1){
+										SQ.notify("success");
+									}else{
+										SQ.notify(data.error);
+									}
+								}
+							});
+
+						});
+
+					};
+
+					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
+					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+					var config = SQ.router.routes[router.currentRoute];
+					SQ.backbone.init(config.bb_config);
+					SQ.backbone.feedHandler.getFeed();
+				});				
 			}
 		};
 		self.formTemplate = {

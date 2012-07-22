@@ -3,19 +3,27 @@ Created on 25-Apr-2012
 
 @author: saini
 '''
+from StringIO import StringIO
 from django.core.exceptions import ValidationError
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from sorl.thumbnail import *
+from sqwag_api.InstaService import *
 from sqwag_api.constants import *
+from sqwag_api.elsaticsearch import *
 from sqwag_api.forms import *
 from sqwag_api.models import *
+from twisted.python.reflect import ObjectNotFound
+import Image
+import cStringIO
 import os
 import tempfile
 import time
 from twisted.python.reflect import ObjectNotFound
 from sqwag_api.elasticsearch import *
+import urllib
+
 
 def mailentry(mailer):
     mailer.is_sent=False
@@ -26,13 +34,18 @@ def mailentry(mailer):
     except ValidationError, e :
         dummy = e.message() #TODO log error
 
-def handle_uploaded_file(content_image,request,imageType=None):
+def handle_uploaded_file(content_image,request=None,imageType=None,user=None):
     resultWrapper = {}
     try:
         time_created = time.time()
-        tempPath = 'user_image/'+ str(request.user.id)+'/'+str(time_created)+'/'
+        if user is not None:
+            user_id = user.id
+        else:
+            user_id = request.user.id
+        tempPath = 'user_image/'+ str(user_id)+'/'+str(time_created)+'/'
         print tempPath
-        path = default_storage.save(tempPath+'original.jpg', ContentFile(content_image.read()))
+        f = content_image.read()
+        path = default_storage.save(tempPath+'original.jpg', ContentFile(f))
         tmp_file = os.path.join(settings.MEDIA_ROOT, path)
         image = open(tmp_file)
         small_image = get_thumbnail(image, '52x52', crop='center', quality=99)
@@ -65,14 +78,14 @@ def crateSquare(request):
     squareForm =  CreateSquareForm(request.POST)
     if squareForm.is_valid():
         square = squareForm.save(commit=False)
-        resultWrapper = saveSquareBoilerPlate(request,request.user, square)
+        resultWrapper = saveSquareBoilerPlate(request=request,user=request.user, square=square)
         return resultWrapper
     else:
         resultWrapper['status'] = BAD_REQUEST
         resultWrapper['error'] = squareForm.errors
         return resultWrapper
 
-def saveSquareBoilerPlate(request,user, square, date_created=None):
+def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None):
     resultWrapper = {}
     if date_created:
         square.date_created = date_created
@@ -83,17 +96,18 @@ def saveSquareBoilerPlate(request,user, square, date_created=None):
     square.user = user
     if square.content_src == 'twitter.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='twitter.com',is_active=True)
+            userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_TWITTER,is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account twitter does not exist"
     elif square.content_src == 'instagram.com':
         try:
-            userAccount = UserAccount.objects.get(user=user,account='instagram.com',is_active=True)
+            userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_INSTAGRAM,is_active=True)
             square.user_account = userAccount
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
+    #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     is_owner = True
     squareResponse = {}
     userSquare = createUserSquare(None,user,square,is_owner)
@@ -153,7 +167,7 @@ def paginate(request, page, inputList, itemsPerPage):
         resultWrapper['error'] = "page is out of bounds"
     return resultWrapper
 
-def getCompleteUserInfo(request,user,accountType=None):
+def getCompleteUserInfo(request=None,user=None,accountType=None):
     resultWrapper = {}
     userInfo = {}
     if user:
@@ -169,7 +183,7 @@ def getCompleteUserInfo(request,user,accountType=None):
             else:    
                 useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType,is_active=True)
             userInfo['user_accounts']= useracc_obj
-            if not request.user.is_anonymous():
+            if request is not None and not request.user.is_anonymous():
                 try:
                     Relationship.objects.get(subscriber=request.user,producer=user)
                     userInfo['is_following'] = True
@@ -249,6 +263,7 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
+    #CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
     return userSquare
 
 def getRelationship(producer,subscriber):
@@ -277,7 +292,7 @@ def getCompleteUserInfoTest(request,user,accountType=None):
             query = {}
             term['user_auth.id'] = user.id
             query['term'] = term
-            result = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET_URL)
+            result = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET)
             print result
             #userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             #userInfo['user_profile'] = userProfile
@@ -306,3 +321,68 @@ def getCompleteUserInfoTest(request,user,accountType=None):
         resultWrapper['error']='user object is null'
         return resultWrapper;
         
+def syncInstaFeed(insta_user_id=None ):
+    #access_token ='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09'
+    print("inside syncINstaFeed")
+    if insta_user_id is not None:
+        print("getting userAccount")
+        userAccount = UserAccount.objects.get(account_id=insta_user_id,
+                                                            account=ACCOUNT_INSTAGRAM, is_active=True)
+        print("userAccount obtained")
+        if userAccount.last_object_id:
+            min_id = userAccount.last_object_id
+            print "last min_id was: "+ str(min_id)
+        else:
+            min_id=1
+        print("min id is "+str(min_id))
+        print("calling insta api for recent user feed")
+        content = getUserRecentFeed(min_id=min_id,
+                                    access_token=userAccount.access_token,
+                                    user_id=insta_user_id);
+        #content is an Object
+        objects =  content['data']
+        for object in reversed(objects):
+            createInstaSquare(object=object, insta_user_id=object['user']['id'])
+        #store the first object's id as the last_object_id in userAccount table
+        userAccount.last_object_id = objects[0]['id']
+        userAccount.save()
+        print "new min_id is: "+ str(object['id'])
+    else:
+        print ("user is none, syncInstaFeed not possible")
+    return content
+
+def createInstaSquare(object=None, insta_user_id=None):
+    if object is not None and insta_user_id is not None:
+        img_url=object['images']['standard_resolution']['url']
+        print img_url
+        img = urllib.urlopen(img_url)
+        try:
+            userAccount = UserAccount.objects.get(account_id=insta_user_id, account=ACCOUNT_INSTAGRAM, is_active=True)
+            wrapper = handle_uploaded_file(img,user=userAccount.user)
+            if wrapper['status']==SUCCESS_STATUS_CODE:
+                image_url = wrapper['result']
+            #check if square exists for this feed
+            try:
+                sqwagUser = userAccount.user
+                Square.objects.get(user=sqwagUser, content_id=object['id'])
+                print ("ignore this object, it is already in database")
+            except Square.DoesNotExist:
+                # now create a square of this object by this sqwag user
+                square = Square(user=sqwagUser, content_type='insta_image', content_src='instagram.com', 
+                                content_id=object['id'],content_data=image_url,
+                                 date_created=object['created_time'],shared_count=0)
+                square.user_account = userAccount
+                
+                if object['caption'] is not None:
+                    square.content_description=object['caption']['text']
+                try:
+                    square.full_clean(exclude='content_description')
+                    square.save()
+                    saveSquareBoilerPlate(user=square.user, square=square, date_created=square.date_created)
+                except ValidationError:
+                    print  "error in saving square"# TODO: log this
+        except UserAccount.DoesNotExist:
+            print "user account does not exist"
+    else:
+        print "invalid arguments"
+        return None

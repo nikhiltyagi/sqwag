@@ -130,10 +130,12 @@ var SQ = {
         url:"/api/feedback",
         dataType: "json",
         type: "POST",
-        data: {'feedback': $("#feedback").val()},
+        data: {
+          'feedback': $("#feedback").val()
+        },
         success: function (data, textStatus, jqXHR){
           if(data.status == 1){
-            $("#resp-feedback").html("THANKS :)");
+            $("#resp-feedback").html("Thanks for you feedback :)");
           }else{
             SQ.notify(data.error);
           }
@@ -143,6 +145,60 @@ var SQ = {
         }
       });
     });
+
+    $(".sqwag-me").live('click',function(){
+      $.ajax({
+        url:"/api/followuser/",
+        datatype:"json",
+        type:"POST",
+        data:{
+          "producer":$(this).data('id')
+        },
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            SQ.notify("success");
+          }else{
+            SQ.notify(data.error);
+          }
+        }
+      });
+    });
+
+    $(".unsqwag").live('click',function(){
+      var producer_id = $(this).data('id')
+      $.ajax({
+        url:"/api/unfollowuser/"+producer_id,
+        datatype:"json",
+        type:"GET",
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            SQ.notify("success");
+          }else{
+            SQ.notify(data.error);
+          }
+        }
+      });
+    });
+// open the popup and get usersquare
+    $("").live('click',function(){
+      // code to open the modal window/ fancybox
+      // once the modal window opens. hit a ajax call to get userSquare info
+      var usersquare_id = $(this).data('id')
+      $.ajax({
+        url:"/api/usersquare/"+usersquare_id,
+        datatype:"json",
+        type:"GET",
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            // populate data
+            
+          }else{
+            SQ.notify(data.error);
+          }
+        }
+      });
+    });
+
 
     $(window).scroll(function () {
       if ($(window).height() + $(window).scrollTop() == $(document).height()) {
