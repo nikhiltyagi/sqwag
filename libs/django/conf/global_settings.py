@@ -202,6 +202,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
 #    'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
+    'django_facebook.context_processors.facebook',
 )
 
 # Output to use in template system for invalid (e.g. misspelled) variables.
@@ -480,7 +481,7 @@ BANNED_IPS = ()
 # AUTHENTICATION #
 ##################
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend','django_facebook.auth_backends.FacebookBackend',)
 
 LOGIN_URL = '/accounts/login/'
 

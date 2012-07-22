@@ -15,6 +15,7 @@ import os
 import tempfile
 import time
 from twisted.python.reflect import ObjectNotFound
+from sqwag_api.elasticsearch import *
 
 def mailentry(mailer):
     mailer.is_sent=False
@@ -260,4 +261,48 @@ def getRelationship(producer,subscriber):
 
 def getActiveUserAccount(user, account):
     return UserAccount.objects.get(user=user, account=account,is_active=True)
+
+
+def getCompleteUserInfoTest(request,user,accountType=None):
+    resultWrapper = {}
+    userInfo = {}
+    if user:
+        try:
+            #userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
+            #                                         "sqwag_image_url","sqwag_cover_image_url","username","fullname").get(user=user)
+            fields = ['user_profile.following_count','user_profile.followed_by_count','user_profile.displayname','user_profile.sqwag_count',
+                      'user_profile.sqwag_image_url','user_profile.sqwag_cover_image_url','user_profile.username','user_profile.fullname',
+                      'user_auth.username','user_auth.first_name','user_auth.last_name','user_auth.email']
+            term = {}
+            query = {}
+            term['user_auth.id'] = user.id
+            query['term'] = term
+            result = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET_URL)
+            print result
+            #userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
+            #userInfo['user_profile'] = userProfile
+#            if not accountType:
+#                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user,is_active=True)
+#            elif accountType=='NA':
+#                useracc_obj = {}
+#            else:    
+#                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType,is_active=True)
+#            userInfo['user_accounts']= useracc_obj
+#            if not request.user.is_anonymous():
+#                try:
+#                    Relationship.objects.get(subscriber=request.user,producer=user)
+#                    userInfo['is_following'] = True
+#                except Relationship.DoesNotExist:
+#                    userInfo['is_following'] = False
+#            resultWrapper['status']=SUCCESS_STATUS_CODE
+#            resultWrapper['result']=userInfo
+#            return resultWrapper
+        except UserProfile.DoesNotExist:
+            resultWrapper['status']=SYSTEM_ERROR
+            resultWrapper['error']= 'user profile does not exist'
+            return resultWrapper
+    else:
+        resultWrapper['status']=BAD_REQUEST
+        resultWrapper['error']='user object is null'
+        return resultWrapper;
         

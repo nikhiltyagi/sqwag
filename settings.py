@@ -96,6 +96,13 @@ INSTA_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 INSTA_WEBSITE_URL = 'http://127.0.0.1:8000/'
 INSTA_CALLBACK_URL = 'http://127.0.0.1:8000/sqwag/accessinsta/'
 
+FACEBOOK_APP_ID = '358855170845635'
+FACEBOOK_APP_SECRET = 'b1f164a2d85cc34f49967e9c14720798'
+FACEBOOK_ACCESS_TOKEN_URL = 'https://graph.facebook.com/oauth/access_token?'
+FACEBOOK_AUTHORIZE_URL = 'https://www.facebook.com/dialog/oauth/?'
+FACEBOOK_CALLBACK_URL = 'http://127.0.0.1:8000/sqwag/accessfacebook/'
+FACEBOOK_CALLBACK_URL_NEW_USER = 'http://127.0.0.1:8000/sqwag/accessfacebooknewuser/'
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (

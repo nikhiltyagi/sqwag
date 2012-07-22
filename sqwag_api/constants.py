@@ -31,4 +31,10 @@ BODY_SUBSCRIBED = "A user has subscribed for you feeds."
 #Accounts
 ACCOUNT_TWITTER = "twitter"
 ACCOUNT_INSTAGRAM = "instagram"
+ACCOUNT_FACEBOOK = "facebook"
+
+#Elastic Search
+ELASTIC_SEARCH_USER_POST_URL = "http://localhost:9200/sqwag/user/"
+ELASTIC_SEARCH_USER_GET_URL = "http://localhost:9200/sqwag/user/_search"
+ELASTIC_SEARCH_RELATIONSHIP_POST_URL = "http://localhost:9200/sqwag/relationship/"
 

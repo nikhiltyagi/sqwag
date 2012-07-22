@@ -16,6 +16,7 @@ from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
 from sqwag_api.twitterConnect import *
+from sqwag_api.elasticsearch import *
 from time import gmtime, strftime
 from urllib import urlencode
 import datetime
@@ -26,6 +27,9 @@ import settings
 import sha
 import simplejson
 import time
+import urlparse
+import json
+from django.core import serializers
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -96,7 +100,7 @@ def registerUser(request):
             user.is_active = False
             user.save();
             # create a profile for this user
-            UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
+            usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
@@ -108,15 +112,25 @@ def registerUser(request):
             message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
             mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user.email,date_created=time.time())
             mailentry(mailer) 
+            reldat= {}
             #this needs to be cronned as part of cron mail
             #send_mail(subject,message,'coordinator@sqwag.com',[user.email],fail_silently=False)
             #subscribe own feeds
             relationShip = Relationship(subscriber=user,producer=user)
-            relationShip.date_subscribed = time.time()
+            relationShip.date_subscribed = int(time.time())
             relationShip.permission = True
             relationShip.save()
-            
+            print relationShip.date_subscribed
+            reldat['rel'] = relationShip
+            CreateDocument(reldat,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST_URL)
             #respObj['url'] = current_site
+            userdata = {}
+#            complete_user = {}
+            userdata['user_auth'] = User.objects.get(pk=user.id)
+            userdata['user_profile'] = UserProfile.objects.get(user=user)  
+            userdata['user_account'] = {}
+#            userdata['user'] = complete_user
+            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST_URL)
             successResponse['result'] = "Activation link is sent to the registration mail"
             #TODO: send email with activation link
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -179,6 +193,7 @@ def authTwitter(request):
     request.session[twitterConnect.mOauthRequestToken.key] = tokenString
     request.session.modified = True
     return HttpResponseRedirect(twitterConnect.mOauthRequestUrl)
+
 
 def accessTweeter(request):
     key =request.GET['oauth_token']
@@ -443,6 +458,7 @@ def authInsta(request):
     # get authttoken
     authorizationUrl = settings.INSTA_AUTHORIZE_URL+'client_id='+settings.INSTA_CLIENT_ID+'&redirect_uri='+settings.INSTA_CALLBACK_URL+'&response_type=code'
     return HttpResponseRedirect(authorizationUrl)
+
 def accessInsta(request):
     if 'code' in request.GET:
         codeReceived = request.GET['code']
@@ -489,6 +505,7 @@ def getInstaFeed(request):
         return HttpResponse(content,mimetype='application/javascript') 
     #successResponse['result']=media
     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+
     
 def forgotPwd(request):
     form = forgotPwdForm(request.POST)
@@ -626,7 +643,120 @@ def changeUserName(request):
         failureResponse['message'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             
-            
+def authFacebook(request):
+    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL+'client_id='+settings.FACEBOOK_APP_ID+'&redirect_uri='+settings.FACEBOOK_CALLBACK_URL+'&response_type=code'
+    return HttpResponseRedirect(authorizationUrl)
+
+def accessFacebook(request):
+    if 'code' in request.GET:
+        codeReceived = request.GET['code']       
+        h = Http()
+        data = dict(client_id=settings.FACEBOOK_APP_ID, client_secret=settings.FACEBOOK_APP_SECRET,
+                    grant_type='authorization_code',redirect_uri=settings.FACEBOOK_CALLBACK_URL,
+                    code=codeReceived)
+        resp, content = h.request(settings.FACEBOOK_ACCESS_TOKEN_URL, "POST", urlencode(data))
+        print resp
+        accesstoken = dict(urlparse.parse_qsl(content)).get('access_token')
+        #respJson = json.loads(resp)
+        if resp.status==200:
+            userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
+            #print userinfo
+            #print userinfo[1]
+            #print userinfo[0]['status']
+            userinformation = json.loads(userinfo[1])
+            #print userinformation['username']
+            #contentJson = json.dumps(userinfo)
+            userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
+            #print userPic[0]
+            #print userinformation['email']
+            userPicture = userPic[0]
+            userAccount = UserAccount(user=request.user,account=ACCOUNT_FACEBOOK, account_id=userinformation['id'],
+                                      access_token=accesstoken, date_created=time.time(),
+                                      account_data=userinfo,account_pic=userPicture['content-location'],
+                                      account_handle=userinformation['username'],is_active=True)
+            try:
+                userAccount.full_clean()
+                userAccount.save()
+                successResponse['result'] = userinfo;
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            except ValidationError, e:
+                failureResponse['status'] = SYSTEM_ERROR
+                failureResponse['error'] = "some error occured, please try later"+e.message
+                #TODO: log it
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = resp.status
+            failureResponse['message'] = 'facebook ERROR'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['message'] = 'GET parameter missing'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    
+def authFacebookNewUser(request):
+    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL+'client_id='+settings.FACEBOOK_APP_ID+'&redirect_uri='+settings.FACEBOOK_CALLBACK_URL_NEW_USER+'&response_type=code&scope=email'
+    return HttpResponseRedirect(authorizationUrl)
+
+def accessFacebookNewUser(request):
+    if 'code' in request.GET:
+        codeReceived = request.GET['code']       
+        h = Http()
+        data = dict(client_id=settings.FACEBOOK_APP_ID, client_secret=settings.FACEBOOK_APP_SECRET,
+                    grant_type='authorization_code',redirect_uri=settings.FACEBOOK_CALLBACK_URL_NEW_USER,
+                    code=codeReceived)
+        resp, content = h.request(settings.FACEBOOK_ACCESS_TOKEN_URL, "POST", urlencode(data))
+        print resp
+        accesstoken = dict(urlparse.parse_qsl(content)).get('access_token')
+        #respJson = json.loads(resp)
+        if resp.status==200:
+            userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
+            #print userinfo[1]
+            #print userinfo[0]['status']
+            userinformation = json.loads(userinfo[1])
+            #print userinformation['username']
+            #contentJson = json.dumps(userinfo)
+            userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
+            #print userPic[0]
+            userPicture = userPic[0]
+            user = User(username=userinformation['email'],email=userinformation['email'],first_name=userinformation['first_name'],
+                        last_name=userinformation['last_name'],is_active=True,)
+            user.date_joined = datetime.datetime.now()
+            user.save()
+            usrprof = UserProfile(user=user,sqwag_image_url=userPicture['content-location'],sqwag_cover_image_url=userPicture['content-location'],sqwag_count=0, following_count=0,followed_by_count=0)
+            usrprof.save()
+            usrprof.displayname = userinformation['name']
+            usrprof.fullname = userinformation['name']
+            usrprof.save()
+            userAccount = UserAccount(user=user,account=ACCOUNT_FACEBOOK, account_id=userinformation['id'],
+                                      access_token=accesstoken, date_created=time.time(),
+                                      account_data=userinfo,account_pic=userPicture['content-location'],
+                                      account_handle=userinformation['username'],is_active=True)
+            try:
+                userAccount.full_clean()
+                userAccount.save()
+                successResponse['result'] = userinfo;
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            except ValidationError, e:
+                failureResponse['status'] = SYSTEM_ERROR
+                failureResponse['error'] = "some error occured, please try later"+e.message
+                #TODO: log it
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+        else:
+            failureResponse['status'] = resp.status
+            failureResponse['message'] = 'facebook ERROR'
+            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['message'] = 'GET parameter missing'
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')   
+    
+def GetElasticSearch(request):
+    import jsonpickle
+    result = GetDocument()
+    for r in result:
+        print r
+    return HttpResponse(jsonpickle.encode(r,unpicklable=False),mimetype='application/javascript')
            
         
+    
     

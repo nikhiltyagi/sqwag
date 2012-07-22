@@ -7,3 +7,6 @@ curl -d "content_type=tweet&content_data=thisismytweet&content_description=sfsdf
 
 login
 curl -d "username=saini&password=saini" httl://loclahost:8000/sqwag/login/
+
+curl -XGET http://localhost:9200/sqwag/_search -d '{"query" : {"term" : {"username" : "sdaaaaaz@xyz.com" }}}'
+
