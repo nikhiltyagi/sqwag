@@ -2,4 +2,6 @@
 api/*.pyc
 piston/*.pyc
 sqwag_api/*.pyc
+assets/media
 assets/media/*.*
+.settings/
