@@ -272,7 +272,11 @@ def getRelationship(producer,subscriber):
     return is_following
 
 def getActiveUserAccount(user, account):
-    return UserAccount.objects.get(user=user, account=account,is_active=True)
+    try:
+        user = User.objects.get(pk=user)
+        return UserAccount.objects.get(user=user, account=account,is_active=True)
+    except:
+        return UserAccount.objects.get(user=user, account=account,is_active=True)
 
 def syncInstaFeed(insta_user_id=None ):
     #access_token ='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09'

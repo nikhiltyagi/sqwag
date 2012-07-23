@@ -22,11 +22,12 @@
     <a id="feed"></a>
     
 	</header>
+  {% if complete_user %}
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container">
         <ul class="sprite nav pull-left">
-          {% if complete_user %}
+          
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="create-feed">Create <b class="caret"></b></a>
             <ul class="dropdown-menu">
@@ -60,16 +61,7 @@
             </div>
           </li>
 
-          {% else %}
-          <ul class="nav">
-          <li>
-            <a href="#register-form" data-toggle="modal">Register</a>
-          </li>
-          <li>
-            <a href="#login-form" data-toggle="modal">Login</a>
-          </li>
-        </ul>
-          {% endif %}
+          
         </ul>
         <div class="logo"><a class="js-load" href="#feed"><img src="assets/img/logo.png" /></a></div>
       </div>
@@ -177,15 +169,93 @@
     
     <p id="console" class="alert alert-info hidden"></p>
     
-    <div id="main">      
+   
+  {% else %}
+          <div id="landing_pg_wrap">
+     <div class="logo_blk"><a href=""><img src="assets/img/sqwag.jpg" alt="Sqwag" title="Sqwag" width="146px" height="146px"/></a></div><!-- logo_blk -->
+      <div id="main_nav">
+      <ul>
+        <li><a href="">About</a></li>
+        <li><a href="">Blog</a></li>
+        <li><a href="">Jobs</a></li>
+        <li><a href="">Terms</a></li>
+        <li><a href="">Contact</a></li>
+      </ul>
+      </div><!-- main_nav -->
+      <div class="cnt_wrap">
+      <div class="login_blk">
+        <div class="login_blk_left">
+          <h1>Welcome to Sqwag</h1>
+          <p>@sqwag</p>
+        </div><!-- login_blk_left -->
+        <div class="login_blk_right" id="login-form">
+
+          <form action="" method="post">
+          <div class="form_wrap" >
+            <label for="username">Username</label>
+            <input class="input" value="Username" type="text" name="username" id="username" required />
+            <label for="password">Password</label>
+            <input type="password" value="Password" name="password" id="password" required />           
+            <input type="checkbox" name="rememberme" id="rememberme" />
+            <label for="rememberme" class="remember_me_label">Remember me</label>
+            <a href="\" class="forgot_pwd_link">Forgot password?</a>
+          </div>
+          <div class="form_sbt_wrap">
+           <input type="submit" value="Login" name="login_sbt" id="login_sbt"/> 
+          </div>
+          </form>
+
+        </div><!-- login_blk_right -->
+      </div><!-- login_blk -->
+      <div class="banner_blk">
+        <p class="banner_txt">Everthing need to be shared, everything need to be sqwagged!</p>
+      </div><!-- banner_blk -->
+      <div class="register_blk">
+        <div class="register_blk_hd">
+          <span class="align_left"><h2>New to sqwag</h2></span>
+          <span class="align_right">1/2</span>
+        </div><!-- register_blk_hd-->
+        <div class="register_blk_inner">
+          <div class="register_blk_left">
+            <a href="#" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>
+            <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
+          </div><!-- register_blk_left -->
+          <div class="register_blk_right">
+            <p>or create an account</p>
+            <form action="">
+              <div class="form-controls">
+                <label for="username">Full name</label>
+                <input class="input" value="Full name" type="text" name="username" id="username" required />
+              </div>
+              <div class="form-controls">
+                <label for="email">Email</label>
+                <input type="email" value="Email" name="email" id="email" required />
+              </div>
+              <div class="form-controls">
+               <label for="password">Password</label>
+            <input type="password" value="Password" name="password" id="password" required />
+              </div>
+              
+              <div class="modal-footer">
+                <input class="btn btn-primary" type="submit" value="Register" />
+              </div>
+            </form>
+          </div><!-- register_blk_right -->
+        </div><!-- register_blk_inner -->
+      
+      </div><!-- register_blk -->
+      </div><!-- cnt_wrap -->
+    </div><!-- landing_pg_wrap -->  
+          {% endif %}
+           <div id="main">      
       <div id="content">
       </div>
     </div>
     
-	</div>
-	<footer>
+  </div>
+  <footer>
     <p class="copyright">&copy; 2012. Sqwag inc.</p>
-	</footer>
+  </footer>
 </div>
 <div class="slide-out-div">
     <a class="handle">feedback</a>
