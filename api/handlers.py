@@ -523,7 +523,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
             square_obj['user_square'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
-        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        resultWrapper = paginate(request, page, squares_all, 4)
         return resultWrapper
 
 class UserInfo(BaseHandler):

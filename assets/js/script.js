@@ -202,7 +202,9 @@ var SQ = {
 
     $(window).scroll(function () {
       if ($(window).height() + $(window).scrollTop() == $(document).height()) {
-        self.backbone.feedHandler.getFeed();
+        if (self.router.currentRoute!='publicfeed'){
+          self.backbone.feedHandler.getFeed();  
+        }
       }
     });
   },
