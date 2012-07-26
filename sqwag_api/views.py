@@ -16,7 +16,6 @@ from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
 from sqwag_api.twitterConnect import *
-from sqwag_api.elasticsearch import *
 from time import gmtime, strftime
 from urllib import urlencode
 import datetime
@@ -27,14 +26,11 @@ import settings
 import sha
 import simplejson
 import time
-<<<<<<< HEAD
 import urlparse
 import json
 from django.core import serializers
-=======
 from sqwag_api.elsaticsearch import *
 from sqwag_api.InstaService import *
->>>>>>> 845723d12d4e9ddd7035fba80901fcc8791ccfa3
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -105,11 +101,7 @@ def registerUser(request):
             user.is_active = False
             user.save();
             # create a profile for this user
-<<<<<<< HEAD
             usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
-=======
-            UserProfile.objects.create(user=user, sqwag_count=0, following_count=0, followed_by_count=0, displayname=uname)
->>>>>>> 845723d12d4e9ddd7035fba80901fcc8791ccfa3
             registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
             subject = "Activation link from sqwag.com"
@@ -125,35 +117,17 @@ def registerUser(request):
             #this needs to be cronned as part of cron mail
             #send_mail(subject,message,'coordinator@sqwag.com',[user.email],fail_silently=False)
             #subscribe own feeds
-<<<<<<< HEAD
             relationShip = Relationship(subscriber=user,producer=user)
             relationShip.date_subscribed = int(time.time())
             relationShip.permission = True
             relationShip.save()
             print relationShip.date_subscribed
-            reldat['rel'] = relationShip
-            CreateDocument(reldat,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST_URL)
-=======
-            relationShip = Relationship(subscriber=user, producer=user)
-            relationShip.date_subscribed = time.time()
-            relationShip.permission = True
-            relationShip.save()
             CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
             userdata = {}
-            userdata['user_auth'] = user
-            userdata['user_profile'] = UserProfile
-            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
-            
-            
->>>>>>> 845723d12d4e9ddd7035fba80901fcc8791ccfa3
-            #respObj['url'] = current_site
-            userdata = {}
-#            complete_user = {}
             userdata['user_auth'] = User.objects.get(pk=user.id)
             userdata['user_profile'] = UserProfile.objects.get(user=user)  
-            userdata['user_account'] = {}
-#            userdata['user'] = complete_user
-            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST_URL)
+#           userdata['user'] = complete_user
+            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
             successResponse['result'] = "Activation link is sent to the registration mail"
             #TODO: send email with activation link
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -542,9 +516,6 @@ def getInstaFeed(request):
         return HttpResponse(content, mimetype='application/javascript') 
     #successResponse['result']=media
     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-
-    
-<<<<<<< HEAD
 def forgotPwd(request):
     form = forgotPwdForm(request.POST)
     if form.is_valid():
@@ -570,30 +541,6 @@ def forgotPwd(request):
             failureResponse['result'] = NOT_FOUND
             failureResponse['message'] = 'invalid username'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-=======
-def forgotPwd(request, user):
-    user_obj = User.objects.get(username=user)
-    if user_obj:
-        user_prof = UserProfile.objects.get(user=user_obj)
-        activation_key = user_prof.create_reset_key(user_prof)
-        user_prof.pwd_reset_key = activation_key
-        user_prof.save()
-        #subject = "pwd reset link from sqwag.com"
-        host = request.get_host()
-        if request.is_secure():
-            protocol = 'https://'
-        else:
-            protocol = 'http://'
-        message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
-        mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user_obj.email, date_created=time.time())
-        mailentry(mailer)
-        successResponse['result'] = 'mail sent successfully' 
-        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-    else:
-        failureResponse['result'] = NOT_FOUND
-        failureResponse['error'] = 'invalid username'
-        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
->>>>>>> 845723d12d4e9ddd7035fba80901fcc8791ccfa3
 
 def forgotPwdKey(request, id, key):
     userProf = UserProfile.objects.get(user=id, pwd_reset_key=key)
@@ -704,7 +651,6 @@ def changeUserName(request):
         failureResponse['result'] = BAD_REQUEST
         failureResponse['error'] = form.errors
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-<<<<<<< HEAD
             
 def authFacebook(request):
     authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL+'client_id='+settings.FACEBOOK_APP_ID+'&redirect_uri='+settings.FACEBOOK_CALLBACK_URL+'&response_type=code'
@@ -819,11 +765,6 @@ def GetElasticSearch(request):
     for r in result:
         print r
     return HttpResponse(jsonpickle.encode(r,unpicklable=False),mimetype='application/javascript')
-           
-        
-    
-    
-=======
 
 def instaSubsCallback(request):
     if request.method == "GET":
@@ -874,5 +815,3 @@ def pocInsta(request):
     x = syncInstaFeed(insta_user_id=8314228)
     #x= getUserRecentFeed(count=10, min_id=40, access_token='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09', user_id=52192801);
     return HttpResponse(x, mimetype='application/javascript')
-    
->>>>>>> 845723d12d4e9ddd7035fba80901fcc8791ccfa3

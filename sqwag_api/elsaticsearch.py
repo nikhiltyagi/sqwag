@@ -7,11 +7,16 @@ def CreateDocument(userdata,id,url):
     h = Http()
     h.request(url,"POST",data)
     
-def GetDocument(query,url,fields=None,sort=None):
+def GetDocument(query=None,url=None,fields=None,filter=None,sort=None):
     data = {}
     if fields is not None:
         data['fields'] = fields
-    data['query'] = query
+    if query is not None:
+        data['query'] = query
+    if filter is not None:
+        data['filter'] = filter
+    if sort is not None:
+        data['sort'] = sort
     h = Http()
     data = jsonpickle.encode(data,unpicklable=True)
     print data

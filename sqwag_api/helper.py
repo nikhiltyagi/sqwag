@@ -21,7 +21,7 @@ import os
 import tempfile
 import time
 from twisted.python.reflect import ObjectNotFound
-from sqwag_api.elasticsearch import *
+from sqwag_api.elsaticsearch import *
 import urllib
 
 
@@ -110,6 +110,7 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
     #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     is_owner = True
     squareResponse = {}
+    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     userSquare = createUserSquare(None,user,square,is_owner)
     try:
         userProfile = UserProfile.objects.get(user=square.user)
@@ -263,7 +264,7 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
-    #CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
     return userSquare
 
 def getRelationship(producer,subscriber):
@@ -289,11 +290,15 @@ def getCompleteUserInfoTest(request,user,accountType=None):
                       'user_profile.sqwag_image_url','user_profile.sqwag_cover_image_url','user_profile.username','user_profile.fullname',
                       'user_auth.username','user_auth.first_name','user_auth.last_name','user_auth.email']
             term = {}
-            query = {}
+            filter = {}
             term['user_auth.id'] = user.id
-            query['term'] = term
-            result = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET)
+            filter['term'] = term
+            result = GetDocument(url=ELASTIC_SEARCH_USER_GET,fields=fields,filter=filter)
             print result
+            result = jsonpickle.decode(result)
+            for res in result['hits']['hits']:
+                x = res['fields']
+            return x
             #userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             #userInfo['user_profile'] = userProfile
 #            if not accountType:
