@@ -91,7 +91,7 @@ def registerUser(request):
             #fname = form.cleaned_data['first_name']
             #lname = form.cleaned_data['last_name']
             pwd = form.cleaned_data['password']
-            fullname = form.cleaned_data['username']
+            fullname = form.cleaned_data['fullname']
             email = form.cleaned_data['email']
             #uname = form.cleaned_data['username']
             user = User.objects.create_user(email, email, pwd)
