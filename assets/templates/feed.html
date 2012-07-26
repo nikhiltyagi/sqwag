@@ -81,29 +81,29 @@
         <div class="sqwag sq-user">
           <div class="island">
             <div class="mask">
-              <span class="sqwag-count">{{ square.shared_count }}</span>
+              <span class="sqwag-count"></span>
               <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ user_square.id }}" class="resqwag">sqwag</button>
+                <button>send</button><button data-id="{{ user.id }}" class="resqwag">sqwag</button>
               </div>
             </div>
             <div class="hd">
-              <h2 class="username">Florent Ferere</h2>
-              <h3 class="handle">@florentferere</h3>
+              <h2 class="username">{{ user_profile.displayname}}</h2>
+              <h3 class="handle">@{{ user_profile.username}}</h3>
             </div>
             <div class="bd">
               <div class="media">
-                <div class="media-obj"><img src="http://placehold.it/100x100" /></div>
+                <div class="media-obj"><img src="{{ user_profile.sqwag_image_url}}" /></div>
                 <div class="media-bd">
                   <ul class="no-bullet sqwag-info">
-                    <li><span class="value">2341</span> sqwag</li>
-                    <li><span class="value">341034</span> sqwaggin</li>
-                    <li><span class="value">41345443</span> sqwaggers</li>
+                    <li><span class="value">{{ user_profile.sqwag_count}}</span> sqwag</li>
+                    <li><span class="value">{{ user_profile.following_count}}</span> sqwaggin</li>
+                    <li><span class="value">{{ user_profile.followed_by_count}}</span> sqwaggers</li>
                   </ul>
                 </div>
               </div>
             </div>
             <div class="ft">
-              <p>My name is flo and I'm a big time sqwagger. Sqwag me!</p>
+              <p>{{ user_profile.personal_message}}</p>
             </div>
           </div>
         </div>

@@ -122,12 +122,12 @@ def registerUser(request):
             relationShip.permission = True
             relationShip.save()
             print relationShip.date_subscribed
-            CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+            #CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
             userdata = {}
             userdata['user_auth'] = User.objects.get(pk=user.id)
             userdata['user_profile'] = UserProfile.objects.get(user=user)  
 #           userdata['user'] = complete_user
-            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
             successResponse['result'] = "Activation link is sent to the registration mail"
             #TODO: send email with activation link
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -727,19 +727,28 @@ def accessFacebookNewUser(request):
             userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
             #print userPic[0]
             userPicture = userPic[0]
-            user = User(username=userinformation['email'],email=userinformation['email'],first_name=userinformation['first_name'],
-                        last_name=userinformation['last_name'],is_active=True,)
+            user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
+            user.first_name = userinformation['first_name']
+            user.last_name = userinformation['last_name']
+            user.is_active = True
             user.date_joined = datetime.datetime.now()
-            user.save()
+            user.save()       
+            # create user profile
             usrprof = UserProfile(user=user,sqwag_image_url=userPicture['content-location'],sqwag_cover_image_url=userPicture['content-location'],sqwag_count=0, following_count=0,followed_by_count=0)
             usrprof.save()
             usrprof.displayname = userinformation['name']
             usrprof.fullname = userinformation['name']
             usrprof.save()
-            userAccount = UserAccount(user=user,account=ACCOUNT_FACEBOOK, account_id=userinformation['id'],
-                                      access_token=accesstoken, date_created=time.time(),
-                                      account_data=userinfo,account_pic=userPicture['content-location'],
-                                      account_handle=userinformation['username'],is_active=True)
+            userAccount = UserAccount(user=user,
+                                      account=ACCOUNT_FACEBOOK, 
+                                      account_id=userinformation['id'],
+                                      access_token=accesstoken, 
+                                      date_created=time.time(),
+                                      account_data=userinfo, 
+                                      account_pic=userPicture['content-location'],
+                                      account_handle=userinformation['username'], 
+                                      is_active=True, 
+                                      last_object_id=0)
             try:
                 userAccount.full_clean()
                 userAccount.save()

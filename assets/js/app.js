@@ -62,10 +62,13 @@ var bb = {
               && model.attributes.user_accounts.length){
               // its a connected account user_object
               if(model.attributes.user_accounts[0].account=='twitter'){
+                var sq = ich.user(model.attributes)
               }
               else if(model.attributes.user_accounts[0].account=='facebook'){
+                var sq = ich.user(model.attributes)
               }
               else if(model.attributes.user_accounts[0].account=='insta'){
+                var sq = ich.user(model.attributes)
               }
 
             }else{

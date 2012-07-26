@@ -202,7 +202,7 @@ var SQ = {
 
     $(window).scroll(function () {
       if ($(window).height() + $(window).scrollTop() == $(document).height()) {
-        if (self.router.currentRoute!='publicfeed'){
+        if (self.router.currentRoute!='publicfeed' && self.router.currentRoute!='toppeople' ){
           self.backbone.feedHandler.getFeed();  
         }
       }
