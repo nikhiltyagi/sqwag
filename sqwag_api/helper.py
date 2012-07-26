@@ -276,7 +276,11 @@ def getRelationship(producer,subscriber):
     return is_following
 
 def getActiveUserAccount(user, account):
-    return UserAccount.objects.get(user=user, account=account,is_active=True)
+    try:
+        user = User.objects.get(pk=user)
+        return UserAccount.objects.get(user=user, account=account,is_active=True)
+    except:
+        return UserAccount.objects.get(user=user, account=account,is_active=True)
 
 
 def getCompleteUserInfoTest(request,user,accountType=None):

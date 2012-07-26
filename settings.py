@@ -181,5 +181,5 @@ LOGGING = {
 
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_USER_ID = 51  #kind of misleading name. this is user's id in auth_user table
+SQWAG_USER_ID = 1  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"
