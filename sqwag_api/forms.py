@@ -6,7 +6,7 @@ from sqwag_api.models import *
 
 
 class RegisterationForm(forms.Form):
-    username = forms.CharField(max_length=50,required=True)
+    fullname = forms.CharField(max_length=50,required=True)
     password = forms.CharField(max_length=128)
     #first_name = forms.CharField(max_length=30, required=False)
     #last_name = forms.CharField(max_length=30, required=False)
