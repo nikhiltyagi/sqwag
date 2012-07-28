@@ -6,6 +6,7 @@ import datetime
 import random
 import re
 import sha
+import os
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
 
@@ -26,6 +27,7 @@ class UserAccount(models.Model):
 
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
+    username = models.CharField(_('username'), max_length=100, unique=True,null=True)
     sqwag_image_url = models.URLField(null=True)
     sqwag_cover_image_url = models.URLField(null=True)
     personal_message = models.TextField(null=True)
