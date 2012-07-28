@@ -9,7 +9,6 @@ import sha
 import os
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
-PROFILE_IMAGE_PATH = os.path.join('images','facebook_profiles/%Y/%m/%d')
 
 class UserAccount(models.Model):
     user = models.ForeignKey(User)
