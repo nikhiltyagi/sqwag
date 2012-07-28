@@ -10,7 +10,6 @@ urlpatterns = patterns('',
     url(r'^api/', include('api.urls')),
     url(r'^assets/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.CONTENT_BASE}),
     url(r'^', include('sqwag_frontend.urls')),
-    #url(r'^facebook/', include('django_facebook.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

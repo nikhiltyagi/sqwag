@@ -31,6 +31,7 @@ import json
 from django.core import serializers
 from sqwag_api.elsaticsearch import *
 from sqwag_api.InstaService import *
+
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
 successResponse['message'] = SUCCESS_MSG
@@ -53,7 +54,7 @@ def loginUser(request):
                 except UserProfile.DoesNotExist:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = 'invalid username'
-                    return failureResponse
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             user = authenticate(username=uname, password=pword)
             if user is not None:
                 if user.is_active:
