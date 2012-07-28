@@ -68,7 +68,7 @@
     </div>
   </div>
 	<div role="main">
-    <div class="modal hide" id="register-form">
+    <!-- <div class="modal hide" id="register-form">
       <form action="" method="post">
         <div class="modal-header">
           <a class="close" data-dismiss="modal">&times;</a>
@@ -92,9 +92,9 @@
         	<input class="btn btn-primary" type="submit" value="register" />
         </div>
       </form>
-    </div>
+    </div> -->
     
-    <div class="modal hide" id="login-form">
+    <!-- <div class="modal hide" id="login-form">
       <form action="" method="post">
         <div class="modal-header">
           <a class="close" data-dismiss="modal">&times;</a>
@@ -115,7 +115,7 @@
         </div>
       </form>
     </div>
-    
+     -->
     <div class="modal hide sqwag-form" id="sqwag-text-form">
       <form action="/api/square/create/" method="post">
         <div class="modal-header">
@@ -171,8 +171,8 @@
     
    
   {% else %}
-          <div id="landing_pg_wrap">
-     <div class="logo_blk"><a href=""><img src="assets/img/sqwag.jpg" alt="Sqwag" title="Sqwag" width="146px" height="146px"/></a></div><!-- logo_blk -->
+    <div id="landing_pg_wrap">
+   <!--  <div class="logo_blk"><a href="\"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></div>--><!-- logo_blk -->
       <div id="main_nav">
       <ul>
         <li><a href="">About</a></li>
@@ -185,26 +185,23 @@
       <div class="cnt_wrap">
       <div class="login_blk">
         <div class="login_blk_left">
-          <h1>Welcome to Sqwag</h1>
-          <p>@sqwag</p>
+          <p><a href="\" class="logo_prelogin"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></p>
         </div><!-- login_blk_left -->
         <div class="login_blk_right" id="login-form">
-
-          <form action="" method="post">
-          <div class="form_wrap" >
+          <form action="#" method="post">
+          <div class="form_wrap">
             <label for="username">Username</label>
-            <input class="input" value="Username" type="text" name="username" id="username" required />
+            <input class="input" type="text" name="username" id="username" required />
             <label for="password">Password</label>
-            <input type="password" value="Password" name="password" id="password" required />           
+            <input type="password" name="password" id="password-login" required />           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
             <a href="\" class="forgot_pwd_link">Forgot password?</a>
           </div>
           <div class="form_sbt_wrap">
-           <input type="submit" value="Login" name="login_sbt" id="login_sbt"/> 
+           <input type="submit" value="Log in" name="login_sbt" id="login_sbt"/>  
           </div>
           </form>
-
         </div><!-- login_blk_right -->
       </div><!-- login_blk -->
       <div class="banner_blk">
@@ -212,28 +209,28 @@
       </div><!-- banner_blk -->
       <div class="register_blk">
         <div class="register_blk_hd">
-          <span class="align_left"><h2>New to sqwag</h2></span>
-          <span class="align_right">1/2</span>
+          <span class="align_left"><h2>New Here?</h2></span>
+          <span class="align_right">Sign up! It's free and easy.</span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
           <div class="register_blk_left">
-            <a href="sqwag/authfacebooknewuser/" class=" _btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>
             <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
+            <a href="#" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
           </div><!-- register_blk_left -->
           <div class="register_blk_right" id="register-form">
-            <p>or create an account</p>
-            <form action="" method="post" >
+            <p>Create an Account</p>
+            <form action=""  method="post">
               <div class="form-controls">
                 <label for="fullname">Full name</label>
-                <input class="input" value="Full name" type="text" name="fullname" id="fullname" required />
+                <input class="input" type="text" name="fullname" id="fullname" required />
               </div>
               <div class="form-controls">
                 <label for="email">Email</label>
-                <input type="email" value="Email" name="email" id="email" required />
+                <input type="email" name="email" id="email" required />
               </div>
               <div class="form-controls">
                <label for="password">Password</label>
-            <input type="password" value="Password" name="password" id="password" required />
+            <input type="password" name="password" id="password-registration" required />
               </div>
               
               <div class="modal-footer">
@@ -270,6 +267,7 @@
 </div>
 
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
+<script src="assets/js/libs/jquery.form-defaults.min.js"></script>
 <script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
 <script src="assets/js/tabslideout.js"></script>
 <script src="assets/js/libs/bootstrap-modal.min.js"></script>
@@ -300,6 +298,13 @@ $(document).ready(function() {
     options = {
       "route":"publicfeed",
     };
+    $("#username").DefaultValue("Username");
+    $("#password-login").DefaultValue("nopassword");
+    $("#fullname").DefaultValue("Full Name");
+    $("#email").DefaultValue("Email");
+    $("#password-registration").DefaultValue("nopassword");
+    
+
   {% endif %}
   $.extend(context,options);
   SQ.init(context);
