@@ -97,7 +97,7 @@ class ChangeUserNameForm(forms.Form):
     def validateUserName(self):
         username = self.cleaned_data.get('username')
         if username:
-            if username and User.objects.filter(username=username).count():
+            if username and UserProfile.objects.filter(username=username).count():
                 raise forms.ValidationError(u'username must be unique.')
             return username
         else:

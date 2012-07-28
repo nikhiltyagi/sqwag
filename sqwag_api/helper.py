@@ -395,3 +395,9 @@ def createInstaSquare(object=None, insta_user_id=None):
     else:
         print "invalid arguments"
         return None
+    
+def CreateUserAccount(user,account,account_id,access_token,account_data,account_pic,account_handle,is_active,last_object_id):
+    userAccount = UserAccount(user=user,account=account,account_id=account_id,access_token=access_token,
+                              date_created=time.time(),account_data=account_data,account_pic=account_pic,
+                              account_handle=account_handle,is_active=is_active,last_object_id=0)
+    return userAccount
