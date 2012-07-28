@@ -171,4 +171,3 @@ class Notifications(models.Model):
 class PrivateSquare(models.Model):
     user = models.ForeignKey(User,related_name='recieving_user')
     userSquare = models.ForeignKey(UserSquare,related_name='shared_square')
-    

@@ -753,6 +753,7 @@ def accessFacebookNewUser(request):
                 userAccount.full_clean()
                 userAccount.save()
                 successResponse['result'] = userinfo;
+                #return render_to_response('index.html')
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
                 failureResponse['status'] = SYSTEM_ERROR
