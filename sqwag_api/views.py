@@ -215,17 +215,23 @@ def accessTweeter(request):
             
         except UserAccount.DoesNotExist:
         # make entry in userAccount table
-            userAccount = UserAccount(user=request.user,
-                                  account=ACCOUNT_TWITTER,
-                                  account_id=oauthAccess.mUser.GetId(),
-                                  access_token=oauthAccess.mOauthAccessToken.to_string(),
-                                  date_created=time.time(),
-                                  account_data=oauthAccess.mUser.AsJsonString(),
-                                  account_pic=oauthAccess.mUser.GetProfileImageUrl(),
-                                  account_handle=oauthAccess.mUser.GetScreenName(),
-                                  is_active=True,
-                                  last_object_id = 0
-                                  )
+            userAccount = CreateUserAccount(user=request.user,
+                                            account=ACCOUNT_TWITTER,
+                                            account_id=oauthAccess.mUser.GetId(),
+                                            access_token=oauthAccess.mOauthAccessToken.to_string(),
+                                            account_data=oauthAccess.mUser.AsJsonString(),
+                                            account_pic=oauthAccess.mUser.GetProfileImageUrl(),
+                                            account_handle=oauthAccess.mUser.GetScreenName())
+#            userAccount = UserAccount(user=request.user,
+#                                  account=ACCOUNT_TWITTER,
+#                                  account_id=oauthAccess.mUser.GetId(),
+#                                  access_token=oauthAccess.mOauthAccessToken.to_string(),
+#                                  date_created=time.time(),
+#                                  account_data=oauthAccess.mUser.AsJsonString(),
+#                                  account_pic=oauthAccess.mUser.GetProfileImageUrl(),
+#                                  account_handle=oauthAccess.mUser.GetScreenName(),
+#                                  is_active=True
+#                                  )
         try:
             userAccount.full_clean()
             userAccount.save()
@@ -483,10 +489,18 @@ def accessInsta(request):
                 userAccount.is_active=True
             except UserAccount.DoesNotExist:
                 print "insta account does not exist, creating fresh account"
-                userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
-                                          access_token=contentJson['access_token'], date_created=time.time(),
-                                          account_data=content, account_pic=contentJson['user']['profile_picture'],
-                                          account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
+                
+                userAccount = CreateUserAccount(user=request.user,
+                                                account=ACCOUNT_INSTAGRAM,
+                                                account_id=contentJson['user']['id'],
+                                                access_token=contentJson['access_token'],
+                                                account_data=content,
+                                                account_pic=contentJson['user']['profile_picture'],
+                                                account_handle=contentJson['user']['username'])
+#                userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
+#                                          access_token=contentJson['access_token'], date_created=time.time(),
+#                                          account_data=content, account_pic=contentJson['user']['profile_picture'],
+#                                          account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
             try:
                 userAccount.full_clean()
                 print "saving account details"
@@ -681,15 +695,15 @@ def accessFacebook(request):
             #print userPic[0]
             #print userinformation['email']
             userPicture = userPic[0]
-            userAccount = UserAccount(user=request.user,
-                                      account=ACCOUNT_FACEBOOK, 
-                                      account_id=userinformation['id'],
-                                      access_token=accesstoken, 
-                                      date_created=time.time(),
-                                      account_data=userinfo, 
-                                      account_pic=userPicture['content-location'],
-                                      account_handle=userinformation['username'], 
-                                      is_active=True)
+            userAccount = CreateUserAccount(user=request.user,
+                                            account=ACCOUNT_FACEBOOK,
+                                            account_id = userinformation['id'],
+                                            access_token = accesstoken,
+                                            account_data=userinfo,
+                                            account_pic=userPicture['content-location'],
+                                            account_handle =userinformation['username'],
+                                            is_active=True,
+                                            last_object_id=0)
             try:
                 userAccount.full_clean()
                 userAccount.save()
@@ -734,39 +748,55 @@ def accessFacebookNewUser(request):
             userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
             #print userPic[0]
             userPicture = userPic[0]
-            user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
-            user.first_name = userinformation['first_name']
-            user.last_name = userinformation['last_name']
-            user.is_active = True
-            user.date_joined = datetime.datetime.now()
-            user.save()       
-            # create user profile
-            usrprof = UserProfile(user=user,sqwag_image_url=userPicture['content-location'],sqwag_cover_image_url=userPicture['content-location'],sqwag_count=0, following_count=0,followed_by_count=0)
-            usrprof.save()
-            usrprof.displayname = userinformation['name']
-            usrprof.fullname = userinformation['name']
-            usrprof.save()
-            userAccount = UserAccount(user=user,
-                                      account=ACCOUNT_FACEBOOK, 
-                                      account_id=userinformation['id'],
-                                      access_token=accesstoken, 
-                                      date_created=time.time(),
-                                      account_data=userinfo, 
-                                      account_pic=userPicture['content-location'],
-                                      account_handle=userinformation['username'], 
-                                      is_active=True, 
-                                      last_object_id=0)
             try:
-                userAccount.full_clean()
-                userAccount.save()
-                successResponse['result'] = userinfo;
+                user = User.objects.get(username=userinformation['email'])
+            except User.DoesNotExist:
+                user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
+                user.first_name = userinformation['first_name']
+                user.last_name = userinformation['last_name']
+                user.is_active = False
+                user.date_joined = datetime.datetime.now()
+                user.save()       
+            # create user profile
+                usrprof = UserProfile(user=user,sqwag_image_url=userPicture['content-location'],sqwag_cover_image_url=userPicture['content-location'],sqwag_count=0, following_count=0,followed_by_count=0)
+                usrprof.save()
+                usrprof.displayname = userinformation['name']
+                usrprof.fullname = userinformation['name']
+                usrprof.save()
+            try:
+                userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_FACEBOOK)
+            except UserAccount.DoesNotExist:
+                userAccount = CreateUserAccount(user=user,
+                                            account=ACCOUNT_FACEBOOK,
+                                            account_id = userinformation['id'],
+                                            access_token = accesstoken,
+                                            account_data=userinfo,
+                                            account_pic=userPicture['content-location'],
+                                            account_handle =userinformation['username'],
+                                            )
+#                userAccount = UserAccount(user=user,
+#                                      account=ACCOUNT_FACEBOOK, 
+#                                      account_id=userinformation['id'],
+#                                      access_token=accesstoken, 
+#                                      date_created=time.time(),
+#                                      account_data=userinfo, 
+#                                      account_pic=userPicture['content-location'],
+#                                      account_handle=userinformation['username'], 
+#                                      is_active=True, 
+#                                      last_object_id=0)
+                try:
+                    userAccount.full_clean()
+                    userAccount.save()
+                    successResponse['result'] = userinfo;
                 #return render_to_response('index.html')
-                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-            except ValidationError, e:
-                failureResponse['status'] = SYSTEM_ERROR
-                failureResponse['error'] = "some error occured, please try later"+e.message
-                #TODO: log it
-                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                except ValidationError, e:
+                    failureResponse['status'] = SYSTEM_ERROR
+                    failureResponse['error'] = "some error occured, please try later"+e.message
+                    #TODO: log it
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+            #redirect to home page of the user as user is already registered and active
+            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = resp.status
             failureResponse['message'] = 'facebook ERROR'
@@ -775,6 +805,48 @@ def accessFacebookNewUser(request):
         failureResponse['status'] = BAD_REQUEST
         failureResponse['message'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')   
+
+def SelectUserName(request):
+    if "type" in request.POST:
+        type = request.POST['type']
+        if type == "sqwag_user":
+            if "username" in request.POST:
+                try:
+                    UserProfile.objects.get(username=request.POST["username"])
+                    failureResponse['status'] = DUPLICATE
+                    failureResponse['error'] = "Username not availaible.Select some other username"
+                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                except UserProfile.DoesNotExist:
+                    userprofile = UserProfile.objects.get(user=request.user)
+                    userprofile.username = request.GET["username"]
+                    successResponse['message'] = "username updated successfully" 
+                    return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+            else:
+                failureResponse['error'] = "username cannot be blank"
+                failureResponse['status'] = BAD_REQUEST
+        elif type == "socialnetwork_register":
+                if "password" in request.POST:
+                    try:
+                        UserProfile.objects.get(username=request.POST["username"])
+                        failureResponse['status'] = DUPLICATE
+                        failureResponse['error'] = "Username not availaible.Select some other username"
+                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    except UserProfile.DoesNotExist:
+                        username = request.POST["username"]
+                        id = request.POST["id"]
+                        user = User.objects.get(pk=id)
+                        print username
+                        userprofile = UserProfile.objects.get(user=user)
+                        userprofile.username = username
+                        user.set_password(request.POST["password"])
+                        user.is_active = True
+                        successResponse['message'] = "username updated successfully" 
+                        user.save()
+                        userprofile.save()
+                        return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                else:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['error'] = "password field cannot be left blank" 
     
 def GetElasticSearch(request):
     import jsonpickle
