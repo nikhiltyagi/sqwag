@@ -7,8 +7,6 @@ import random
 import re
 import sha
 import os
-from django_facebook.models import *
-from django_facebook.views import *
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
 PROFILE_IMAGE_PATH = os.path.join('images','facebook_profiles/%Y/%m/%d')
@@ -30,9 +28,7 @@ class UserAccount(models.Model):
 
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
-    
     username = models.CharField(_('username'), max_length=100, unique=True,null=True)
-    
     sqwag_image_url = models.URLField(null=True)
     sqwag_cover_image_url = models.URLField(null=True)
     personal_message = models.TextField(null=True)
