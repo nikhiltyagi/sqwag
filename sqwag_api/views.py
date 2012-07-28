@@ -223,7 +223,8 @@ def accessTweeter(request):
                                   account_data=oauthAccess.mUser.AsJsonString(),
                                   account_pic=oauthAccess.mUser.GetProfileImageUrl(),
                                   account_handle=oauthAccess.mUser.GetScreenName(),
-                                  is_active=True
+                                  is_active=True,
+                                  last_object_id = 0
                                   )
         try:
             userAccount.full_clean()
@@ -680,10 +681,15 @@ def accessFacebook(request):
             #print userPic[0]
             #print userinformation['email']
             userPicture = userPic[0]
-            userAccount = UserAccount(user=request.user,account=ACCOUNT_FACEBOOK, account_id=userinformation['id'],
-                                      access_token=accesstoken, date_created=time.time(),
-                                      account_data=userinfo,account_pic=userPicture['content-location'],
-                                      account_handle=userinformation['username'],is_active=True)
+            userAccount = UserAccount(user=request.user,
+                                      account=ACCOUNT_FACEBOOK, 
+                                      account_id=userinformation['id'],
+                                      access_token=accesstoken, 
+                                      date_created=time.time(),
+                                      account_data=userinfo, 
+                                      account_pic=userPicture['content-location'],
+                                      account_handle=userinformation['username'], 
+                                      is_active=True)
             try:
                 userAccount.full_clean()
                 userAccount.save()
