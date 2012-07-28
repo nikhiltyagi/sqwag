@@ -7,7 +7,6 @@ import random
 import re
 import sha
 import os
-from django_facebook import model_managers
 from django_facebook.models import *
 from django_facebook.views import *
 
@@ -31,7 +30,9 @@ class UserAccount(models.Model):
 
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
+    
     username = models.CharField(_('username'), max_length=100, unique=True,null=True)
+    
     sqwag_image_url = models.URLField(null=True)
     sqwag_cover_image_url = models.URLField(null=True)
     personal_message = models.TextField(null=True)
