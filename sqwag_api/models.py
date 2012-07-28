@@ -34,6 +34,7 @@ class UserProfile(models.Model):
     followed_by_count = models.IntegerField()
     pwd_reset_key = models.CharField(_('activation key'), max_length=40, null=True)
     displayname = models.CharField(_('displayname'), max_length=30)
+    fullname = models.CharField(max_length=30)
     
     def create_reset_key(self, userProfile):
         salt = sha.new(str(random.random())).hexdigest()[:5]
