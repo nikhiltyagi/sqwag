@@ -56,7 +56,7 @@
                 {% else %}
                 <h2>{{complete_user.user.username }}</h2>
                 {% endif %}
-                <div class=""><span class="profile-link">@{{complete_user.user.username }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
+                <div class=""><span class="profile-link">@{{complete_user.user_profile.fullname }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
               </div>
             </div>
           </li>
@@ -196,7 +196,7 @@
             <input type="password" name="password" id="password-login" required />           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
-            <a href="\" class="forgot_pwd_link">Forgot password?</a>
+            <a href="#" class="forgot_pwd_link">Forgot password?</a>
           </div>
           <div class="form_sbt_wrap">
            <input type="submit" value="Log in" name="login_sbt" id="login_sbt"/>  

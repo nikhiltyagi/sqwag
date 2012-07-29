@@ -178,7 +178,7 @@ LOGGING = {
         },
     }
 }
-
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SQWAG_TWITTER_USER = 'sqwaglc'
 SQWAG_USER_ID = 2  #kind of misleading name. this is user's id in auth_user table

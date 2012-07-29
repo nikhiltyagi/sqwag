@@ -50,7 +50,7 @@ def handle_uploaded_file(content_image,request=None,imageType=None,user=None):
         image = open(tmp_file)
         small_image = get_thumbnail(image, '52x52', crop='center', quality=99)
         default_storage.save(tempPath+'small.jpg', ContentFile(small_image.read()))
-        medium_image = get_thumbnail(image, '220x220', crop='center', quality=99)
+        medium_image = get_thumbnail(image, '240x240', crop='center', quality=99)
         default_storage.save(tempPath+'medium.jpg', ContentFile(medium_image.read()))
         large_image = get_thumbnail(image, '500x500', crop='center', quality=99)
         default_storage.save(tempPath+'large.jpg', ContentFile(large_image.read()))
