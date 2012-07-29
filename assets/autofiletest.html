@@ -1,0 +1,51 @@
+<html>
+<head>
+</head>
+<body>
+    <form method="GET">
+        <input id="data" type="text"/>
+    </form>
+    <script src="js/libs/jquery-1.7.2.min.js"></script>
+    <script src="js/libs/jquery.form-defaults.min.js"></script>
+    <script src="js/libs/jquery.form.js"></script>
+    <script>
+        $(document).ready(function() {
+            var isUsernameCandidate = function(input) {
+                //http://www.advanced-javascript-tutorial.com/RegularExpressions.cfm#.UBV3G4ybwWU
+                var pattern = "^@[a-zA-Z0-9]" // ^@-> starts with @
+                var reg = new RegExp(pattern);
+                var match = reg.test(input);
+                return match;
+            }
+
+            $("#data").bind('keyup', function(){
+                var prefix = $("#data").val();
+                var words = prefix.split(" ");
+                $.each(words, function(index, value) {
+                    var isCandidate = isUsernameCandidate(value);
+                    if (isCandidate){
+                        value = value.substring(1);
+                        console.log(value + " is candidate, get users for it.");
+                        $.ajax({
+                            url:"http://127.0.0.1:8000/sqwag/getelasticsearch/"+value,
+                            dataType: "json",
+                            type: "GET",
+                            data: {
+                            },
+                            success: function (data, textStatus, jqXHR){
+                                if(data.status == 1){
+                                    console.log(data.result);
+                                }else{
+                                    console.log("error caught: "+ data.error);
+                                }
+                            },
+                            complete: function(jqXHR, textStatus){
+                            }
+                        });
+                    }
+                });
+            })
+        });
+    </script> 
+</body>
+</html>
