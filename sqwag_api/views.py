@@ -103,23 +103,13 @@ def registerUser(request):
             user.save();
             # create a profile for this user
             usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
-            registration_profile = RegistrationProfile.objects.create_profile(user)
             #current_site = Site.objects.get_current()
-            subject = "Activation link from sqwag.com"
-            host = request.get_host()
-            if request.is_secure():
-                protocol = 'https://'
-            else:
-                protocol = 'http://'
-            message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
-            mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
-            mailentry(mailer) 
-            reldat= {}
+            #reldat= {}
             #this needs to be cronned as part of cron mail
             #send_mail(subject,message,'coordinator@sqwag.com',[user.email],fail_silently=False)
             #subscribe own feeds
             relationShip = Relationship(subscriber=user,producer=user)
-            relationShip.date_subscribed = int(time.time())
+            relationShip.date_subscribed = time.time()
             relationShip.permission = True
             relationShip.save()
             print relationShip.date_subscribed
@@ -127,10 +117,8 @@ def registerUser(request):
             userdata = {}
             userdata['user_auth'] = User.objects.get(pk=user.id)
             userdata['user_profile'] = UserProfile.objects.get(user=user)  
-#           userdata['user'] = complete_user
             #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
-            successResponse['result'] = "Activation link is sent to the registration mail"
-            #TODO: send email with activation link
+            successResponse['result'] = user.id
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = BAD_REQUEST
@@ -180,11 +168,12 @@ def cronMail(request):
     successResponse['result'] = "success"
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
 
-def authTwitter(request):
-    if not request.user.is_authenticated():
-            failureResponse['status'] = AUTHENTICATION_ERROR
-            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
-            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+def authTwitter(request,type):
+    if type == "connect_twitter":
+        if not request.user.is_authenticated():
+                failureResponse['status'] = AUTHENTICATION_ERROR
+                failureResponse['error'] = "Login Required"#rc.FORBIDDEN
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     twitterConnect = TwitterConnect()
     twitterConnect.GetRequest()
     tokenString = twitterConnect.mOauthRequestToken.to_string()
@@ -203,8 +192,28 @@ def accessTweeter(request):
         oauthAccess.getOauthAccess()
         # store mOauthAccessToken in data base for further use.
         # check if an entry already exists in useraccount
+        user = request.user
+        if not request.user.is_authenticated():
+            user = User.objects.create_user("uname","temp123","email")
+            user.username = str(user.id)
+            user.email = str(user.id)
+            user.is_active = False
+            userProfile = UserProfile(user=user,
+                                      sqwag_image_url=oauthAccess.mUser.GetProfileImageUrl(),
+                                      sqwag_cover_image_url=oauthAccess.mUser.GetProfileImageUrl(),
+                                      sqwag_count=0,
+                                      following_count=0,
+                                      followed_by_count=0,
+                                      displayname=oauthAccess.mUser.GetScreenName(),
+                                      fullname=oauthAccess.mUser.GetName())
+            relationShip = Relationship(subscriber=user,producer=user)
+            relationShip.date_subscribed = time.time()
+            relationShip.permission = True
+            relationShip.save()
+            user.save()
+            userProfile.save()
         try:
-            userAccount = getActiveUserAccount(request.user, ACCOUNT_TWITTER)
+            userAccount = getActiveUserAccount(user, ACCOUNT_TWITTER)
             print oauthAccess.mUser.GetId()
             userAccount.account_id = oauthAccess.mUser.GetId()
             userAccount.access_token = oauthAccess.mOauthAccessToken.to_string()
@@ -215,7 +224,7 @@ def accessTweeter(request):
             
         except UserAccount.DoesNotExist:
         # make entry in userAccount table
-            userAccount = CreateUserAccount(user=request.user,
+            userAccount = CreateUserAccount(user=user,
                                             account=ACCOUNT_TWITTER,
                                             account_id=oauthAccess.mUser.GetId(),
                                             access_token=oauthAccess.mOauthAccessToken.to_string(),
@@ -237,7 +246,7 @@ def accessTweeter(request):
             userAccount.save()
             successResponse['result'] = oauthAccess.mUser.AsDict();
             # follow this user by TWITTER_USER
-            if request.user.id == settings.SQWAG_USER_ID:
+            if user.id == settings.SQWAG_USER_ID:
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             sqwagTwitterUserAccount = getActiveUserAccount(settings.SQWAG_USER_ID, ACCOUNT_TWITTER)
             sqAccessTokenString = sqwagTwitterUserAccount.access_token
@@ -612,10 +621,29 @@ def editEmail(request):
 def editDisplayName(request):
     form = EditDisplayName(request.POST)
     if form.is_valid():
-        user = request.user
+        #user = request.user
+        user = User.objects.get(pk=51)
         displayname = form.cleaned_data['displayName']
         if displayname:
             user.displayname = displayname
+            #code for elastic search start
+#            query = {}
+#            term = {}
+#            term["user_auth.id"] = user.id
+#            query['term'] = term
+#            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#            jsoncontent = jsonpickle.decode(result)
+#            for i in jsoncontent['hits']['hits']:
+#                ES_Obj = i['_source']
+#                print ES_Obj
+#            userdata = {}
+#            print ES_Obj['user_profile']
+#            ES_Obj['user_profile'].displayname = displayname
+#            print ES_Obj['user_profile'].displayname
+#            userdata['user_auth'] = ES_Obj['user_auth']
+#            userdata['user_profile'] = ES_Obj['user_profile']  
+#            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search end
             user.save()
             successResponse['result'] = 'dislay name changed successfully'
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -750,6 +778,19 @@ def accessFacebookNewUser(request):
             userPicture = userPic[0]
             try:
                 user = User.objects.get(username=userinformation['email'])
+                if not user.first_name:
+                    user.first_name = userinformation['first_name']
+                if not user.last_name:
+                    user.last_name = userinformation['last_name']
+                userProf = UserProfile.objects.get(user=user)
+                if not userProf.sqwag_image_url.strip():
+                    userProf.sqwag_image_url = userPicture['content-location']
+                if not userProf.sqwag_cover_image_url:
+                    userProf.sqwag_cover_image_url = userPicture['content-location']
+                if not user.is_active:
+                    user.is_active = True
+                user.save()
+                userProf.save()
             except User.DoesNotExist:
                 user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
                 user.first_name = userinformation['first_name']
@@ -763,6 +804,10 @@ def accessFacebookNewUser(request):
                 usrprof.displayname = userinformation['name']
                 usrprof.fullname = userinformation['name']
                 usrprof.save()
+                relationShip = Relationship(subscriber=user,producer=user)
+                relationShip.date_subscribed = time.time()
+                relationShip.permission = True
+                relationShip.save()
             try:
                 userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_FACEBOOK)
             except UserAccount.DoesNotExist:
@@ -774,16 +819,6 @@ def accessFacebookNewUser(request):
                                             account_pic=userPicture['content-location'],
                                             account_handle =userinformation['username'],
                                             )
-#                userAccount = UserAccount(user=user,
-#                                      account=ACCOUNT_FACEBOOK, 
-#                                      account_id=userinformation['id'],
-#                                      access_token=accesstoken, 
-#                                      date_created=time.time(),
-#                                      account_data=userinfo, 
-#                                      account_pic=userPicture['content-location'],
-#                                      account_handle=userinformation['username'], 
-#                                      is_active=True, 
-#                                      last_object_id=0)
                 try:
                     userAccount.full_clean()
                     userAccount.save()
@@ -811,21 +846,56 @@ def SelectUserName(request):
         type = request.POST['type']
         if type == "sqwag_user":
             if "username" in request.POST:
+                id = request.POST['id']
                 try:
                     UserProfile.objects.get(username=request.POST["username"])
                     failureResponse['status'] = DUPLICATE
                     failureResponse['error'] = "Username not availaible.Select some other username"
                     return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
                 except UserProfile.DoesNotExist:
-                    userprofile = UserProfile.objects.get(user=request.user)
-                    userprofile.username = request.GET["username"]
-                    successResponse['message'] = "username updated successfully" 
+                    user = User.objects.get(pk=id)
+                    registration_profile = RegistrationProfile.objects.create_profile(user)
+                    userprofile = UserProfile.objects.get(user=user)
+                    userprofile.username = request.POST["username"]
+                    host = request.get_host()
+                    if request.is_secure():
+                        protocol = 'https://'
+                    else:
+                        protocol = 'http://'
+                    message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
+                    mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
+                    mailentry(mailer) 
+                    successResponse['message'] = "Registration complete.Activation Link is sent to mail." 
                     return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
                 failureResponse['error'] = "username cannot be blank"
                 failureResponse['status'] = BAD_REQUEST
-        elif type == "socialnetwork_register":
-                if "password" in request.POST:
+        elif type == "socialnetwork_facebook":
+            if "password" in request.POST:
+                try:
+                    UserProfile.objects.get(username=request.POST["username"])
+                    failureResponse['status'] = DUPLICATE
+                    failureResponse['error'] = "Username not availaible.Select some other username"
+                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                except UserProfile.DoesNotExist:
+                    username = request.POST["username"]
+                    id = request.POST["id"]
+                    user = User.objects.get(pk=id)
+                    print username
+                    userprofile = UserProfile.objects.get(user=user)
+                    userprofile.username = username
+                    user.set_password(request.POST["password"])
+                    user.is_active = True
+                    successResponse['message'] = "username updated successfully" 
+                    user.save()
+                    userprofile.save()
+                    return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "password field cannot be left blank" 
+        elif type == "socailnetwork_twitter":
+            if "password" in request.POST:
+                if "email" in request.POST:
                     try:
                         UserProfile.objects.get(username=request.POST["username"])
                         failureResponse['status'] = DUPLICATE
@@ -835,25 +905,47 @@ def SelectUserName(request):
                         username = request.POST["username"]
                         id = request.POST["id"]
                         user = User.objects.get(pk=id)
+                        email = request.POST["email"]
                         print username
                         userprofile = UserProfile.objects.get(user=user)
                         userprofile.username = username
                         user.set_password(request.POST["password"])
                         user.is_active = True
+                        user.username = email
+                        user.email = email
                         successResponse['message'] = "username updated successfully" 
                         user.save()
                         userprofile.save()
                         return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
-                    failureResponse['error'] = "password field cannot be left blank" 
+                    failureResponse['error'] = "email field cannot be left blank"
+                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "password field cannot be left blank"
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')  
     
-def GetElasticSearch(request):
-    import jsonpickle
-    result = GetDocument()
-    for r in result:
-        print r
-    return HttpResponse(jsonpickle.encode(r,unpicklable=False),mimetype='application/javascript')
+def GetElasticSearch(request,user):
+    #import jsonpickle
+    query = {}
+    prefix = {}
+    fields = ["user_auth.first_name","user_auth.last_name","user_auth.username",
+              "user_auth.id","user_auth.email","user_profile.username","user_profile.following_count",
+              "user_profile.displayname","user_profile.sqwag_count","user_profile.sqwag_image_url",
+              "user_profile.sqwag_cover_image_url","user_profile.personal_message",
+              "user_profile.followed_by_count"]
+    prefix["user_profile.displayname"] = user
+    query["prefix"] = prefix
+    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET,fields=fields)
+    print "calling GET"
+    jsoncontent = jsonpickle.decode(result)
+    user_all = []
+    for i in jsoncontent['hits']['hits']:
+        user_all.insert(0,i['fields'])
+        print i['fields']
+    resultWrapper = paginate(request, 1, user_all, NUMBER_OF_SQUARES)
+    return HttpResponse(jsonpickle.encode(resultWrapper,unpicklable=False),mimetype='application/javascript')
 
 def instaSubsCallback(request):
     if request.method == "GET":

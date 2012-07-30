@@ -107,10 +107,9 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
-    #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
+#    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     is_owner = True
     squareResponse = {}
-    #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     userSquare = createUserSquare(None,user,square,is_owner)
     try:
         userProfile = UserProfile.objects.get(user=square.user)
@@ -264,7 +263,7 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
-    #CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+#    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
     return userSquare
 
 def getRelationship(producer,subscriber):
@@ -287,22 +286,22 @@ def getCompleteUserInfoTest(request,user,accountType=None):
     resultWrapper = {}
     userInfo = {}
     if user:
-        try:
+#        try:
             #userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
             #                                         "sqwag_image_url","sqwag_cover_image_url","username","fullname").get(user=user)
-            fields = ['user_profile.following_count','user_profile.followed_by_count','user_profile.displayname','user_profile.sqwag_count',
-                      'user_profile.sqwag_image_url','user_profile.sqwag_cover_image_url','user_profile.username','user_profile.fullname',
-                      'user_auth.username','user_auth.first_name','user_auth.last_name','user_auth.email']
-            term = {}
-            filter = {}
-            term['user_auth.id'] = user.id
-            filter['term'] = term
-            result = GetDocument(url=ELASTIC_SEARCH_USER_GET,fields=fields,filter=filter)
-            print result
-            result = jsonpickle.decode(result)
-            for res in result['hits']['hits']:
-                x = res['fields']
-            return x
+        fields = ['user_profile.following_count','user_profile.followed_by_count','user_profile.displayname','user_profile.sqwag_count',
+                  'user_profile.sqwag_image_url','user_profile.sqwag_cover_image_url','user_profile.username','user_profile.fullname',
+                  'user_auth.username','user_auth.first_name','user_auth.last_name','user_auth.email']
+        term = {}
+        filter = {}
+        term['user_auth.id'] = user.id
+        filter['term'] = term
+        result = GetDocument(url=ELASTIC_SEARCH_USER_GET,fields=fields,filter=filter)
+        print result
+        result = jsonpickle.decode(result)
+        for res in result['hits']['hits']:
+            x = res['fields']
+        return x
             #userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
             #userInfo['user_profile'] = userProfile
 #            if not accountType:
@@ -321,10 +320,10 @@ def getCompleteUserInfoTest(request,user,accountType=None):
 #            resultWrapper['status']=SUCCESS_STATUS_CODE
 #            resultWrapper['result']=userInfo
 #            return resultWrapper
-        except UserProfile.DoesNotExist:
-            resultWrapper['status']=SYSTEM_ERROR
-            resultWrapper['error']= 'user profile does not exist'
-            return resultWrapper
+#        except UserProfile.DoesNotExist:
+#            resultWrapper['status']=SYSTEM_ERROR
+#            resultWrapper['error']= 'user profile does not exist'
+#            return resultWrapper
     else:
         resultWrapper['status']=BAD_REQUEST
         resultWrapper['error']='user object is null'
