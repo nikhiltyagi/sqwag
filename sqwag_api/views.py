@@ -41,36 +41,43 @@ def index(request):
     return HttpResponse("Hello, world. You're at the sqwag index.")
 
 def loginUser(request):
-    if 'username' in request.POST:
-        if 'password' in request.POST:
-            uname = request.POST['username']
-            pword = request.POST['password']
-            try:
-                User.objects.get(username=uname)
-            except User.DoesNotExist:
+    if request.method == 'POST':
+        if not request.POST.get('rememberme', None):
+            request.session.set_expiry(0)
+        if 'username' in request.POST:
+            if 'password' in request.POST:
+                uname = request.POST['username']
+                pword = request.POST['password']
                 try:
-                    usrprf = UserProfile.objects.get(username=uname)
-                    uname = usrprf.user.username
-                except UserProfile.DoesNotExist:
-                    failureResponse['status'] = BAD_REQUEST
-                    failureResponse['error'] = 'invalid username'
-                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-            user = authenticate(username=uname, password=pword)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    user = User.objects.get(username=uname)
-                    respObj = {}
-                    respObj['username'] = user.username
-                    respObj['id'] = user.id
-                    respObj['first_name'] = user.first_name
-                    respObj['last_name'] = user.last_name
-                    respObj['email'] =  user.email
-                    successResponse['result'] = respObj
-                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                    User.objects.get(username=uname)
+                except User.DoesNotExist:
+                    try:
+                        usrprf = UserProfile.objects.get(username=uname)
+                        uname = usrprf.user.username
+                    except UserProfile.DoesNotExist:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = 'invalid username'
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+                user = authenticate(username=uname, password=pword)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        user = User.objects.get(username=uname)
+                        respObj = {}
+                        respObj['username'] = user.username
+                        respObj['id'] = user.id
+                        respObj['first_name'] = user.first_name
+                        respObj['last_name'] = user.last_name
+                        respObj['email'] =  user.email
+                        successResponse['result'] = respObj
+                        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                    else:
+                        failureResponse['status'] = ACCOUNT_INACTIVE
+                        failureResponse['error'] = "your account is not active"
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                 else:
-                    failureResponse['status'] = ACCOUNT_INACTIVE
-                    failureResponse['error'] = "your account is not active"
+                    failureResponse['status'] = INVALID_CREDENTIALS
+                    failureResponse['error'] = "invalid credentials"
                     return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             else:
                 failureResponse['status'] = INVALID_CREDENTIALS
@@ -81,10 +88,10 @@ def loginUser(request):
             failureResponse['error'] = "invalid credentials"
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
-        failureResponse['status'] = INVALID_CREDENTIALS
-        failureResponse['error'] = "invalid credentials"
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "Not a Post request."
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
-    
+
 def registerUser(request):
     if request.method == "POST":
         form = RegisterationForm(request.POST)

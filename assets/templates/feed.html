@@ -1,137 +1,125 @@
 <div id="sqwag-list-id" class="sqwag-list row">
-      <script id="tweet" type="text/html">
-      <div class="span3">
-      	<div class="sqwag sq-{{ square.content_type }}">
-          <div class="island">
-            <div class="mask">
-              <span class="sqwag-count">{{ square.shared_count }}</span>
-              <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ user_square.id }}" class="resqwag">sqwag</button>
-              </div>
-            </div>
-          	<div class="hd">
-          		<div class="media">
-                <img class="media-obj avatar" src="{{ square.complete_user.user_accounts.account_pic }}" alt=""/>
-                <div class="media-bd">
-                  <ul class="no-bullet">
-                    <li class="fullname">{{ square.complete_user.user_accounts.account_handle }}</li>
-                    <li class="twitter-handle"><a href="#">@{{  square.complete_user.user_accounts.account_handle }}</a></li>
-                  </ul>
-                </div>
-              </div>
-          	</div>
-          	<div class="bd">
-          	  <p class="tweet-text">{{ square.content_data }}</p>
-          	</div>
-          	<div class="ft">
-              <div class="media">
-              	<div class="media-bd">
-                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
-                  <ul class="action-links">
-                    <li><a class = "action-reply" href="#">reply</a></li>
-                    <li><a class = "action-retweet" href="#">retweet</a></li>
-                    <li><a class = "action-favourite" href="#">favorite</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+  <script id="tweet" type="text/html">
+    <div class="feed_blk twitter_blk">
+      <div class="feed_blk_hd">
+          <h3>{{ square.shared_count }}</h3>
+          <div class="align_right">
+              <a href="#" >Send</a>
+              <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
           </div>
+      </div><!-- feed_blk_hd -->  
+      <div class="feed_blk_cnt">
+          <img src="{{ square.complete_user.user_accounts.account_pic }}" width=52px height=52px />
+          <h4>{{ square.complete_user.user_accounts.account_handle }}</h4>
+          <h5>@{{  square.complete_user.user_accounts.account_handle }}</h5>
+          <p>{{ square.content_data }}</p>
+          <p class="count pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</p>
+      </div><!-- feed_blk_cnt --> 
+    </div><!-- feed_blk --> 
+  </script>
+  
+  <script id="text" type="text/html">
+    <div class="feed_blk text_blk">
+      <div class="feed_blk_hd">
+        <h3>{{ square.shared_count }}</h3>
+        <div class="align_right">
+          <a href="">Send</a>
+          <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
         </div>
-      </div>
-      </script>
-      
-      <script id="text" type="text/html">
-      <div class="span3">
-      	<div class="sqwag sq-{{ square.content_type }}">
-          <div class="island">
-            <div class="mask">
-              <span class="sqwag-count">{{ square.shared_count }}</span>
-              <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ user_square.id }}" class="resqwag">sqwag</button>
-              </div>
-            </div>
-          	<div class="hd">
-          		<div class="media">
-                <img class="media-obj avatar" src="{{ square.complete_user.user_profile.sqwag_image_url}}" alt=""/>
-                <div class="media-bd">
-                  <ul class="no-bullet">
-                    <li class="fullname">{{ square.complete_user.user_profile.displayname }}</li>
-                    <li class="sqwag-handle"><a href="#">@{{  square.complete_user.user.username }}</a></li>
-                  </ul>
-                </div>
-              </div>
-          	</div>
-          	<div class="bd">
-          	  <p class="tweet-text">{{ square.content_data }}</p>
-          	</div>
-          	<div class="ft">
-              <div class="media">
-              	<div class="media-bd">
-                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </script>
+      </div><!-- feed_blk_hd -->  
+      <div class="feed_blk_cnt">
+        <img src="{{ square.complete_user.user_accounts.account_pic }}" width=52px height=52px />
+        <h4>{{ square.complete_user.user_accounts.account_handle }}</h4>
+        <h5>@{{  square.complete_user.user_accounts.account_handle }}</h5>
+        <p>{{ square.content_data }}</p>
+        <p class="count pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</p>
+      </div><!-- feed_blk_cnt --> 
+    </div><!-- feed_blk -->   
+  </script>
 
-      <script id="user" type="text/html">
-      <div class="span3">
-        <div class="sqwag sq-user">
-          <div class="island">
-            <div class="mask">
-              <span class="sqwag-count"></span>
-              <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ user.id }}" class="resqwag">sqwag</button>
+  <script id="user" type="text/html">
+    <div class="span3">
+      <div class="sqwag sq-user">
+        <div class="island">
+          <div class="mask">
+            <span class="sqwag-count"></span>
+            <div class="buttons-group fr">
+              <button>send</button><button data-id="{{ user.id }}" class="resqwag">sqwag</button>
+            </div>
+          </div>
+          <div class="hd">
+            <h2 class="username">{{ user_profile.displayname}}</hwo2>
+            <h3 class="handle">@{{ user_profile.username}}</h3>
+          </div>
+          <div class="bd">
+            <div class="media">
+              <div class="media-obj"><img src="{{ user_profile.sqwag_image_url}}" /></div>
+              <div class="media-bd">
+                <ul class="no-bullet sqwag-info">
+                  <li><span class="value">{{ user_profile.sqwag_count}}</span> sqwag</li>
+                  <li><span class="value">{{ user_profile.following_count}}</span> sqwaggin</li>
+                  <li><span class="value">{{ user_profile.followed_by_count}}</span> sqwaggers</li>
+                </ul>
               </div>
             </div>
-            <div class="hd">
-              <h2 class="username">{{ user_profile.displayname}}</h2>
-              <h3 class="handle">@{{ user_profile.username}}</h3>
-            </div>
-            <div class="bd">
-              <div class="media">
-                <div class="media-obj"><img src="{{ user_profile.sqwag_image_url}}" /></div>
-                <div class="media-bd">
-                  <ul class="no-bullet sqwag-info">
-                    <li><span class="value">{{ user_profile.sqwag_count}}</span> sqwag</li>
-                    <li><span class="value">{{ user_profile.following_count}}</span> sqwaggin</li>
-                    <li><span class="value">{{ user_profile.followed_by_count}}</span> sqwaggers</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="ft">
-              <p>{{ user_profile.personal_message}}</p>
-            </div>
+          </div>
+          <div class="ft">
+            <p>{{ user_profile.personal_message}}</p>
           </div>
         </div>
       </div>
-      </script>
+    </div>
+  </script>
 
-      <script id="image" type="text/html">
-      <div class="span3">
-        <div class="sqwag sq-{{ square.content_type }}">
-          <div class="island">
-            <div class="mask">
-              <span class="sqwag-count">{{ square.shared_count }}</span>
-              <div class="buttons-group fr">
-                <button>send</button><button data-id="{{ user_square.id }}" class="resqwag">sqwag</button>
-              </div>
-            </div>
-            <div class="bd">
-              <img class="media-obj image-sqwag" src="{{ square.content_data }}" alt="" width="220"/>
-            </div>
-            <div class="ft">
-              <div class="media">
-                <div class="media-bd">
-                  <span class="pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</span>
-                </div>
-              </div>
-            </div>
+  <script id="image" type="text/html">
+    <div class="feed_blk photo_blk">
+      <div class="feed_blk_hd">
+          <h3>{{ square.shared_count }}</h3>
+          <div class="align_right">
+              <a href="#">Send</a>
+              <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
           </div>
+      </div><!-- feed_blk_hd -->  
+      <div class="feed_blk_cnt">
+          <img src="{{ square.content_data }}"  />                 
+      </div><!-- feed_blk_cnt --> 
+    </div><!-- feed_blk --> 
+  </script>
+
+  <script id="song" type="text/html">
+    <div class="feed_blk song_blk">
+      <div class="feed_blk_hd">
+        <h3>{{ square.shared_count }}</h3>
+        <div class="align_right">
+          <a href="">Send</a>
+          <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
         </div>
-      </div>
-      </script>
-	  </div>
+      </div><!-- feed_blk_hd -->  
+      <div class="feed_blk_cnt">
+        <h4>Scream</h4>
+        <p>usher</p>
+        <img src="assets/img/usher.png" />
+        <p class="groveicon"><img src="assets/img/grove.png" /></p>
+      </div><!-- feed_blk_cnt --> 
+    </div><!-- feed_blk -->
+  </script>
+
+  <script id="video" type="text/html">
+    <div class="feed_blk photo_blk">
+        <div class="feed_blk_hd">
+          <h3>{{ square.shared_count }}</h3>
+          <div class="align_right">
+            <a href="">Send</a>
+            <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
+          </div>
+        </div><!-- feed_blk_hd -->  
+        <div class="feed_blk_cnt">
+          <img src="assets/img/photo_video.png"  /> 
+        </div><!-- feed_blk_cnt --> 
+      </div><!-- feed_blk -->       
+    </div><!-- cnt_wrap -->
+    </div><!-- landing_pg_wrap -->  
+      </div><!-- content -->
+    </div><!-- main --> 
+  </script>
+</div>
