@@ -848,35 +848,42 @@ def accessFacebookNewUser(request):
         failureResponse['message'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')   
 
-def SelectUserName(request):
+def selectUserName(request):
     if "type" in request.POST:
         type = request.POST['type']
         if type == "sqwag_user":
             if "username" in request.POST:
-                id = request.POST['id']
-                try:
-                    UserProfile.objects.get(username=request.POST["username"])
-                    failureResponse['status'] = DUPLICATE
-                    failureResponse['error'] = "Username not availaible.Select some other username"
+                if "user_id" in request.POST:
+                    id = request.POST["user_id"]
+                    try:
+                        UserProfile.objects.get(username=request.POST["username"])
+                        failureResponse['status'] = DUPLICATE
+                        failureResponse['error'] = "Username not availaible.Select some other username"
+                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    except UserProfile.DoesNotExist:
+                        user = User.objects.get(pk=id)
+                        registration_profile = RegistrationProfile.objects.create_profile(user)
+                        userprofile = UserProfile.objects.get(user=user)
+                        userprofile.username = request.POST["username"]
+                        userprofile.save();
+                        host = request.get_host()
+                        if request.is_secure():
+                            protocol = 'https://'
+                        else:
+                            protocol = 'http://'
+                        message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
+                        mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
+                        mailentry(mailer) 
+                        successResponse['result'] = "Registration complete.Activation Link is sent to mail." 
+                        return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                else:
+                    failureResponse['error'] = "id is missing" #todo: put this in log.
+                    failureResponse['status'] = BAD_REQUEST
                     return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
-                except UserProfile.DoesNotExist:
-                    user = User.objects.get(pk=id)
-                    registration_profile = RegistrationProfile.objects.create_profile(user)
-                    userprofile = UserProfile.objects.get(user=user)
-                    userprofile.username = request.POST["username"]
-                    host = request.get_host()
-                    if request.is_secure():
-                        protocol = 'https://'
-                    else:
-                        protocol = 'http://'
-                    message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
-                    mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
-                    mailentry(mailer) 
-                    successResponse['message'] = "Registration complete.Activation Link is sent to mail." 
-                    return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
                 failureResponse['error'] = "username cannot be blank"
                 failureResponse['status'] = BAD_REQUEST
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
         elif type == "socialnetwork_facebook":
             if "password" in request.POST:
                 try:
@@ -893,13 +900,14 @@ def SelectUserName(request):
                     userprofile.username = username
                     user.set_password(request.POST["password"])
                     user.is_active = True
-                    successResponse['message'] = "username updated successfully" 
                     user.save()
                     userprofile.save()
+                    successResponse['message'] = "username updated successfully" 
                     return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "password field cannot be left blank" 
+                failureResponse['error'] = "password field cannot be left blank"
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript') 
         elif type == "socailnetwork_twitter":
             if "password" in request.POST:
                 if "email" in request.POST:
@@ -920,9 +928,9 @@ def SelectUserName(request):
                         user.is_active = True
                         user.username = email
                         user.email = email
-                        successResponse['message'] = "username updated successfully" 
                         user.save()
                         userprofile.save()
+                        successResponse['message'] = "username updated successfully"
                         return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
@@ -931,7 +939,11 @@ def SelectUserName(request):
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
-                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')  
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "type field is missing"
+        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
 
 def getUserSuggestions(request,user):
     #import jsonpickle

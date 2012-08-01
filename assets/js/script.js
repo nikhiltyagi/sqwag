@@ -90,7 +90,8 @@ var SQ = {
         if(data.status == 1) {
           $(".register_step1").hide();
           $(".register_step2").show();
-          //self.notify(data.status);
+          $("#user_id").val(data.result);
+          self.notify(data.result);
         }
         else {
           self.notify(data.error);
@@ -106,7 +107,8 @@ var SQ = {
         if(data.status == 1) {
           $(".register_step2").hide();
           $(".register_step1").show();
-          self.notify(data.status);
+          $("#user_id").val("");
+          self.notify(data.result);
         }
         else {
           self.notify(data.error);
