@@ -831,6 +831,7 @@ def SelectUserName(request):
             else:
                 failureResponse['error'] = "username cannot be blank"
                 failureResponse['status'] = BAD_REQUEST
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         elif type == "socialnetwork_register":
                 if "password" in request.POST:
                     try:
@@ -854,7 +855,12 @@ def SelectUserName(request):
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = "password field cannot be left blank" 
-    
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "type field cannot be left blank" 
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
 def GetElasticSearch(request):
     import jsonpickle
     result = GetDocument()

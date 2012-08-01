@@ -88,6 +88,24 @@ var SQ = {
       dataType: 'json',
       success: function(data) {
         if(data.status == 1) {
+          $(".register_step1").hide();
+          $(".register_step2").show();
+          //self.notify(data.status);
+        }
+        else {
+          self.notify(data.error);
+        }
+        self.close();
+      }
+    });
+
+    $('#register-form-step2 form').ajaxForm({
+      url: window.location.href+'sqwag/selectusername/',
+      dataType: 'json',
+      success: function(data) {
+        if(data.status == 1) {
+          $(".register_step2").hide();
+          $(".register_step1").show();
           self.notify(data.status);
         }
         else {

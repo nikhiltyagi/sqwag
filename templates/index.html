@@ -192,7 +192,7 @@
           <div class="form_wrap">
             <label for="username">Username</label>
             <input class="input" type="text" name="username" id="username" required />
-            <label for="password">Password</label>
+            <label for="password-login">Password</label>
             <input type="password" name="password" id="password-login" required />           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
@@ -213,11 +213,12 @@
           <span class="align_right">Sign up! It's free and easy.</span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
-          <div class="register_blk_left">
-            <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
-            <a href="sqwag/authfacebooknewuser" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
-          </div><!-- register_blk_left -->
-          <div class="register_blk_right" id="register-form">
+          <div class="register_step1" >
+            <div class="register_blk_left">
+              <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
+              <a href="#" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
+            </div><!-- register_blk_left -->
+            <div class="register_blk_right" id="register-form">
             <p>Create an Account</p>
             <form action=""  method="post">
               <div class="form-controls">
@@ -238,6 +239,24 @@
               </div>
             </form>
           </div><!-- register_blk_right -->
+          </div><!-- register_step1 -->
+          <div class="register_step2" style="display:none;">
+            <div class="register_blk_right" id="register-form-step2">
+              <p>Select your username and start Sqwagging!</p>
+              <form action="" method="post">
+              <div  class="align_center">
+                <label for="username-register">@</label>
+                  <input class="input" type="text" name="username" id="username-register" required />
+                  <span class="legend_text">You can change it later!</span>
+                  <input type="text" value="sqwag_user" name="type" style="display:none"/>
+              </div><!-- align_center -->
+              <div class="modal-footer">
+                  <p><input type="checkbox" required /><label for="username">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+                  <input class="btn btn-primary" type="submit" value="Done!" /></p>
+                </div>
+              </form>
+            </div><!-- register_blk_right -->
+          </div><!-- register_step2 -->
         </div><!-- register_blk_inner -->
       
       </div><!-- register_blk -->
@@ -279,7 +298,7 @@
 <script src="assets/js/libs/underscore-min.js"></script>
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
-<script src="assets/js/script.js"></script>
+<script src="assets/js/script.js?12"></script>
 <script>
 
 $(document).ready(function() {
@@ -303,7 +322,7 @@ $(document).ready(function() {
     $("#fullname").DefaultValue("Full Name");
     $("#email").DefaultValue("Email");
     $("#password-registration").DefaultValue("nopassword");
-    
+    $("#username-register").DefaultValue("username");
 
   {% endif %}
   $.extend(context,options);
