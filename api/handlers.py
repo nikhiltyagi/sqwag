@@ -85,55 +85,55 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False,is_private=False).order_by('date_shared')
-#        filter = {}
-#        term = {}
-#        date_shared = {}
-#        dt = {}
-#        date_shared['order'] = "asc"
-#        dt['date_shared'] = date_shared
-#        sort = [dt]
-#        term["user_id"] = request.user.id
-#        term["is_deleted"] = False
-#        term["is_private"] = False
-#        #term["is_deleted"] = False
-#        #term["is_private"] = False
-#        filter['term'] = term
-#        fields = ["content_description","id","square_id","py/object"]
-#        print "calling GET"
-#        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,fields=fields,filter=filter,sort=sort)
-#        print "Done"
-#        js = simplejson.loads(result)
-#        print "simple json"
-#        print js['hits']['hits']
-#        jsoncontent = jsonpickle.decode(result)
-#        print "json pickle"
-#        print jsoncontent['hits']['hits']
-#        squrs_all = []
-#        for i in jsoncontent['hits']['hits']:
-#            sqr_obj = {}
-#            #print i['_source'].id
-#            #print i['_source'].square_id
-#            #print jsonpickle.encode(i['_source'],unpicklable=False)
-#            term = {}
-#            term['id'] = i['fields'].square_id
-#            query = {}
-#            query['term'] = term
-#            #fields = ["content_description","user_id","content_type","content_src","content_data","date_created","user_account_id",]
-#            square = GetDocument(query,ELATIC_SEARCH_SQUARE_GET)
-#            rs = jsonpickle.decode(square)
-#            print rs
-#            for x in rs['hits']['hits']:
-#                if not x['_source'].user_account:
-#                    account_type = 'NA'
-#                else:
-#                    account_type = x['_source'].user_account
-#            x['_source'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-#            sqr_obj['square'] = x['_source']
-#            i['fields'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-#            sqr_obj['user_square'] = i['fields']
-#            squrs_all.insert(0,sqr_obj)
-#        print jsonpickle.encode(squrs_all,unpicklable=False)
-#        print paginate(request,page,squrs_all,NUMBER_OF_SQUARES)
+        filter = {}
+        term = {}
+        date_shared = {}
+        dt = {}
+        date_shared['order'] = "asc"
+        dt['date_shared'] = date_shared
+        sort = [dt]
+        term["user_id"] = request.user.id
+        term["is_deleted"] = False
+        term["is_private"] = False
+        #term["is_deleted"] = False
+        #term["is_private"] = False
+        filter['term'] = term
+        fields = ["content_description","id","square_id","py/object"]
+        print "calling GET"
+        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,fields=fields,filter=filter,sort=sort)
+        print "Done"
+        js = simplejson.loads(result)
+        print "simple json"
+        print js['hits']['hits']
+        jsoncontent = jsonpickle.decode(result)
+        print "json pickle"
+        print jsoncontent['hits']['hits']
+        squrs_all = []
+        for i in jsoncontent['hits']['hits']:
+            sqr_obj = {}
+            #print i['_source'].id
+            #print i['_source'].square_id
+            #print jsonpickle.encode(i['_source'],unpicklable=False)
+            term = {}
+            term['id'] = i['fields'].square_id
+            query = {}
+            query['term'] = term
+            #fields = ["content_description","user_id","content_type","content_src","content_data","date_created","user_account_id",]
+            square = GetDocument(query,ELATIC_SEARCH_SQUARE_GET)
+            rs = jsonpickle.decode(square)
+            print rs
+            for x in rs['hits']['hits']:
+                if not x['_source'].user_account:
+                    account_type = 'NA'
+                else:
+                    account_type = x['_source'].user_account
+            x['_source'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
+            sqr_obj['square'] = x['_source']
+            i['fields'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
+            sqr_obj['user_square'] = i['fields']
+            squrs_all.insert(0,sqr_obj)
+        print jsonpickle.encode(squrs_all,unpicklable=False)
+        print paginate(request,page,squrs_all,NUMBER_OF_SQUARES)
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:

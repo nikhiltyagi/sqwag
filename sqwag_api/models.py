@@ -16,10 +16,10 @@ class UserAccount(models.Model):
     account_id = models.CharField(max_length=100)
     access_token = models.CharField(max_length=4000)
     date_created = models.IntegerField()
-    account_data = models.TextField(null=True)
-    account_pic = models.URLField(null=True)
-    account_handle = models.CharField(max_length=200, null=True)
-    last_object_id = models.CharField(max_length=240, null=True)
+    account_data = models.TextField(blank=True)
+    account_pic = models.URLField(blank=True)
+    account_handle = models.CharField(max_length=200, blank=True)
+    last_object_id = models.CharField(max_length=240, blank=True)
     is_active = models.BooleanField(default=True)
     
     def __unicode__(self):
@@ -28,13 +28,13 @@ class UserAccount(models.Model):
 class UserProfile(models.Model):
     user =  models.OneToOneField(User)
     username = models.CharField(_('username'), max_length=100, unique=True,null=True)
-    sqwag_image_url = models.URLField(null=True)
-    sqwag_cover_image_url = models.URLField(null=True)
-    personal_message = models.TextField(null=True)
+    sqwag_image_url = models.URLField(blank=True)
+    sqwag_cover_image_url = models.URLField(blank=True)
+    personal_message = models.TextField(blank=True)
     sqwag_count = models.IntegerField()
     following_count = models.IntegerField()
     followed_by_count = models.IntegerField()
-    pwd_reset_key = models.CharField(_('activation key'), max_length=40, null=True)
+    pwd_reset_key = models.CharField(_('activation key'), max_length=40, blank=True)
     displayname = models.CharField(_('displayname'), max_length=30)
     fullname = models.CharField(max_length=30)
     
@@ -47,15 +47,15 @@ class UserProfile(models.Model):
 
 class Square(models.Model):
     user = models.ForeignKey(User)
-    content_id = models.CharField(max_length=400, null=True)
+    content_id = models.CharField(max_length=400, blank=True)
     content_src = models.CharField(max_length=200)
     content_type = models.CharField(max_length=50)
     content_data = models.CharField(max_length=4000)
-    content_description = models.CharField(max_length=4000,null=True)
-    date_created = models.IntegerField('date published',null=True)
-    shared_count = models.IntegerField(null=True)
+    content_description = models.CharField(max_length=4000,blank=True)
+    date_created = models.IntegerField('date published',blank=True,null=True)
+    shared_count = models.IntegerField(blank=True,null=True)
     is_deleted = models.BooleanField(default=False)
-    user_account = models.ForeignKey(UserAccount, null=True)
+    user_account = models.ForeignKey(UserAccount, blank=True)
 
     def __unicode__(self):
         return self.content_data
@@ -65,7 +65,7 @@ class UserSquare(models.Model):
     square = models.ForeignKey(Square)
     date_shared = models.IntegerField('date shared')
     is_deleted = models.BooleanField(default=False)
-    content_description = models.CharField(max_length=4000,null=True)
+    content_description = models.CharField(max_length=4000,blank=True)
     is_owner = models.BooleanField()
     is_private = models.BooleanField(default=False)
         
@@ -78,13 +78,13 @@ class RequestInvitation(models.Model):
         return self.email
 
 class Emailer(models.Model):
-    to = models.EmailField(max_length=254,null=False)
-    from_email = models.EmailField(max_length=254, null=False)
+    to = models.EmailField(max_length=254,blank=False)
+    from_email = models.EmailField(max_length=254, blank=False)
     body = models.TextField()
     subject = models.CharField(max_length=100)
     date_created = models.IntegerField()
     is_sent = models.BooleanField(default=False)
-    status = models.TextField(null=True)
+    status = models.TextField(blank=True)
 
 class Relationship(models.Model):
     subscriber = models.ForeignKey(User,related_name='subscriber')
@@ -125,7 +125,7 @@ class RegistrationManager(models.Manager):
 class RegistrationProfile(models.Model):
     user = models.ForeignKey(User, unique=True, verbose_name=_('user'))
     activation_key = models.CharField(_('activation key'), max_length=40)
-    date_activated = models.IntegerField('date activated',null=True)
+    date_activated = models.IntegerField('date activated',blank=True,null=True)
     is_deleted = models.BooleanField('active',default=False)
     
     objects = RegistrationManager()
@@ -155,10 +155,10 @@ class SquareComments(models.Model):
     user = models.ForeignKey(User,related_name='user')
     square = models.ForeignKey(Square,related_name='square')
     date_created = models.IntegerField()
-    comment = models.CharField(max_length=4000,null=False)
+    comment = models.CharField(max_length=4000,blank=False)
 
 class Feedback(models.Model):
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, blank=True)
     date_created = models.IntegerField()
     feedback = models.TextField()
     
@@ -169,7 +169,7 @@ class Notifications(models.Model):
     sendingUser = models.ForeignKey(User,related_name='sendingUser')
     is_seen = models.BooleanField(default=False)
     notification_type = models.CharField(max_length=100)
-    notification_message = models.CharField(max_length=4000,null=True)
+    notification_message = models.CharField(max_length=4000,blank=True)
 
 class PrivateSquare(models.Model):
     user = models.ForeignKey(User,related_name='recieving_user')

@@ -25,9 +25,10 @@
                     var isCandidate = isUsernameCandidate(value);
                     if (isCandidate){
                         value = value.substring(1);
-                        console.log(value + " is candidate, get users for it.");
+                        alert(value + " is candidate, get users for it.");
+                        value 
                         $.ajax({
-                            url:"http://127.0.0.1:8000/sqwag/getusersuggestions/"+value,
+                            url:"http://127.0.0.1:8000/sqwag/getelasticsearch/"+prefix,
                             dataType: "json",
                             type: "GET",
                             data: {
@@ -49,4 +50,3 @@
     </script> 
 </body>
 </html>
-
