@@ -55,7 +55,7 @@ class Square(models.Model):
     date_created = models.IntegerField('date published',blank=True,null=True)
     shared_count = models.IntegerField(blank=True,null=True)
     is_deleted = models.BooleanField(default=False)
-    user_account = models.ForeignKey(UserAccount, blank=True)
+    user_account = models.ForeignKey(UserAccount, blank=True,null=True)
 
     def __unicode__(self):
         return self.content_data
@@ -158,7 +158,7 @@ class SquareComments(models.Model):
     comment = models.CharField(max_length=4000,blank=False)
 
 class Feedback(models.Model):
-    user = models.ForeignKey(User, blank=True)
+    user = models.ForeignKey(User, blank=True,null=True)
     date_created = models.IntegerField()
     feedback = models.TextField()
     
