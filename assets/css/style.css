@@ -378,7 +378,7 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .register_blk_hd h2{font:bold 18px/32px Arial;color:#FFF;font-size:17px;font-weight: bold;line-height:32px;}
 .register_blk_hd span{color:#fff;line-height:32px;font:bold 14px/32px Arial;}
 .align_left{float:left;padding-left:20px;}
-.align_right{padding-left:5px;}
+.align_right{padding-left:5px; display: none;}
 .register_blk_inner{clear:both;overflow:hidden;height:202px;opacity:0.8;filter: alpha(opacity=80);background:#fff;border:1px solid #908f8f;}
 .register_blk_left{float:left;margin:25px 0px;width:200px;padding:25px 20px 15px 20px;border-right:3px solid #ccc;}
 .register_blk_left a{display:inline-block;margin-bottom:15px;}

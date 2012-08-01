@@ -230,8 +230,8 @@ var SQ = {
   },
   
   bindSqwags: function() {
-    $('.sqwag').live('mouseover mouseout', function(event) {
-      var mask = $(this).find('.mask');
+    $('.feed_blk').live('mouseover mouseout', function(event) {
+      var mask = $(this).find('.align_right');
       if(event.type == 'mouseover') {
         mask.show();
       }
