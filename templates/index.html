@@ -220,18 +220,18 @@
             </div><!-- register_blk_left -->
             <div class="register_blk_right" id="register-form">
             <p>Create an Account</p>
-            <form action=""  method="post">
+            <form id="register-step1" method="post">
               <div class="form-controls">
                 <label for="fullname">Full name</label>
-                <input class="input" type="text" name="fullname" id="fullname" required />
+                <input class="input" type="text" name="fullname" id="fullname"/>
               </div>
               <div class="form-controls">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" required />
+                <input type="email" name="email" id="email"/>
               </div>
               <div class="form-controls">
-               <label for="password">Password</label>
-            <input type="password" name="password" id="password-registration" required />
+               <label for="password-registration">Password</label>
+            <input type="password" name="password" id="password-registration"/>
               </div>
               
               <div class="modal-footer">
@@ -291,7 +291,8 @@
 <script src="assets/js/libs/jquery.form-defaults.min.js"></script>
 <script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
 <script src="assets/js/tabslideout.js"></script>
-<script src="assets/js/libs/bootstrap-modal.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+<!-- <script src="assets/js/libs/bootstrap-modal.min.js"></script> -->
 <script src="assets/js/libs/bootstrap-dropdown.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/app.js"></script>

@@ -82,23 +82,57 @@ var SQ = {
         }
       }
     }); 
-    
-    $('#register-form form').ajaxForm({
-      url: window.location.href+'sqwag/register/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          $(".register_step1").hide();
-          $(".register_step2").show();
-          $("#user_id").val(data.result);
-          self.notify(data.result);
+
+    $("#register-step1").validate({
+        rules: {
+            fullname: "required",
+            email: {
+              required: true,
+              email: true
+            },
+            password:{
+              required:true
+            }
+        },
+        messages: {
+            fullname: "Please specify your fullname name",
+            email: {
+                required: "We need your email address to contact you",
+                email: "Your email address must be in the format of name@domain.com"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/register/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                $(".register_step1").hide();
+                $(".register_step2").show();close
+                $("#user_id").val(data.result);
+                self.notify(data.result);
+              }
+              else {
+                self.notify(data.error);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
-        }
-        self.close();
-      }
     });
+
+/*
+    $('#register-form form').ajaxForm({
+      
+    });*/
 
     $('#register-form-step2 form').ajaxForm({
       url: window.location.href+'sqwag/selectusername/',
