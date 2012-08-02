@@ -17,8 +17,12 @@ class RegisterationForm(forms.Form):
         if email:
             #username = self.cleaned_data.get('username')
             if email and User.objects.filter(email=email):
-                raise forms.ValidationError(u'Email addresses must be unique.')
-            return email
+                user = User.objects.get(email=email)
+                try:
+                    RegistrationProfile.objects.get(user=user,is_registration_completed=True)
+                    raise forms.ValidationError(u'Email addresses must be unique.')
+                except RegistrationProfile.DoesNotExist:
+                    return email
         else:
             raise forms.ValidationError(u'Email is a required field')
 
