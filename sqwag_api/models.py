@@ -127,6 +127,7 @@ class RegistrationProfile(models.Model):
     activation_key = models.CharField(_('activation key'), max_length=40)
     date_activated = models.IntegerField('date activated',blank=True,null=True)
     is_deleted = models.BooleanField('active',default=False)
+    is_registration_completed = models.BooleanField('registration',default=False)
     
     objects = RegistrationManager()
     
