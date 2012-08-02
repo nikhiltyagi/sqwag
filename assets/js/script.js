@@ -69,19 +69,46 @@ var SQ = {
       }
     });
 
-     $('#login-form form').ajaxForm({
-      url: window.location.href+'sqwag/login/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          self.refresh();
+    $("#login-form").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            password:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please specify username"
+            },
+            password: {
+                required: "We need your password to verify your credentials"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/login/',
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                self.refresh();
+              }
+              else {
+                self.notify(data.error);
+                //self.close(); // TODO : refactor
+              }
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
-          self.close(); // TODO : refactor
-        }
-      }
-    }); 
+    });
+
+   /*  $('#login-form form').ajaxForm({
+      
+    }); */
 
     $("#register-step1").validate({
         rules: {
