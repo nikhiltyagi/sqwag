@@ -85,7 +85,10 @@ var SQ = {
 
     $("#register-step1").validate({
         rules: {
-            fullname: "required",
+            fullname:{
+              required: true,
+              maxlength: 25
+            },
             email: {
               required: true,
               email: true
@@ -95,7 +98,10 @@ var SQ = {
             }
         },
         messages: {
-            fullname: "Please specify your fullname name",
+            fullname: {
+              required: "Please specify your fullname name",
+              maxlength: "fullname should be less than 25 characters"
+            },
             email: {
                 required: "We need your email address to contact you",
                 email: "Your email address must be in the format of name@domain.com"
