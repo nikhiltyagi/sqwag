@@ -151,7 +151,14 @@ var SQ = {
                 self.notify(data.result);
               }
               else {
-                self.notify(data.error);
+                var error_string = "";
+                for (var key in data.error) {
+                  var obj = data.error[key];
+                  for (var prop in obj) {
+                    error_string = obj[prop]+" ";
+                  }
+                }
+                self.notify(error_string);
               }
               //self.close();
             }
@@ -166,22 +173,56 @@ var SQ = {
     $('#register-form form').ajaxForm({
       
     });*/
+//register-form-step2
+    $("#register-form-step2").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            tos_cbok:{
+              required: true
+            },
+            user_id:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please select a username"
+            },
+            tos_cbok: {
+                required: "please select the checkbox to agree with TOS."
+            },
+            user_id:{
+              required: "please restart the registration, we detected some error"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/selectusername/',
+              dataType: 'json',
+              success: function(data) {
+                if(data.status == 1) {
+                  $(".register_step2").hide();
+                  $(".register_step1").show();
+                  $("#user_id").val("");
+                  self.notify(data.result);
+                }
+                else {
+                  self.notify(data.error);
+                }
+                self.close();
+              }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
+    });
+
 
     $('#register-form-step2 form').ajaxForm({
-      url: window.location.href+'sqwag/selectusername/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          $(".register_step2").hide();
-          $(".register_step1").show();
-          $("#user_id").val("");
-          self.notify(data.result);
-        }
-        else {
-          self.notify(data.error);
-        }
-        self.close();
-      }
+      
     });
   },
   bindButtons: function() {

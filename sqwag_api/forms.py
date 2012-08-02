@@ -23,6 +23,7 @@ class RegisterationForm(forms.Form):
                     raise forms.ValidationError(u'Email addresses must be unique.')
                 except RegistrationProfile.DoesNotExist:
                     return email
+            return email
         else:
             raise forms.ValidationError(u'Email is a required field')
 
