@@ -69,32 +69,160 @@ var SQ = {
       }
     });
 
-     $('#login-form form').ajaxForm({
-      url: window.location.href+'sqwag/login/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          self.refresh();
+    $("#login-form").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            password:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please specify username"
+            },
+            password: {
+                required: "We need your password to verify your credentials"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/login/',
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                self.refresh();
+              }
+              else {
+                self.notify(data.error);
+                //self.close(); // TODO : refactor
+              }
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
-          self.close(); // TODO : refactor
+    });
+
+   /*  $('#login-form form').ajaxForm({
+      
+    }); */
+
+    $("#register-step1").validate({
+        rules: {
+            fullname:{
+              required: true,
+              maxlength: 25
+            },
+            email: {
+              required: true,
+              email: true
+            },
+            password:{
+              required:true
+            }
+        },
+        messages: {
+            fullname: {
+              required: "Please specify your fullname name",
+              maxlength: "fullname should be less than 25 characters"
+            },
+            email: {
+                required: "We need your email address to contact you",
+                email: "Your email address must be in the format of name@domain.com"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/register/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                $(".register_step1").hide();
+                $(".register_step2").show();close
+                $("#user_id").val(data.result);
+                self.notify(data.result);
+              }
+              else {
+                var error_string = "";
+                for (var key in data.error) {
+                  var obj = data.error[key];
+                  for (var prop in obj) {
+                    error_string = obj[prop]+" ";
+                  }
+                }
+                self.notify(error_string);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-      }
-    }); 
-    
+    });
+
+/*
     $('#register-form form').ajaxForm({
-      url: window.location.href+'sqwag/register/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          self.notify(data.status);
+      
+    });*/
+//register-form-step2
+    $("#register-form-step2").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            tos_cbok:{
+              required: true
+            },
+            user_id:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please select a username"
+            },
+            tos_cbok: {
+                required: "please select the checkbox to agree with TOS."
+            },
+            user_id:{
+              required: "please restart the registration, we detected some error"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/selectusername/',
+              dataType: 'json',
+              success: function(data) {
+                if(data.status == 1) {
+                  $(".register_step2").hide();
+                  $(".register_step1").show();
+                  $("#user_id").val("");
+                  self.notify(data.result);
+                }
+                else {
+                  self.notify(data.error);
+                }
+                self.close();
+              }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
-        }
-        self.close();
-      }
+    });
+
+
+    $('#register-form-step2 form').ajaxForm({
+      
     });
   },
   bindButtons: function() {
@@ -210,8 +338,8 @@ var SQ = {
   },
   
   bindSqwags: function() {
-    $('.sqwag').live('mouseover mouseout', function(event) {
-      var mask = $(this).find('.mask');
+    $('.feed_blk').live('mouseover mouseout', function(event) {
+      var mask = $(this).find('.align_right');
       if(event.type == 'mouseover') {
         mask.show();
       }

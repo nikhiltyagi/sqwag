@@ -96,35 +96,37 @@ def registerUser(request):
     if request.method == "POST":
         form = RegisterationForm(request.POST)
         if form.is_valid():
-            #fname = form.cleaned_data['first_name']
-            #lname = form.cleaned_data['last_name']
             pwd = form.cleaned_data['password']
             fullname = form.cleaned_data['fullname']
             email = form.cleaned_data['email']
-            #uname = form.cleaned_data['username']
-            user = User.objects.create_user(email, email, pwd)
-            #user.first_name = fname
-            #user.last_name = lname
-            user.date_joined = datetime.datetime.now()
-            user.is_active = False
-            user.save();
-            # create a profile for this user
-            usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
-            #current_site = Site.objects.get_current()
-            #reldat= {}
-            #this needs to be cronned as part of cron mail
-            #send_mail(subject,message,'coordinator@sqwag.com',[user.email],fail_silently=False)
-            #subscribe own feeds
-            relationShip = Relationship(subscriber=user,producer=user)
-            relationShip.date_subscribed = time.time()
-            relationShip.permission = True
-            relationShip.save()
-            print relationShip.date_subscribed
-            #CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
-            userdata = {}
-            userdata['user_auth'] = User.objects.get(pk=user.id)
-            userdata['user_profile'] = UserProfile.objects.get(user=user)  
-            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            try:
+                user = User.objects.get(username=email)
+                user.set_password(pwd)
+                user.save()
+                usrProf = UserProfile.objects.get(user=user)
+                usrProf.displayname = fullname
+                usrProf.fullname = fullname
+                usrProf.save()
+                print "not a new user"
+            except User.DoesNotExist:
+                print "new user"
+                user = User.objects.create_user(email, email, pwd)
+                user.date_joined = datetime.datetime.now()
+                user.is_active = False
+                user.save()
+                # create a profile for this user
+                usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
+                relationShip = Relationship(subscriber=user,producer=user)
+                relationShip.date_subscribed = time.time()
+                relationShip.permission = True
+                relationShip.save()
+                RegistrationProfile.objects.create_profile(user)
+                print relationShip.date_subscribed
+                #CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+                userdata = {}
+                userdata['user_auth'] = User.objects.get(pk=user.id)
+                userdata['user_profile'] = UserProfile.objects.get(user=user)  
+                #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
             successResponse['result'] = user.id
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
@@ -848,35 +850,50 @@ def accessFacebookNewUser(request):
         failureResponse['message'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')   
 
-def SelectUserName(request):
+def selectUserName(request):
     if "type" in request.POST:
         type = request.POST['type']
         if type == "sqwag_user":
             if "username" in request.POST:
-                id = request.POST['id']
-                try:
-                    UserProfile.objects.get(username=request.POST["username"])
-                    failureResponse['status'] = DUPLICATE
-                    failureResponse['error'] = "Username not availaible.Select some other username"
+                if "user_id" in request.POST:
+                    id = request.POST["user_id"]
+                    try:
+                        id = int(id)
+                    except TypeError:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = "bad request detected."
+                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    try:
+                        UserProfile.objects.get(username=request.POST["username"])
+                        failureResponse['status'] = DUPLICATE
+                        failureResponse['error'] = "Username not availaible.Select some other username"
+                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    except UserProfile.DoesNotExist:
+                        user = User.objects.get(pk=id)
+                        registration_profile = RegistrationProfile.objects.get(user=user)
+                        registration_profile.is_registration_completed = True
+                        registration_profile.save()
+                        userprofile = UserProfile.objects.get(user=user)
+                        userprofile.username = request.POST["username"]
+                        userprofile.save();
+                        host = request.get_host()
+                        if request.is_secure():
+                            protocol = 'https://'
+                        else:
+                            protocol = 'http://'
+                        message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
+                        mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
+                        mailentry(mailer) 
+                        successResponse['result'] = "Registration complete.Activation Link is sent to mail." 
+                        return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                else:
+                    failureResponse['error'] = "id is missing" #todo: put this in log.
+                    failureResponse['status'] = BAD_REQUEST
                     return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
-                except UserProfile.DoesNotExist:
-                    user = User.objects.get(pk=id)
-                    registration_profile = RegistrationProfile.objects.create_profile(user)
-                    userprofile = UserProfile.objects.get(user=user)
-                    userprofile.username = request.POST["username"]
-                    host = request.get_host()
-                    if request.is_secure():
-                        protocol = 'https://'
-                    else:
-                        protocol = 'http://'
-                    message = protocol + host + '/sqwag/activate/' + str(user.id) + '/' + registration_profile.activation_key
-                    mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
-                    mailentry(mailer) 
-                    successResponse['message'] = "Registration complete.Activation Link is sent to mail." 
-                    return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
                 failureResponse['error'] = "username cannot be blank"
                 failureResponse['status'] = BAD_REQUEST
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
         elif type == "socialnetwork_facebook":
             if "password" in request.POST:
                 try:
@@ -893,13 +910,14 @@ def SelectUserName(request):
                     userprofile.username = username
                     user.set_password(request.POST["password"])
                     user.is_active = True
-                    successResponse['message'] = "username updated successfully" 
                     user.save()
                     userprofile.save()
+                    successResponse['message'] = "username updated successfully" 
                     return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
                 failureResponse['status'] = BAD_REQUEST
-                failureResponse['error'] = "password field cannot be left blank" 
+                failureResponse['error'] = "password field cannot be left blank"
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript') 
         elif type == "socailnetwork_twitter":
             if "password" in request.POST:
                 if "email" in request.POST:
@@ -920,9 +938,9 @@ def SelectUserName(request):
                         user.is_active = True
                         user.username = email
                         user.email = email
-                        successResponse['message'] = "username updated successfully" 
                         user.save()
                         userprofile.save()
+                        successResponse['message'] = "username updated successfully"
                         return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
@@ -931,9 +949,13 @@ def SelectUserName(request):
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
-                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')  
-    
-def GetElasticSearch(request,user):
+                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = "type field is missing"
+        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+
+def getUserSuggestions(request,user):
     #import jsonpickle
     query = {}
     prefix = {}

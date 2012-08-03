@@ -27,7 +27,7 @@
                         value = value.substring(1);
                         console.log(value + " is candidate, get users for it.");
                         $.ajax({
-                            url:"http://127.0.0.1:8000/sqwag/getelasticsearch/"+value,
+                            url:"http://127.0.0.1:8000/sqwag/getusersuggestions/"+value,
                             dataType: "json",
                             type: "GET",
                             data: {

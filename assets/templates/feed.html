@@ -29,8 +29,8 @@
       </div><!-- feed_blk_hd -->  
       <div class="feed_blk_cnt">
         <img src="{{ square.complete_user.user_accounts.account_pic }}" width=52px height=52px />
-        <h4>{{ square.complete_user.user_accounts.account_handle }}</h4>
-        <h5>@{{  square.complete_user.user_accounts.account_handle }}</h5>
+        <h4>{{ square.complete_user.user_profile.displayname }}</h4>
+        <h5>@{{  square.complete_user.user_profile.username }}</h5>
         <p>{{ square.content_data }}</p>
         <p class="count pub-time" data-time="{{ square.date_created }}">{{ square.date_created }}</p>
       </div><!-- feed_blk_cnt --> 

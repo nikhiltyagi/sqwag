@@ -1,0 +1,57 @@
+<html>
+<head>
+    <script src="js/libs/jquery-1.7.2.min.js"></script>
+<script src="js/libs/jquery.form-defaults.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+</head>
+<body>
+    <div class="register_step1" >
+            <div class="register_blk_right" id="register-form">
+            <p>Create an Account</p>
+            <form id="register-step1" action=""  method="post">
+              <div class="form-controls">
+                <label for="fullname">Full name</label>
+                <input class="input" type="text" name="fullname" id="fullname"/>
+              </div>
+              <div class="form-controls">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email"/>
+              </div>
+              <div class="form-controls">
+               <label for="password-registration">Password</label>
+            <input type="password" name="password" id="password-registration" />
+              </div>
+              
+              <div class="modal-footer">
+                <input class="btn btn-primary" type="submit" value="Register" />
+              </div>
+            </form>
+          </div><!-- register_blk_right -->
+          </div><!-- register_step1 -->
+    <script>
+
+        $(document).ready(function() {
+            $("#register-step1").validate({
+                rules: {
+                    fullname: "required",
+                    email: {
+                        required: true,
+                        email: true
+                    }
+                },
+                messages: {
+                    fullname: "Please specify your fullname name",
+                    email: {
+                        required: "We need your email address to contact you",
+                        email: "Your email address must be in the format of name@domain.com"
+                    }
+                },
+                submitHandler: function(form) {
+                    // do other stuff for a valid form
+                    form.submit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

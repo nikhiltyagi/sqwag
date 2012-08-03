@@ -378,23 +378,32 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .register_blk_hd h2{font:bold 18px/32px Arial;color:#FFF;font-size:17px;font-weight: bold;line-height:32px;}
 .register_blk_hd span{color:#fff;line-height:32px;font:bold 14px/32px Arial;}
 .align_left{float:left;padding-left:20px;}
-.align_right{padding-left:5px;}
+.align_right{padding-left:5px; display: none;}
 .register_blk_inner{clear:both;overflow:hidden;height:202px;background:url(../img/register_blk_bg.png) repeat;border:1px solid #908f8f;}
 .register_blk_left{float:left;margin:25px 0px;width:200px;padding:25px 20px 15px 20px;border-right:3px solid #ccc;}
 .register_blk_left a{display:inline-block;margin-bottom:15px;}
-.register_blk_right{float:right;margin:5px 15px;width:215px;}
+.register_blk_right{float:right;margin:8px 15px;width:215px;}
+.register_step2 .register_blk_right{width:458px;}
+.register_step2 form{margin:35px 0px 0px;}
 .register_blk_right label{display:none;}
-.register_blk_right p{padding-bottom:5px;color:#615f5f;font:bold 16px/30px Arial;}
-.register_blk_right input{height:16px;margin-bottom:5px;width:180px;border:1px solid #959494;height:29px;line-height:29px;font:bold 14px/29px Arial;color:#b7b4b6;padding:0px 10px;}
+.register_step2 label{display:block;font:bold 16px/26px Arial;float:left;margin-right:5px;}
+.register_blk_right p{padding-bottom:5px;color:#615f5f;font:bold 16px/30px Arial;clear:both;overflow:hidden;}
+.register_blk_right input{background:#fff;height:16px;margin-bottom:5px;width:191px;border:1px solid #959494;height:29px;line-height:29px;font:bold 14px/29px Arial;color:#b7b4b6;padding:0px 10px;}
+.register_step2 input[type="checkbox"]{width:auto;float:left;margin-right:5px;}
+.register_step2 .align_center{margin:0px 100px;}
+.register_step2 .legend_text{font:normal 10px/6px Arial;clear:both;float:left;margin-left:122px;}
 .register_blk_right .modal-footer{background:none;border:0 none;box-shadow: none;padding:5px 0px;}
 .register_blk_right input[type="submit"]{border:1px solid #070606;background:url("../img/btn_bg.png") repeat-x;height:29px;margin:4px 0;width:72px;color:#fff;line-height:35px;font:bold 14px/29px Arial;}
+.register_step2 .register_blk_right .modal-footer p label{font-size:14px;font-weight:normal;line-height:35px;}
+.register_step2 .register_blk_right .modal-footer p{margin-top:40px;}
+.register_step2 .register_blk_right .modal-footer p a{text-decoration:underline;color:#333;}
 .logo_prelogin{margin-top:8px;display:block;}
 .feed_blk{overflow:hidden;float:left;width:240px;border:1px solid #555;height:240px;position:relative;margin:0px 3px 6px;}
 .feed_blk_hd{background:rgba(0,0,0,0.6);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";width:100%;clear:both;overflow:hidden;position:absolute;left:0px;padding-top:1px;}
 .feed_blk_hd h3{font:bold 25px/30px Arial;padding-left:5px;color:#fff;float:left;}
 .feed_blk_hd .align_right{float:right;}
 .feed_blk  .feed_blk_hd a{float:left;background:#56785c;font:normal 12px/14px Arial;border:1px solid #2d5234;margin-right:1px;color:#fff;padding:6px 10px;}
-.feed_blk h4 a,.feed_blk h4{font:bold 14px/14px Arial;padding:25px 0px 0px 5px;color:#fff;}
+.feed_blk h4 a,.feed_blk h4,.feed_blk_footer h4{font:bold 14px/14px Arial;padding:25px 0px 0px 5px;color:#fff;}
 .feed_blk h5 a,.feed_blk h5{font:normal 12px/14px Arial;padding:0px 0px 0px 5px;color:#fff;}
 .feed_blk_cnt{clear:both;overflow:hidden;padding:40px 8px 8px;}
 .feed_blk_cnt img{float:left;margin:0px 10px 5px 0px;}
@@ -411,6 +420,10 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .feed_blk.song_blk p{font-weight:bold;color:#000;padding:0px}
 .feed_blk.song_blk img{margin:10px 0px 0px 40px;}
 .feed_blk.song_blk p.groveicon img{position:absolute;right:35px;top:53px;}
+.feed_blk_footer{position:absolute;bottom:0px;background-color: rgba(38,35,37,0.6);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";padding:0px 10px;}
+.feed_blk_footer p{font:normal 12px/16px Arial;color:#fff;}
+.feed_blk_footer img{float:left;margin-right:10px;margin-top:-25px;}
+.feed_blk_footer h4{padding:5px 0px;}
 .overlay{z-index:10;background:rgba(0,0,0,0.9);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";position:fixed;width:100%;height:100%;left:0%;top:0%;}
 /* forgot password popup styles */
 .fgt_pwd_req{position:absolute;top:22%;left:26%;width:492px;height:242px;z-index:11;}

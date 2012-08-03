@@ -7,7 +7,7 @@ from sqwag_api.models import *
 
 class RegisterationForm(forms.Form):
     fullname = forms.CharField(max_length=50,required=True)
-    password = forms.CharField(max_length=128)
+    password = forms.CharField(max_length=128,required=True)
     #first_name = forms.CharField(max_length=30, required=False)
     #last_name = forms.CharField(max_length=30, required=False)
     email = forms.EmailField(required=True)
@@ -17,7 +17,12 @@ class RegisterationForm(forms.Form):
         if email:
             #username = self.cleaned_data.get('username')
             if email and User.objects.filter(email=email):
-                raise forms.ValidationError(u'Email addresses must be unique.')
+                user = User.objects.get(email=email)
+                try:
+                    RegistrationProfile.objects.get(user=user,is_registration_completed=True)
+                    raise forms.ValidationError(u'Email addresses must be unique.')
+                except RegistrationProfile.DoesNotExist:
+                    return email
             return email
         else:
             raise forms.ValidationError(u'Email is a required field')
