@@ -279,11 +279,11 @@
 <div class="slide-out-div">
     <a class="handle">feedback</a>
       <div id="resp-feedback"> </div>
-      <form action="/api/feedback" method="post">
+      <form id="feedback-form" action="/api/feedback" method="post">
           <div class="form-controls">
-            <textarea class="input-xlarge" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
+            <textarea class="input-xlarge" id="feedback" name="feedback"></textarea>
           </div>
-          <input id="submit-feedback" type="button" class="btn btn-primary fr" value="submit" />
+          <input id="submit-feedback" type="submit" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
 
@@ -305,7 +305,7 @@
 <script>
 
 $(document).ready(function() {
-  
+  $("#feedback").DefaultValue("we love feedback :)");
   var context = {
       "router" :router,
       "route": "home",
@@ -326,6 +326,8 @@ $(document).ready(function() {
     $("#email").DefaultValue("Email");
     $("#password-registration").DefaultValue("nopassword");
     $("#username-register").DefaultValue("username");
+    
+    
 
   {% endif %}
   $.extend(context,options);
