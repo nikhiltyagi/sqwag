@@ -174,7 +174,7 @@
     <div id="landing_pg_wrap">
    <!--  <div class="logo_blk"><a href="\"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></div>--><!-- logo_blk -->
       <div id="main_nav">
-      <ul>
+      <ul style="visibility:hidden">
         <li><a href="">About</a></li>
         <li><a href="">Blog</a></li>
         <li><a href="">Jobs</a></li>
@@ -187,13 +187,13 @@
         <div class="login_blk_left">
           <p><a href="\" class="logo_prelogin"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></p>
         </div><!-- login_blk_left -->
-        <div class="login_blk_right" id="login-form">
-          <form action="#" method="post">
+        <div class="login_blk_right" id="login-form-div">
+          <form id="login-form" method="post">
           <div class="form_wrap">
             <label for="username">Username</label>
-            <input class="input" type="text" name="username" id="username" required />
+            <input class="input" type="text" name="username" id="username" />
             <label for="password-login">Password</label>
-            <input type="password" name="password" id="password-login" required />           
+            <input type="password" name="password" id="password-login"/>           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
             <a href="#" class="forgot_pwd_link">Forgot password?</a>
@@ -213,25 +213,25 @@
           <span class="align_right">Sign up! It's free and easy.</span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
-          <div class="register_step1" >
+          <div class="register_step1" style="display:block;" >
             <div class="register_blk_left">
               <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
-              <a href="#" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
+              <a href="sqwag/authfacebooknewuser/" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
             </div><!-- register_blk_left -->
-            <div class="register_blk_right" id="register-form">
+            <div class="register_blk_right" id="register-form-div" >
             <p>Create an Account</p>
-            <form action=""  method="post">
+            <form id="register-step1" method="post">
               <div class="form-controls">
                 <label for="fullname">Full name</label>
-                <input class="input" type="text" name="fullname" id="fullname" required />
+                <input class="input" type="text" name="fullname" id="fullname"/>
               </div>
               <div class="form-controls">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" required />
+                <input type="email" name="email" id="email"/>
               </div>
               <div class="form-controls">
-               <label for="password">Password</label>
-            <input type="password" name="password" id="password-registration" required />
+               <label for="password-registration">Password</label>
+            <input type="password" name="password" id="password-registration"/>
               </div>
               
               <div class="modal-footer">
@@ -241,19 +241,19 @@
           </div><!-- register_blk_right -->
           </div><!-- register_step1 -->
           <div class="register_step2" style="display:none;">
-            <div class="register_blk_right" id="register-form-step2">
+            <div class="register_blk_right" id="register-form-step2-div">
               <p>Select your username and start Sqwagging!</p>
-              <form action="" method="post">
+              <form id="register-form-step2" method="post">
               <div  class="align_center">
                 <label for="username-register">@</label>
-                  <input class="input" type="text" name="username" id="username-register" required />
+                  <input class="input" type="text" name="username" id="username-register"/>
                   <span class="legend_text">You can change it later!</span>
                   <input type="text" value="sqwag_user" name="type" style="display:none"/>
                   <input id="user_id" type="text" name="user_id" style="display:none"/>
                   
               </div><!-- align_center -->
               <div class="modal-footer">
-                  <p><input type="checkbox" required /><label for="username">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+                  <p><input name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
                   <input class="btn btn-primary" type="submit" value="Done!" /></p>
                 </div>
               </form>
@@ -279,11 +279,11 @@
 <div class="slide-out-div">
     <a class="handle">feedback</a>
       <div id="resp-feedback"> </div>
-      <form action="/api/feedback" method="post">
+      <form id="feedback-form" action="/api/feedback" method="post">
           <div class="form-controls">
-            <textarea class="input-xlarge" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
+            <textarea class="input-xlarge" id="feedback" name="feedback"></textarea>
           </div>
-          <input id="submit-feedback" type="button" class="btn btn-primary fr" value="submit" />
+          <input id="submit-feedback" type="submit" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
 
@@ -291,7 +291,8 @@
 <script src="assets/js/libs/jquery.form-defaults.min.js"></script>
 <script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
 <script src="assets/js/tabslideout.js"></script>
-<script src="assets/js/libs/bootstrap-modal.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+<!-- <script src="assets/js/libs/bootstrap-modal.min.js"></script> -->
 <script src="assets/js/libs/bootstrap-dropdown.js"></script>
 <script src="assets/js/libs/jquery.form.js"></script>
 <script src="assets/js/app.js"></script>
@@ -304,7 +305,7 @@
 <script>
 
 $(document).ready(function() {
-  
+  $("#feedback").DefaultValue("we love feedback :)");
   var context = {
       "router" :router,
       "route": "home",
@@ -325,6 +326,8 @@ $(document).ready(function() {
     $("#email").DefaultValue("Email");
     $("#password-registration").DefaultValue("nopassword");
     $("#username-register").DefaultValue("username");
+    
+    
 
   {% endif %}
   $.extend(context,options);

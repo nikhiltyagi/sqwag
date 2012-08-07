@@ -953,6 +953,12 @@ def selectUserName(request):
                 if "user_id" in request.POST:
                     id = request.POST["user_id"]
                     try:
+                        id = int(id)
+                    except TypeError:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['error'] = "bad request detected."
+                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    try:
                         UserProfile.objects.get(username=request.POST["username"])
                         failureResponse['status'] = DUPLICATE
                         failureResponse['error'] = "Username not availaible.Select some other username"

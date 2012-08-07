@@ -69,52 +69,188 @@ var SQ = {
       }
     });
 
-     $('#login-form form').ajaxForm({
-      url: window.location.href+'sqwag/login/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          self.refresh();
+    $("#login-form").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            password:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please specify username"
+            },
+            password: {
+                required: "We need your password to verify your credentials"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/login/',
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                self.refresh();
+              }
+              else {
+                self.notify(data.error);
+                //self.close(); // TODO : refactor
+              }
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
-          self.close(); // TODO : refactor
-        }
-      }
-    }); 
-    
-    $('#register-form form').ajaxForm({
-      url: window.location.href+'sqwag/register/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          $(".register_step1").hide();
-          $(".register_step2").show();
-          $("#user_id").val(data.result);
-          self.notify(data.result);
-        }
-        else {
-          self.notify(data.error);
-        }
-        self.close();
-      }
     });
 
-    $('#register-form-step2 form').ajaxForm({
-      url: window.location.href+'sqwag/selectusername/',
-      dataType: 'json',
-      success: function(data) {
-        if(data.status == 1) {
-          $(".register_step2").hide();
-          $(".register_step1").show();
-          $("#user_id").val("");
-          self.notify(data.result);
+   /*  $('#login-form form').ajaxForm({
+      
+    }); */
+
+    $("#register-step1").validate({
+        rules: {
+            fullname:{
+              required: true,
+              maxlength: 25
+            },
+            email: {
+              required: true,
+              email: true
+            },
+            password:{
+              required:true
+            }
+        },
+        messages: {
+            fullname: {
+              required: "Please specify your fullname name",
+              maxlength: "fullname should be less than 25 characters"
+            },
+            email: {
+                required: "We need your email address to contact you",
+                email: "Your email address must be in the format of name@domain.com"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/register/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                $(".register_step1").hide();
+                $(".register_step2").show();close
+                $("#user_id").val(data.result);
+                self.notify(data.result);
+              }
+              else {
+                var error_string = "";
+                for (var key in data.error) {
+                  var obj = data.error[key];
+                  for (var prop in obj) {
+                    error_string = obj[prop]+" ";
+                  }
+                }
+                self.notify(error_string);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        else {
-          self.notify(data.error);
+    });
+
+/*
+    $('#register-form form').ajaxForm({
+      
+    });*/
+//register-form-step2
+    $("#register-form-step2").validate({
+        rules: {
+            username:{
+              required: true
+            },
+            tos_cbok:{
+              required: true
+            },
+            user_id:{
+              required: true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please select a username"
+            },
+            tos_cbok: {
+                required: "please select the checkbox to agree with TOS."
+            },
+            user_id:{
+              required: "please restart the registration, we detected some error"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/selectusername/',
+              dataType: 'json',
+              success: function(data) {
+                if(data.status == 1) {
+                  $(".register_step2").hide();
+                  $(".register_step1").show();
+                  $("#user_id").val("");
+                  self.notify(data.result);
+                }
+                else {
+                  self.notify(data.error);
+                }
+                self.close();
+              }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
         }
-        self.close();
-      }
+    });
+
+    $("#feedback-form").validate({
+      rules: {
+            feedback:{
+              required: true
+            }
+        },
+        messages: {
+            feedback: {
+              required: "you can not submit an empty feedback!"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url:"/api/feedback",
+            type: "POST",
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                $("#feedback").val("");
+                $("#feedback").DefaultValue("Thanks for your feedback!");
+              }
+              else {
+                self.notify(data.error);
+              }
+              self.close();
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
     });
   },
   bindButtons: function() {
@@ -145,26 +281,9 @@ var SQ = {
       self.backbone.feedHandler.favTweet({'square_id' : user_square_id});
     });
     
-    $("#submit-feedback").bind('click',function(){
-      $.ajax({
-        url:"/api/feedback",
-        dataType: "json",
-        type: "POST",
-        data: {
-          'feedback': $("#feedback").val()
-        },
-        success: function (data, textStatus, jqXHR){
-          if(data.status == 1){
-            $("#resp-feedback").html("Thanks for you feedback :)");
-          }else{
-            SQ.notify(data.error);
-          }
-        },
-        complete: function(jqXHR, textStatus){
-          smartDate.refresh();
-        }
-      });
-    });
+    /*$("#submit-feedback").bind('click',function(){
+      
+    });*/
 
     $(".sqwag-me").live('click',function(){
       $.ajax({
