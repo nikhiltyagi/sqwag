@@ -779,6 +779,24 @@ class unfollowHandler(BaseHandler):
         #DeleteDocument(ELASTIC_SEARCH_RELATIONSHIP_POST,RelationshipObj.id)
         #code for elastic search ends
         RelationshipObj.delete()
+        usrProfSubscriber = UserProfile.objects.get(user=request.user)
+        usrProfSubscriber.following_count = usrProfSubscriber.following_count - 1
+        usrProfSubscriber.save()
+        #elastic search code starts(tested and working fine)
+        #userdata = {}
+        #userdata['user_auth'] = User.objects.get(pk=request.user.id)
+        #userdata['user_profile'] = UserProfile.objects.get(user=request.user)
+        #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
+        #elastic search code ends
+        usrProfProducer = UserProfile.objects.get(user=user)
+        usrProfProducer.followed_by_count = usrProfProducer.followed_by_count -1
+        usrProfProducer.save()
+        #elastic search code starts(tested and working fine)
+        #userdata = {}
+        #userdata['user_auth'] = User.objects.get(pk=user.id)
+        #userdata['user_profile'] = UserProfile.objects.get(user=user)
+        #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+        #elastic search code ends
         successResponse['status'] = SUCCESS_STATUS_CODE
         successResponse['message'] = SUCCESS_MSG
         successResponse['result'] = 'successfully unfollowed the user'
