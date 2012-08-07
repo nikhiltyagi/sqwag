@@ -27,3 +27,8 @@ def GetDocument(query=None,url=None,fields=None,filter=None,sort=None):
         return content
     else:
         return resp
+
+def DeleteDocument(url,id):
+    h = Http()
+    url = url + str(id)
+    h.request(url,"DELETE")
