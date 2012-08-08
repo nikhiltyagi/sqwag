@@ -1,17 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.core import serializers
+from django.core import serializers, serializers
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core.mail.message import BadHeaderError
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.template.context import Context
 from django.template.loader import render_to_string
 from httplib2 import Http
-#from instagram.client import InstagramAPI
 from oauth.oauth import OAuthToken
+from sqwag_api.InstaService import *
 from sqwag_api.constants import *
+from sqwag_api.elsaticsearch import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
@@ -20,6 +23,7 @@ from time import gmtime, strftime
 from urllib import urlencode
 import datetime
 import httplib
+import json
 import oauth.oauth as oauth
 import random
 import settings
@@ -27,10 +31,7 @@ import sha
 import simplejson
 import time
 import urlparse
-import json
-from django.core import serializers
-from sqwag_api.elsaticsearch import *
-from sqwag_api.InstaService import *
+#from instagram.client import InstagramAPI
 
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
@@ -831,16 +832,26 @@ def accessFacebookNewUser(request):
                 try:
                     userAccount.full_clean()
                     userAccount.save()
-                    successResponse['result'] = userinfo;
+                    complete_user = getCompleteUserInfo(user=user)
+                    c = Context(getUserContextObject(complete_user))
+                    return render_to_response('index.html',c)
+                    #successResponse['result'] = userinfo;
                 #return render_to_response('index.html')
-                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                    #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 except ValidationError, e:
                     failureResponse['status'] = SYSTEM_ERROR
                     failureResponse['error'] = "some error occured, please try later"+e.message
                     #TODO: log it
                     return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #redirect to home page of the user as user is already registered and active
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            complete_user = getCompleteUserInfo(user=user)
+            c = Context(getUserContextObject(complete_user))
+            user = authenticate(username=userinformation['email'], password='123456')
+            if user is not None:
+                login(request, user)
+                return HttpResponseRedirect('/');
+            #return render_to_response('index.html',c)
+            #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = resp.status
             failureResponse['message'] = 'facebook ERROR'

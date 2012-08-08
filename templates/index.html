@@ -13,7 +13,11 @@
 	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
 	<link rel="stylesheet" href="assets/css/style.css">
 
-  
+  <script type="text/javascript">
+    if (window.location.href.indexOf('#_=_') > 0) {
+      window.location = window.location.href.replace(/#.*/, '');
+    }
+  </script>
 </head>
 <body>
 <div class="container">
@@ -329,6 +333,12 @@ $(document).ready(function() {
     
     
 
+  {% endif %}
+
+  {% if complete_user.user.is_active %}
+  // do nothing
+  {% else %}
+  alert("nothing");
   {% endif %}
   $.extend(context,options);
   SQ.init(context);
