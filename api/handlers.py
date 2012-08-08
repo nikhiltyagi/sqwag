@@ -85,55 +85,55 @@ class UserSelfFeedsHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False,is_private=False).order_by('date_shared')
-        filter = {}
-        term = {}
-        date_shared = {}
-        dt = {}
-        date_shared['order'] = "asc"
-        dt['date_shared'] = date_shared
-        sort = [dt]
-        term["user_id"] = request.user.id
-        term["is_deleted"] = False
-        term["is_private"] = False
-        #term["is_deleted"] = False
-        #term["is_private"] = False
-        filter['term'] = term
-        fields = ["content_description","id","square_id","py/object"]
-        print "calling GET"
-        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,fields=fields,filter=filter,sort=sort)
-        print "Done"
-        js = simplejson.loads(result)
-        print "simple json"
-        print js['hits']['hits']
-        jsoncontent = jsonpickle.decode(result)
-        print "json pickle"
-        print jsoncontent['hits']['hits']
-        squrs_all = []
-        for i in jsoncontent['hits']['hits']:
-            sqr_obj = {}
-            #print i['_source'].id
-            #print i['_source'].square_id
-            #print jsonpickle.encode(i['_source'],unpicklable=False)
-            term = {}
-            term['id'] = i['fields'].square_id
-            query = {}
-            query['term'] = term
-            #fields = ["content_description","user_id","content_type","content_src","content_data","date_created","user_account_id",]
-            square = GetDocument(query,ELATIC_SEARCH_SQUARE_GET)
-            rs = jsonpickle.decode(square)
-            print rs
-            for x in rs['hits']['hits']:
-                if not x['_source'].user_account:
-                    account_type = 'NA'
-                else:
-                    account_type = x['_source'].user_account
-            x['_source'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-            sqr_obj['square'] = x['_source']
-            i['fields'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-            sqr_obj['user_square'] = i['fields']
-            squrs_all.insert(0,sqr_obj)
-        print jsonpickle.encode(squrs_all,unpicklable=False)
-        print paginate(request,page,squrs_all,NUMBER_OF_SQUARES)
+#        filter = {}
+#        term = {}
+#        date_shared = {}
+#        dt = {}
+#        date_shared['order'] = "asc"
+#        dt['date_shared'] = date_shared
+#        sort = [dt]
+#        term["user_id"] = request.user.id
+#        term["is_deleted"] = False
+#        term["is_private"] = False
+#        #term["is_deleted"] = False
+#        #term["is_private"] = False
+#        filter['term'] = term
+#        fields = ["content_description","id","square_id","py/object"]
+#        print "calling GET"
+#        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,fields=fields,filter=filter,sort=sort)
+#        print "Done"
+#        js = simplejson.loads(result)
+#        print "simple json"
+#        print js['hits']['hits']
+#        jsoncontent = jsonpickle.decode(result)
+#        print "json pickle"
+#        print jsoncontent['hits']['hits']
+#        squrs_all = []
+#        for i in jsoncontent['hits']['hits']:
+#            sqr_obj = {}
+#            #print i['_source'].id
+#            #print i['_source'].square_id
+#            #print jsonpickle.encode(i['_source'],unpicklable=False)
+#            term = {}
+#            term['id'] = i['fields'].square_id
+#            query = {}
+#            query['term'] = term
+#            #fields = ["content_description","user_id","content_type","content_src","content_data","date_created","user_account_id",]
+#            square = GetDocument(query,ELATIC_SEARCH_SQUARE_GET)
+#            rs = jsonpickle.decode(square)
+#            print rs
+#            for x in rs['hits']['hits']:
+#                if not x['_source'].user_account:
+#                    account_type = 'NA'
+#                else:
+#                    account_type = x['_source'].user_account
+#            x['_source'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
+#            sqr_obj['square'] = x['_source']
+#            i['fields'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
+#            sqr_obj['user_square'] = i['fields']
+#            squrs_all.insert(0,sqr_obj)
+#        print jsonpickle.encode(squrs_all,unpicklable=False)
+#        print paginate(request,page,squrs_all,NUMBER_OF_SQUARES)
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
@@ -212,6 +212,13 @@ class ShareSquareHandler(BaseHandler):
                         return failureResponse
                     usrprofile.sqwag_count = usrprofile.sqwag_count + 1
                     usrprofile.save()
+                    #code for elastic search start(tested and working fine)
+                    #CreateDocument(Square.objects.get(pk=squareObj.id),squareObj.id,ELASTIC_SEARCH_SQUARE_POST)
+                    #userdata = {}
+                    #userdata['user_auth'] = User.objects.get(pk=request.user.id)
+                    #userdata['user_profile'] = UserProfile.objects.get(user=request.user)  
+                    #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
+                        #code for elastic search end
                     squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)['result']
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')['result']
@@ -262,14 +269,32 @@ class RelationshipHandler(BaseHandler):
                 relationship.date_subscribed = time.time()
                 relationship.permission = True
                 relationship.save()
+                #code for elastic search starts(tested and working fine)
+                #rel = Relationship.objects.get(subscriber=sub,producer=prod)
+                #CreateDocument(rel,relationship.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+                #code for elastic search ends
                 #update producer's profile
-                userProfile = UserProfile.objects.get(user=relationship.producer)
+                usr = relationship.producer
+                userProfile = UserProfile.objects.get(user=usr)
                 userProfile.followed_by_count += 1 
                 userProfile.save()
+                #code or elastic search starts(tested and working fine)
+                #userdata = {}
+                #userdata['user_auth'] = User.objects.get(pk=usr.id)
+                #userdata['user_profile'] = UserProfile.objects.get(user=usr)
+                #CreateDocument(userdata,usr.id,ELASTIC_SEARCH_USER_POST)
+                #code for elastic search ends
                 #update subscriber's profile
-                userProfile = UserProfile.objects.get(user=relationship.subscriber)
+                usr = relationship.subscriber
+                userProfile = UserProfile.objects.get(user=usr)
                 userProfile.following_count += 1 
                 userProfile.save()
+                #code or elastic search starts(tested and working fine)
+                #userdata = {}
+                #userdata['user_auth'] = User.objects.get(pk=usr.id)
+                #userdata['user_profile'] = UserProfile.objects.get(user=usr)
+                #CreateDocument(userdata,usr.id,ELASTIC_SEARCH_USER_POST)
+                #code for elastic search ends
                 relationship.producer_complete_user = getCompleteUserInfo(request,prod)
                 relationship.subscriber_complete_user = getCompleteUserInfo(request,sub)
                 to_email = relationship.producer.email
@@ -750,7 +775,28 @@ class unfollowHandler(BaseHandler):
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = 'you are not following this user'
             return failureResponse
+        #code for elastic search starts(tested and working fine)
+        #DeleteDocument(ELASTIC_SEARCH_RELATIONSHIP_POST,RelationshipObj.id)
+        #code for elastic search ends
         RelationshipObj.delete()
+        usrProfSubscriber = UserProfile.objects.get(user=request.user)
+        usrProfSubscriber.following_count = usrProfSubscriber.following_count - 1
+        usrProfSubscriber.save()
+        #elastic search code starts(tested and working fine)
+        #userdata = {}
+        #userdata['user_auth'] = User.objects.get(pk=request.user.id)
+        #userdata['user_profile'] = UserProfile.objects.get(user=request.user)
+        #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
+        #elastic search code ends
+        usrProfProducer = UserProfile.objects.get(user=user)
+        usrProfProducer.followed_by_count = usrProfProducer.followed_by_count -1
+        usrProfProducer.save()
+        #elastic search code starts(tested and working fine)
+        #userdata = {}
+        #userdata['user_auth'] = User.objects.get(pk=user.id)
+        #userdata['user_profile'] = UserProfile.objects.get(user=user)
+        #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+        #elastic search code ends
         successResponse['status'] = SUCCESS_STATUS_CODE
         successResponse['message'] = SUCCESS_MSG
         successResponse['result'] = 'successfully unfollowed the user'
@@ -807,6 +853,12 @@ class uploadCoverHandler(BaseHandler):
             else:
                 return wrapper
             userProfile.save()
+            #code or elastic search starts(tested and working fine)
+            #userdata = {}
+            #userdata['user_auth'] = User.objects.get(pk=user.id)
+            #userdata['user_profile'] = UserProfile.objects.get(user=user)  
+            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search ends
             successResponse['status'] = SUCCESS_STATUS_CODE
             successResponse['message'] = 'cover photo updated successfully'
             successResponse['result'] = userProfile
@@ -840,6 +892,12 @@ class uploadProfilePictureHandler(BaseHandler):
             else:
                 return wrapper
             userProfile.save()
+            #code for elastic search starts(tested and working fine)
+            #userdata = {}
+            #userdata['user_auth'] = User.objects.get(pk=user.id)
+            #userdata['user_profile'] = UserProfile.objects.get(user=user)  
+            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search ends
             successResponse['status'] = SUCCESS_STATUS_CODE
             successResponse['message'] = 'profile pic updated successfully'
             successResponse['result'] = userProfile
@@ -869,6 +927,12 @@ class uploadPersonalMessage(BaseHandler):
         if 'message' in request.POST:
             userProfile.personal_message = request.POST['message']
             userProfile.save()
+            #code for elastic search starts(tested and working fine)
+            #userdata = {}
+            #userdata['user_auth'] = User.objects.get(pk=user.id)
+            #userdata['user_profile'] = UserProfile.objects.get(user=user)  
+            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search ends
             successResponse['status'] = SUCCESS_STATUS_CODE
             successResponse['message'] = 'personal message updated successfully'
             successResponse['result'] = userProfile

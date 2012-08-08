@@ -107,7 +107,7 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
-#    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
+    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
     is_owner = True
     squareResponse = {}
     userSquare = createUserSquare(None,user,square,is_owner)
@@ -263,7 +263,7 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
-#    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
     return userSquare
 
 def getRelationship(producer,subscriber):

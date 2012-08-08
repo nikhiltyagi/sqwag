@@ -11,7 +11,9 @@ var SQ = {
     //initialize routers 
     self.router.init();
     // route to a template
-    self.router.routeTo(context.route);
+    if(context.route){
+      self.router.routeTo(context.route);
+    }
     setInterval(smartDate.refresh, 60*1000);
   },
 
