@@ -174,7 +174,7 @@
     <div id="landing_pg_wrap">
    <!--  <div class="logo_blk"><a href="\"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></div>--><!-- logo_blk -->
       <div id="main_nav">
-      <ul>
+      <ul style="visibility:hidden">
         <li><a href="">About</a></li>
         <li><a href="">Blog</a></li>
         <li><a href="">Jobs</a></li>
@@ -216,7 +216,7 @@
           <div class="register_step1" style="display:block;" >
             <div class="register_blk_left">
               <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
-              <a href="#" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
+              <a href="sqwag/authfacebooknewuser/" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
             </div><!-- register_blk_left -->
             <div class="register_blk_right" id="register-form-div" >
             <p>Create an Account</p>
@@ -278,11 +278,11 @@
 <div class="slide-out-div">
     <a class="handle">feedback</a>
       <div id="resp-feedback"> </div>
-      <form action="/api/feedback" method="post">
+      <form id="feedback-form" action="/api/feedback" method="post">
           <div class="form-controls">
-            <textarea class="input-xlarge" id="feedback" name="feedback" placeholder="we love feedbacks :)"></textarea>
+            <textarea class="input-xlarge" id="feedback" name="feedback"></textarea>
           </div>
-          <input id="submit-feedback" type="button" class="btn btn-primary fr" value="submit" />
+          <input id="submit-feedback" type="submit" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
 <div class="fgt_pwd_req" style="display:none;">
@@ -440,7 +440,7 @@
 <script>
 
 $(document).ready(function() {
-  
+  $("#feedback").DefaultValue("we love feedback :)");
   var context = {
       "router" :router,
       "route": "home",
@@ -461,6 +461,8 @@ $(document).ready(function() {
     $("#email").DefaultValue("Email");
     $("#password-registration").DefaultValue("nopassword");
     $("#username-register").DefaultValue("username");
+    
+    
 
   {% endif %}
   $.extend(context,options);

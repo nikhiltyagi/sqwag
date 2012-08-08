@@ -220,9 +220,37 @@ var SQ = {
         }
     });
 
-
-    $('#register-form-step2 form').ajaxForm({
-      
+    $("#feedback-form").validate({
+      rules: {
+            feedback:{
+              required: true
+            }
+        },
+        messages: {
+            feedback: {
+              required: "you can not submit an empty feedback!"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url:"/api/feedback",
+            type: "POST",
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                $("#feedback").val("");
+                $("#feedback").DefaultValue("Thanks for your feedback!");
+              }
+              else {
+                self.notify(data.error);
+              }
+              self.close();
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
     });
   },
   bindButtons: function() {
@@ -253,26 +281,9 @@ var SQ = {
       self.backbone.feedHandler.favTweet({'square_id' : user_square_id});
     });
     
-    $("#submit-feedback").bind('click',function(){
-      $.ajax({
-        url:"/api/feedback",
-        dataType: "json",
-        type: "POST",
-        data: {
-          'feedback': $("#feedback").val()
-        },
-        success: function (data, textStatus, jqXHR){
-          if(data.status == 1){
-            $("#resp-feedback").html("Thanks for you feedback :)");
-          }else{
-            SQ.notify(data.error);
-          }
-        },
-        complete: function(jqXHR, textStatus){
-          smartDate.refresh();
-        }
-      });
-    });
+    /*$("#submit-feedback").bind('click',function(){
+      
+    });*/
 
     $(".sqwag-me").live('click',function(){
       $.ajax({

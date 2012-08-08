@@ -122,7 +122,9 @@ def registerUser(request):
                 relationShip.save()
                 RegistrationProfile.objects.create_profile(user)
                 print relationShip.date_subscribed
-                #CreateDocument(relationShip,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+                #Elastic search code(CreateDocument part) is working fine
+                #rel = Relationship.objects.get(subscriber=sub,producer=prod)
+                #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
                 userdata = {}
                 userdata['user_auth'] = User.objects.get(pk=user.id)
                 userdata['user_profile'] = UserProfile.objects.get(user=user)  
@@ -221,6 +223,14 @@ def accessTweeter(request):
             relationShip.save()
             user.save()
             userProfile.save()
+            #code for elastic search starts
+            #userdata = {}
+            #userdata['user_auth'] = User.objects.get(pk=user.id)
+            #userdata['user_profile'] = UserProfile.objects.get(user=user)  
+            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #rel = Relationship.objects.get(subscriber=sub,producer=prod)
+            #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+            #Code for elastic search ends
         try:
             userAccount = getActiveUserAccount(user, ACCOUNT_TWITTER)
             print oauthAccess.mUser.GetId()
@@ -240,19 +250,13 @@ def accessTweeter(request):
                                             account_data=oauthAccess.mUser.AsJsonString(),
                                             account_pic=oauthAccess.mUser.GetProfileImageUrl(),
                                             account_handle=oauthAccess.mUser.GetScreenName())
-#            userAccount = UserAccount(user=request.user,
-#                                  account=ACCOUNT_TWITTER,
-#                                  account_id=oauthAccess.mUser.GetId(),
-#                                  access_token=oauthAccess.mOauthAccessToken.to_string(),
-#                                  date_created=time.time(),
-#                                  account_data=oauthAccess.mUser.AsJsonString(),
-#                                  account_pic=oauthAccess.mUser.GetProfileImageUrl(),
-#                                  account_handle=oauthAccess.mUser.GetScreenName(),
-#                                  is_active=True
-#                                  )
         try:
             userAccount.full_clean()
             userAccount.save()
+            #Code for Elastic Search starts
+            #usracc = UserAccount.objects.get(pk=userAccount.id)
+            #CreateDocument(usracc,usracc.id,ELASTIC_SEARCH_USERACCOUNT_POST)
+            #Code for Elastic Search ends
             successResponse['result'] = oauthAccess.mUser.AsDict();
             # follow this user by TWITTER_USER
             if user.id == settings.SQWAG_USER_ID:
@@ -295,6 +299,24 @@ def activateUser(request, id, key):
             #user = User.objects.get(pk=id)
             user.is_active = True
             user.save()
+            #code for elastic search start(This is tested and working fine)
+#            query = {}
+#            term = {}
+#            term["user_auth.id"] = user.id
+#            query['term'] = term
+#            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#            jsoncontent = jsonpickle.decode(result)
+#            for i in jsoncontent['hits']['hits']:
+#                ES_Obj = i['_source']
+#                print ES_Obj
+#            userdata = {}
+#            print ES_Obj['user_auth']
+#            ES_Obj['user_auth'].is_active = True
+#            print ES_Obj['user_auth'].is_active
+#            userdata['user_auth'] = ES_Obj['user_auth']
+#            userdata['user_profile'] = ES_Obj['user_profile']  
+#            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search end(this is tested and working fine)
             Reg_prof.date_activated = time.time()
             Reg_prof.is_deleted = True
             Reg_prof.save()
@@ -515,15 +537,15 @@ def accessInsta(request):
                                                 account_data=content,
                                                 account_pic=contentJson['user']['profile_picture'],
                                                 account_handle=contentJson['user']['username'])
-#                userAccount = UserAccount(user=request.user, account=ACCOUNT_INSTAGRAM, account_id=contentJson['user']['id'],
-#                                          access_token=contentJson['access_token'], date_created=time.time(),
-#                                          account_data=content, account_pic=contentJson['user']['profile_picture'],
-#                                          account_handle=contentJson['user']['username'], is_active=True, last_object_id=1)
             try:
                 userAccount.full_clean()
                 print "saving account details"
                 userAccount.save()
                 print "returning"
+                #Code for Elastic Search starts
+                #usracc = UserAccount.objects.get(pk=userAccount.id)
+                #CreateDocument(usracc,usracc.id,ELASTIC_SEARCH_USERACCOUNT_POST)
+                #Code for Elastic Search ends
                 successResponse['result'] = contentJson;
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
@@ -606,10 +628,31 @@ def editEmail(request):
     if form.is_valid():
         email = form.cleaned_data['email']
         oldpwd = form.cleaned_data['oldPassword']
-        user = request.user
+        #user = request.user
+        user = User.objects.get(pk=1)
         if(user.check_password(oldpwd)):
             if email:
                 user.email = email
+                user.username = email
+                #code for elastic search start(tested and working fine)
+#                query = {}
+#                term = {}
+#                term["user_auth.id"] = user.id
+#                query['term'] = term
+#                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                jsoncontent = jsonpickle.decode(result)
+#                for i in jsoncontent['hits']['hits']:
+#                    ES_Obj = i['_source']
+#                    print ES_Obj
+#                userdata = {}
+#                print ES_Obj['user_auth']
+#                ES_Obj['user_auth'].email = email
+#                ES_Obj['user_auth'].username = email
+#                print ES_Obj['user_auth'].email
+#                userdata['user_auth'] = ES_Obj['user_auth']
+#                userdata['user_profile'] = ES_Obj['user_profile']  
+#                CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search end(tested and working fine)
                 user.save()
                 successResponse['result'] = 'email changed successfully'
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -631,11 +674,12 @@ def editDisplayName(request):
     form = EditDisplayName(request.POST)
     if form.is_valid():
         #user = request.user
-        user = User.objects.get(pk=51)
+        user = User.objects.get(pk=1)
         displayname = form.cleaned_data['displayName']
         if displayname:
-            user.displayname = displayname
-            #code for elastic search start
+            userProf = UserProfile.objects.get(user=user)
+            userProf.displayname = displayname
+            #code for elastic search start(tested and working fine)
 #            query = {}
 #            term = {}
 #            term["user_auth.id"] = user.id
@@ -652,7 +696,7 @@ def editDisplayName(request):
 #            userdata['user_auth'] = ES_Obj['user_auth']
 #            userdata['user_profile'] = ES_Obj['user_profile']  
 #            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
-            #code for elastic search end
+            #code for elastic search end(tested and working fine)
             user.save()
             successResponse['result'] = 'dislay name changed successfully'
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -688,14 +732,37 @@ def changePassword(request):
 def changeUserName(request):
     form = ChangeUserNameForm(request.POST)
     if form.is_valid():
-        user = User.objects.get(pk=45)
+        user = User.objects.get(pk=1)
         pwd = form.cleaned_data['password']
         if(user.check_password(pwd)):
             username = form.cleaned_data['username']
-            user.username = username
-            user.save()
-            successResponse['result'] = 'username changed successfully'
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            usrProf = UserProfile.objects.get(user=user)
+            try:
+                UserProfile.objects.get(username=username)
+                failureResponse['error'] = "username not availaible,please select some other username"
+            except UserProfile.DoesNotExist:
+                usrProf.username = username
+            #code for elastic search start(tested and working fine)
+#                query = {}
+#                term = {}
+#                term["user_auth.id"] = user.id
+#                query['term'] = term
+#                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                jsoncontent = jsonpickle.decode(result)
+#                for i in jsoncontent['hits']['hits']:
+#                    ES_Obj = i['_source']
+#                    print ES_Obj
+#                userdata = {}
+#                print ES_Obj['user_profile']
+#                ES_Obj['user_profile'].username = username
+#                print ES_Obj['user_profile'].username
+#                userdata['user_auth'] = ES_Obj['user_auth']
+#                userdata['user_profile'] = ES_Obj['user_profile']  
+#                CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search end(tested and working fine)
+                usrProf.save()
+                successResponse['result'] = 'username changed successfully'
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = BAD_REQUEST
             failureResponse['error'] = 'password does not match'
@@ -722,15 +789,8 @@ def accessFacebook(request):
         #respJson = json.loads(resp)
         if resp.status==200:
             userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
-            #print userinfo
-            #print userinfo[1]
-            #print userinfo[0]['status']
             userinformation = json.loads(userinfo[1])
-            #print userinformation['username']
-            #contentJson = json.dumps(userinfo)
             userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
-            #print userPic[0]
-            #print userinformation['email']
             userPicture = userPic[0]
             userAccount = CreateUserAccount(user=request.user,
                                             account=ACCOUNT_FACEBOOK,
@@ -744,6 +804,10 @@ def accessFacebook(request):
             try:
                 userAccount.full_clean()
                 userAccount.save()
+                #Code for Elastic Search starts
+                #usracc = UserAccount.objects.get(pk=userAccount.id)
+                #CreateDocument(usracc,usracc.id,ELASTIC_SEARCH_USERACCOUNT_POST)
+                #Code for Elastic Search ends
                 successResponse['result'] = userinfo;
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
@@ -777,29 +841,46 @@ def accessFacebookNewUser(request):
         #respJson = json.loads(resp)
         if resp.status==200:
             userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
-            #print userinfo[1]
-            #print userinfo[0]['status']
             userinformation = json.loads(userinfo[1])
-            #print userinformation['username']
-            #contentJson = json.dumps(userinfo)
             userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
-            #print userPic[0]
             userPicture = userPic[0]
             try:
                 user = User.objects.get(username=userinformation['email'])
+                #code for elastic search start(tested and working fine)
+#                query = {}
+#                term = {}
+#                term["user_auth.id"] = user.id
+#                query['term'] = term
+#                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                jsoncontent = jsonpickle.decode(result)
+#                for i in jsoncontent['hits']['hits']:
+#                    ES_Obj = i['_source']
+#                    print ES_Obj
+#                print ES_Obj['user_profile']
+
                 if not user.first_name:
                     user.first_name = userinformation['first_name']
+#                    ES_Obj['user_auth'].first_name = userinformation['first_name']
                 if not user.last_name:
                     user.last_name = userinformation['last_name']
+#                    ES_Obj['user_auth'].last_name = userinformation['last_name']
                 userProf = UserProfile.objects.get(user=user)
                 if not userProf.sqwag_image_url.strip():
                     userProf.sqwag_image_url = userPicture['content-location']
+#                    ES_Obj['user_profile'].sqwag_image_url = userPicture['content-location']
                 if not userProf.sqwag_cover_image_url:
                     userProf.sqwag_cover_image_url = userPicture['content-location']
+#                    ES_Obj['user_profile'].sqwag_cover_image_url = userPicture['content-location']
                 if not user.is_active:
                     user.is_active = True
+#                    ES_Obj['user_auth'].is_active = True
                 user.save()
                 userProf.save()
+#                userdata = {}
+#                userdata['user_auth'] = ES_Obj['user_auth']
+#                userdata['user_profile'] = ES_Obj['user_profile']  
+#                CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+            #code for elastic search end
             except User.DoesNotExist:
                 user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
                 user.first_name = userinformation['first_name']
@@ -813,10 +894,20 @@ def accessFacebookNewUser(request):
                 usrprof.displayname = userinformation['name']
                 usrprof.fullname = userinformation['name']
                 usrprof.save()
+                #code for elasticsearch start(tested and working fine)
+                #userdata = {}
+                #userdata['user_auth'] = User.objects.get(pk=user.id)
+                #userdata['user_profile'] = UserProfile.objects.get(pk=usrprof.id)
+                #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                #code for elasticsearch ends
                 relationShip = Relationship(subscriber=user,producer=user)
                 relationShip.date_subscribed = time.time()
                 relationShip.permission = True
                 relationShip.save()
+                #code for elasticsearch start(tested and working fine)
+                #rel = Relationship.objects.get(subscriber=sub,producer=prod)
+                #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+                #code for elasticsearch ends
             try:
                 userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_FACEBOOK)
             except UserAccount.DoesNotExist:
@@ -831,6 +922,10 @@ def accessFacebookNewUser(request):
                 try:
                     userAccount.full_clean()
                     userAccount.save()
+                    #Code for Elastic Search starts(tested and working fine)
+                    #usracc = UserAccount.objects.get(pk=userAccount.id)
+                    #CreateDocument(usracc,usracc.id,ELASTIC_SEARCH_USERACCOUNT_POST)
+                    #Code for Elastic Search ends
                     successResponse['result'] = userinfo;
                 #return render_to_response('index.html')
                     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -875,7 +970,25 @@ def selectUserName(request):
                         registration_profile.save()
                         userprofile = UserProfile.objects.get(user=user)
                         userprofile.username = request.POST["username"]
-                        userprofile.save();
+                        userprofile.save()
+                        #code for elastic search start(tested and working fine)
+#                        query = {}
+#                        term = {}
+#                        term["user_auth.id"] = user.id
+#                        query['term'] = term
+#                        result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                        jsoncontent = jsonpickle.decode(result)
+#                        for i in jsoncontent['hits']['hits']:
+#                            ES_Obj = i['_source']
+#                            print ES_Obj
+#                        userdata = {}
+#                        print ES_Obj['user_profile']
+#                        ES_Obj['user_profile'].username = request.POST["username"]
+#                        print ES_Obj['user_profile'].username
+#                        userdata['user_auth'] = ES_Obj['user_auth']
+#                        userdata['user_profile'] = ES_Obj['user_profile']  
+#                        CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                        #code for elastic search end(tested and workiing fine)
                         host = request.get_host()
                         if request.is_secure():
                             protocol = 'https://'
@@ -903,7 +1016,7 @@ def selectUserName(request):
                     return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
                 except UserProfile.DoesNotExist:
                     username = request.POST["username"]
-                    id = request.POST["id"]
+                    id = request.POST["user_id"]
                     user = User.objects.get(pk=id)
                     print username
                     userprofile = UserProfile.objects.get(user=user)
@@ -912,6 +1025,25 @@ def selectUserName(request):
                     user.is_active = True
                     user.save()
                     userprofile.save()
+                    #code for elastic search start(tested and working fine)
+#                    query = {}
+#                    term = {}
+#                    term["user_auth.id"] = user.id
+#                    query['term'] = term
+#                    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                    jsoncontent = jsonpickle.decode(result)
+#                    for i in jsoncontent['hits']['hits']:
+#                        ES_Obj = i['_source']
+#                        print ES_Obj
+#                    userdata = {}
+#                    print ES_Obj['user_profile']
+#                    ES_Obj['user_profile'].username = request.POST["username"]
+#                    ES_Obj['user_auth'].is_active = True
+#                    print ES_Obj['user_profile'].username
+#                    userdata['user_auth'] = ES_Obj['user_auth']
+#                    userdata['user_profile'] = ES_Obj['user_profile']  
+#                    CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                    #code for elastic search end
                     successResponse['message'] = "username updated successfully" 
                     return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
             else:
@@ -928,7 +1060,7 @@ def selectUserName(request):
                         return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
                     except UserProfile.DoesNotExist:
                         username = request.POST["username"]
-                        id = request.POST["id"]
+                        id = request.POST["user_id"]
                         user = User.objects.get(pk=id)
                         email = request.POST["email"]
                         print username
@@ -940,6 +1072,26 @@ def selectUserName(request):
                         user.email = email
                         user.save()
                         userprofile.save()
+                        #code for elastic search start
+#                       query = {}
+#                       term = {}
+#                       term["user_auth.id"] = user.id
+#                       query['term'] = term
+#                       result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                       jsoncontent = jsonpickle.decode(result)
+#                       for i in jsoncontent['hits']['hits']:
+#                           ES_Obj = i['_source']
+#                           print ES_Obj
+#                       userdata = {}
+#                       print ES_Obj['user_profile']
+#                       ES_Obj['user_profile'].username = request.POST["username"]
+#                       ES_Obj['user_auth'].is_active = True
+#                       ES_Obj['user_auth'].email = email
+#                       print ES_Obj['user_profile'].username
+#                       userdata['user_auth'] = ES_Obj['user_auth']
+#                       userdata['user_profile'] = ES_Obj['user_profile']  
+#                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                        #code for elastic search end
                         successResponse['message'] = "username updated successfully"
                         return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
                 else:

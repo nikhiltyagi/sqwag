@@ -42,6 +42,8 @@ ELASTIC_SEARCH_SQUARE_POST = "http://localhost:9200/sqwag/square/"
 ELATIC_SEARCH_SQUARE_GET = "http://localhost:9200/sqwag/square/_search?"
 ELASTIC_SEARCH_USERSQUARE_POST = "http://localhost:9200/sqwag/usersquare/"
 ELASTIC_SEARCH_USERSQUARE_GET = "http://localhost:9200/sqwag/usersquare/_search?"
+ELASTIC_SEARCH_USERACCOUNT_POST = "http://localhost:9200/sqwag/useraccount/"
+ELASTIC_SEARCH_USERACCOUNT_GET = "http://localhost:9200/sqwag/useraccount/_search?"
 
 
 #INSTAGRAM URLS
