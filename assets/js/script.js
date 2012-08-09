@@ -11,7 +11,9 @@ var SQ = {
     //initialize routers 
     self.router.init();
     // route to a template
-    self.router.routeTo(context.route);
+    if(context.route){
+      self.router.routeTo(context.route);
+    }
     setInterval(smartDate.refresh, 60*1000);
   },
 
@@ -132,6 +134,9 @@ var SQ = {
             email: {
                 required: "We need your email address to contact you",
                 email: "Your email address must be in the format of name@domain.com"
+            },
+            password:{
+              required: "Please enter Password"
             }
         },
         submitHandler: function(form) {
