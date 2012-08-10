@@ -379,7 +379,7 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .register_blk_hd span{color:#fff;line-height:32px;font:bold 14px/32px Arial;}
 .align_left{float:left;padding-left:20px;}
 .align_right{padding-left:5px; display: none;}
-.register_blk_inner{clear:both;overflow:hidden;height:202px;background:url(../img/register_blk_bg.png) repeat;border:1px solid #908f8f;}
+.register_blk_inner{clear:both;overflow:hidden;/*height:202px;*/background:url(../img/register_blk_bg.png) repeat;border:1px solid #908f8f;}
 .register_blk_left{float:left;margin:25px 0px;width:200px;padding:25px 20px 15px 20px;border-right:3px solid #ccc;}
 .register_blk_left a{display:inline-block;margin-bottom:15px;}
 .register_blk_right{float:right;margin:8px 15px;width:215px;}
@@ -391,7 +391,8 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .register_blk_right input{background:#fff;height:16px;margin-bottom:5px;width:191px;border:1px solid #959494;height:29px;line-height:29px;font:bold 14px/29px Arial;color:#b7b4b6;padding:0px 10px;}
 .register_step2 input[type="checkbox"]{width:auto;float:left;margin-right:5px;}
 .register_step2 .align_center{margin:0px 100px;}
-.register_step2 .legend_text{font:normal 10px/6px Arial;clear:both;float:left;margin-left:122px;}
+.register_step2 .legend_text,.fb_signin_inner .legend_text{font:normal 10px/6px Arial;clear:both;float:left;margin-left:122px;}
+.fb_signin_inner .legend_text{margin-left:148px;}
 .register_blk_right .modal-footer{background:none;border:0 none;box-shadow: none;padding:5px 0px;}
 .register_blk_right input[type="submit"]{border:1px solid #070606;background:url("../img/btn_bg.png") repeat-x;height:29px;margin:4px 0;width:72px;color:#fff;line-height:35px;font:bold 14px/29px Arial;}
 .register_step2 .register_blk_right .modal-footer p label{font-size:14px;font-weight:normal;line-height:35px;}
@@ -424,12 +425,13 @@ a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 .feed_blk_footer p{font:normal 12px/16px Arial;color:#fff;}
 .feed_blk_footer img{float:left;margin-right:10px;margin-top:-25px;}
 .feed_blk_footer h4{padding:5px 0px;}
-.overlay{z-index:10;background:rgba(0,0,0,0.9);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";position:fixed;width:100%;height:100%;left:0%;top:0%;}
+.overlay{z-index:10;background:rgba(0,0,0,0.7);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";position:fixed;width:100%;height:100%;left:0%;top:0%;}
 /* forgot password popup styles */
 .fgt_pwd_req{position:absolute;top:22%;left:26%;width:492px;height:242px;z-index:11;}
 .fgt_pwd_req .register_blk{border:1px solid #000;}
-.fgt_pwd_req .register_blk_inner{height:185px;}
+/*.fgt_pwd_req .register_blk_inner{height:185px;}*/
 .fgt_pwd_req .register_blk_hd h2{float:left;padding-left:10px;}
+.fgt_pwd_req .register_blk_hd h2 span{font-size:13px;}
 .fgt_pwd_req .register_blk_hd span.align_left{padding:0px;line-height:0px;}
 .fgt_pwd_req .register_blk_right{width:458px;}
 .fgt_pwd_req .register_blk_right label{font:bold 14px/14px Arial;float:left;display:block;}
@@ -452,8 +454,18 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
 .sqwag_popup textarea{width:438px;height:110px;margin:0px;border:1px solid #959494;background:#fff;}
 .align_right_hd{padding-left:10px;float:left;}
 .align_left_hd,.register_blk_hd span.align_left_hd{padding:0px;float:left;line-height:10px;}
-.sqwag_popup{width:480px;}
+.sqwag_popup{width:480px;display:none;}
 .sqwag_popup div{clear:both;overflow:hidden;}
-.sqwag_popup .register_blk_right label{display:block;}
+.sqwag_popup .register_blk_right label,.fgt_pwd_req .align_right{display:block;}
 .sqwag_popup #add_video label.position_right{float:left;line-height:30px;padding:0px 10px 10px 50px;font-size:14px;}
 .sqwag_popup .register_blk_right input[type="text"]{width:269px;}
+.fb_signin_inner{clear:both;overflow:hidden;}
+.fgt_pwd_req .register_blk_right.fb_signin_inner input[type="text"],.fgt_pwd_req .register_blk_right.fb_signin_inner input[type="password"]{clear:none;float:left;width:222px;height:29px;color:#bdb9b9;font:bold 14px/29px Arial;}
+.fgt_pwd_req .register_blk_right.fb_signin_inner input[type="password"],#twt_email{margin-left:20px;}
+#twt_email{margin-bottom:15px;}
+.modal-footer{overflow:hidden;clear:both;}
+.fb_signin_inner .align_center{margin:0px 83px;}
+.register_blk_right input[type="checkbox"]{width:auto;}
+.register_step2 .fb_signin_inner form{margin:0px;padding:20px 0px 0px;}
+.register_step2 .register_blk_right.fb_signin_inner .modal-footer p{margin-top:10px;}
+.fgt_pwd_req .register_blk_right.fb_signin_inner  label{line-height:26px;}

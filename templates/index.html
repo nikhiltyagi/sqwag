@@ -286,7 +286,7 @@
       </form>
 </div>
 <div class="fgt_pwd_req" style="display:none;">
-    <div class="register_blk" >
+    <div class="register_blk fpwd_step1" >
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -304,8 +304,8 @@
             </form>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- register_blk -->
-    <div class="register_blk">
+    </div><!-- fpwd_step1 -->
+    <div class="register_blk fpwd_step2">
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -316,7 +316,61 @@
             <p>Check your inbox and follow the steps to reset your password.</p>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- register_blk -->
+    </div><!-- fpwd_step2 -->
+	<div class="register_blk register_step2 fb_signin">
+        <div class="register_blk_hd">
+          <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
+          <span class="align_right"><h2>New Here? <span>Select your Username and Password!</span></h2></span>
+        </div><!-- register_blk_hd-->
+        <div class="register_blk_inner">
+          <div class="register_blk_right fb_signin_inner">
+            <form action="#"  method="post">
+              <div class="align_center" style="height:55px;">
+                <label for="fd_username">@</label>
+                <input class="input" type="text" name="fd_username" id="fd_username" value="Username" />
+				<span class="legend_text">You can change it later!</span>
+              </div> 
+			  <div class="align_center">
+                <label for="fd_password" style="display:none;">Password</label>
+                <input class="input" type="password" name="fd_password" id="fd_password" value="Password" />
+              </div> 			  
+              <div class="modal-footer">
+                  <p><input name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+                  <input class="btn btn-primary" type="submit" value="Done!" /></p>
+                </div>
+            </form>
+          </div><!-- register_blk_right -->
+        </div><!-- register_blk_inner -->      
+    </div><!-- fb_signin -->
+	<div class="register_blk register_step2 twitter_signin">
+        <div class="register_blk_hd">
+          <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
+          <span class="align_right"><h2>New Here? <span>Select your Username and Password!</span></h2></span>
+        </div><!-- register_blk_hd-->
+        <div class="register_blk_inner">
+          <div class="register_blk_right fb_signin_inner">
+            <form action="#"  method="post">
+              <div class="align_center" style="height:55px;">
+                <label for="twt_username">@</label>
+                <input class="input" type="text" name="twt_username" id="twt_username" value="Username" />
+				<span class="legend_text">You can change it later!</span>
+              </div> 
+			  <div class="align_center">
+                <label for="twt_email" style="display:none;">Email</label>
+                <input class="input" type="text" name="twt_email" id="twt_email" value="Email" />
+              </div>
+			  <div class="align_center">
+                <label for="twt_password" style="display:none;">Password</label>
+                <input class="input" type="password" name="twt_password" id="twt_password" value="Password" />
+              </div> 			  
+              <div class="modal-footer">
+                  <p><input name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+                  <input class="btn btn-primary" type="submit" value="Done!" /></p>
+                </div>
+            </form>
+          </div><!-- register_blk_right -->
+        </div><!-- register_blk_inner -->      
+    </div><!-- twitter_signin -->
 </div><!-- fgt_pwd_req -->
 <div class="register_blk sqwag_popup add_photo">
         <div class="register_blk_hd">
