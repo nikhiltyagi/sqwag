@@ -174,6 +174,27 @@ var SQ = {
         }
     });
 
+    // validate email on blur
+    $("#email").bind('blur',function(){
+      
+      $.ajax({
+        url:"/sqwag/testname/",
+        datatype:"json",
+        type:"POST",
+        data:{
+        },
+        success:function(data,textStatus,jqXHR){
+          alert(data.result);
+            SQ.notify(data.result);
+        },
+        error: function(data){
+          alert("error: "+ data);
+        }
+      });
+
+    });
+  
+
 /*
     $('#register-form form').ajaxForm({
       

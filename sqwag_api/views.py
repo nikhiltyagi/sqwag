@@ -1189,3 +1189,26 @@ def pocInsta(request):
     x = syncInstaFeed(insta_user_id=8314228)
     #x= getUserRecentFeed(count=10, min_id=40, access_token='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09', user_id=52192801);
     return HttpResponse(x, mimetype='application/javascript')
+def testName(request):
+    #email = request.POST['email']
+    successResponse['status']=1
+    successResponse['result'] = 'Valid'
+    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+    #return HttpResponse('false',mimetype='application/javascript') 
+#    if email:
+#        if email and User.objects.filter(email=email):
+#            user = User.objects.get(email=email)
+#            try:
+#                RegistrationProfile.objects.get(user=user,is_registration_completed=True)
+#                failureResponse['status'] = BAD_REQUEST
+#                failureResponse['error'] = "email already present"
+#                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+#            except RegistrationProfile.DoesNotExist:
+#                successResponse['result'] = 'Valid'
+#                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+#        successResponse['result'] = 'Valid'
+#        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+#    else:
+#        failureResponse['status'] = BAD_REQUEST
+#        failureResponse['error'] = "email field can not be blank"
+#        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
