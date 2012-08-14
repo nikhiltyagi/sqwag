@@ -50,11 +50,17 @@ body {
   margin-top: 60px;
   margin-bottom: 50px;
 }
-.navbar-inner {
+/*.navbar-inner {
   background: url('../img/bg-bar.jpg') repeat-x;
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}*/
+.navbar-inner {
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.7);
 }
+
+
 /* sprites */
 .sprite > li > a {
   text-indent: -999999px;
