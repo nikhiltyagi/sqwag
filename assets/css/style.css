@@ -469,3 +469,27 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
 .register_step2 .fb_signin_inner form{margin:0px;padding:20px 0px 0px;}
 .register_step2 .register_blk_right.fb_signin_inner .modal-footer p{margin-top:10px;}
 .fgt_pwd_req .register_blk_right.fb_signin_inner  label{line-height:26px;}
+
+
+
+/* modal window*/
+
+#mask {
+  position:absolute;
+  left:0;
+  top:0;
+  z-index:90;
+  background-color:#000;
+  display:none;
+}
+  
+.window {
+  position:fixed;
+  left:0;
+  top:0;
+  width:440px;
+  height:200px;
+  display:none;
+  z-index:9999;
+  padding:20px;
+}

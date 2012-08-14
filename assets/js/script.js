@@ -17,6 +17,8 @@ var SQ = {
     setInterval(smartDate.refresh, 60*1000);
   },
 
+  
+
   close: function() {
     $('.close').click();
   },
@@ -28,7 +30,21 @@ var SQ = {
   refresh: function() {
     window.location.reload();
   },
-  
+  errorHandler: function(data){
+    var error_string = "";
+    if(data.error.constructor== Object){
+      for (var key in data.error) {
+        var obj = data.error[key];
+        for (var prop in obj) {
+          error_string = obj[prop]+" ";
+        }
+      }
+    }else{
+      error_string = data.error;
+    }
+    return error_string;
+  },
+
   bindLinks: function() {
     var self = this;
     $('.js-load').click(function() {
@@ -65,11 +81,75 @@ var SQ = {
       }
     });
 
+     
+     $("#create-text-form").validate({
+        rules: {
+            content_data:{
+              required: true
+            }
+        },
+        messages: {
+            content_data: {
+              required: "you can not post an empty sqwag"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'api/square/create/',
+            dataType: 'json',
+            success: function(data) {
+              if(data.status == 1) {
+                self.refresh();
+              }
+              else {
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
+              }
+            }
+          };
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
+    });
+
+    $("#create-image-form").validate({
+      rules: {
+          content_file:{
+            required: true
+          }
+      },
+      messages: {
+          content_file: {
+            required: "please select an image to upload"
+          }
+      },
+      submitHandler: function(form) {
+        // do other stuff for a valid form
+        var options = {
+          url: window.location.href+'api/imagesquare/create/',
+          dataType: 'json',
+          success: function(data) {
+            if(data.status == 1) {
+              self.refresh();
+            }
+            else {
+              var error_string = SQ.errorHandler(data);
+              self.notify(error_string);
+            }
+          }
+        };
+        $(form).ajaxSubmit(options);
+        return false; 
+      }
+  });
+     
+/*
     $('#sqwag-image-form form').ajaxForm({
       success: function(data) {
         self.refresh();
       }
-    });
+    });*/
 
     $("#login-form").validate({
         rules: {
@@ -98,8 +178,8 @@ var SQ = {
                 self.refresh();
               }
               else {
-                self.notify(data.error);
-                //self.close(); // TODO : refactor
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
               }
             }
           };
@@ -156,13 +236,66 @@ var SQ = {
                 self.notify(data.result);
               }
               else {
-                var error_string = "";
-                for (var key in data.error) {
-                  var obj = data.error[key];
-                  for (var prop in obj) {
-                    error_string = obj[prop]+" ";
-                  }
-                }
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
+    });
+
+    // fb register step 2 form
+    
+    $("#fb-step2-form").validate({
+        rules: {
+            username:{
+              required: true,
+              maxlength: 25
+            },
+            password:{
+              required:true
+            },
+            tos_cbok:{
+              required:true
+            },
+            user_id:{
+              required:true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please specify username",
+              maxlength: "username should be less than 25 characters"
+            },
+            password:{
+              required: "Please enter Password"
+            },
+            tos_cbok:{
+              required:"please select the checkbox to agree with TOS"
+            },
+            user_id:{
+              required:"Some error detected. please restart the registration process."
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/selectusername/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                SQ.refresh();
+              }
+              else {
+                var error_string = SQ.errorHandler(data);
                 self.notify(error_string);
               }
               //self.close();
@@ -185,7 +318,7 @@ var SQ = {
         },
         success:function(data,textStatus,jqXHR){
           alert(data.result);
-            SQ.notify(data.result);
+          SQ.notify(data.result);
         },
         error: function(data){
           alert("error: "+ data);
@@ -194,11 +327,6 @@ var SQ = {
 
     });
   
-
-/*
-    $('#register-form form').ajaxForm({
-      
-    });*/
 //register-form-step2
     $("#register-form-step2").validate({
         rules: {
@@ -236,7 +364,8 @@ var SQ = {
                   self.notify(data.result);
                 }
                 else {
-                  self.notify(data.error);
+                  var error_string = SQ.errorHandler(data);
+                  self.notify(error_string);
                 }
                 self.close();
               }
@@ -269,7 +398,8 @@ var SQ = {
                 $("#feedback").DefaultValue("Thanks for your feedback!");
               }
               else {
-                self.notify(data.error);
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
               }
               self.close();
             }
@@ -323,7 +453,8 @@ var SQ = {
           if(data.status==1){
             SQ.notify("success");
           }else{
-            SQ.notify(data.error);
+            var error_string = SQ.errorHandler(data);
+            self.notify(error_string);
           }
         }
       });
@@ -339,7 +470,8 @@ var SQ = {
           if(data.status==1){
             SQ.notify("success");
           }else{
-            SQ.notify(data.error);
+            var error_string = SQ.errorHandler(data);
+            self.notify(error_string);
           }
         }
       });
@@ -358,7 +490,8 @@ var SQ = {
             // populate data
             
           }else{
-            SQ.notify(data.error);
+            var error_string = SQ.errorHandler(data);
+            self.notify(error_string);
           }
         }
       });

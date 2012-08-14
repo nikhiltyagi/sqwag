@@ -69,7 +69,7 @@ def loginUser(request):
                         respObj['id'] = user.id
                         respObj['first_name'] = user.first_name
                         respObj['last_name'] = user.last_name
-                        respObj['email'] =  user.email
+                        respObj['email'] = user.email
                         successResponse['result'] = respObj
                         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                     else:
@@ -116,8 +116,8 @@ def registerUser(request):
                 user.is_active = False
                 user.save()
                 # create a profile for this user
-                usrprof = UserProfile.objects.create(user=user,sqwag_count=0, following_count=0,followed_by_count=0,displayname=fullname,fullname=fullname)
-                relationShip = Relationship(subscriber=user,producer=user)
+                usrprof = UserProfile.objects.create(user=user, sqwag_count=0, following_count=0, followed_by_count=0, displayname=fullname, fullname=fullname)
+                relationShip = Relationship(subscriber=user, producer=user)
                 relationShip.date_subscribed = time.time()
                 relationShip.permission = True
                 relationShip.save()
@@ -180,7 +180,7 @@ def cronMail(request):
     successResponse['result'] = "success"
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
 
-def authTwitter(request,type):
+def authTwitter(request, type):
     if type == "connect_twitter":
         if not request.user.is_authenticated():
                 failureResponse['status'] = AUTHENTICATION_ERROR
@@ -206,7 +206,7 @@ def accessTweeter(request):
         # check if an entry already exists in useraccount
         user = request.user
         if not request.user.is_authenticated():
-            user = User.objects.create_user("uname","temp123","email")
+            user = User.objects.create_user("uname", "temp123", "email")
             user.username = str(user.id)
             user.email = str(user.id)
             user.is_active = False
@@ -218,7 +218,7 @@ def accessTweeter(request):
                                       followed_by_count=0,
                                       displayname=oauthAccess.mUser.GetScreenName(),
                                       fullname=oauthAccess.mUser.GetName())
-            relationShip = Relationship(subscriber=user,producer=user)
+            relationShip = Relationship(subscriber=user, producer=user)
             relationShip.date_subscribed = time.time()
             relationShip.permission = True
             relationShip.save()
@@ -384,7 +384,7 @@ def syncTwitterFeeds(request):
                     try:
                         square.full_clean(exclude='content_description')
                         square.save()
-                        saveSquareBoilerPlate(request=request,user=square.user, square=square, date_created=square.date_created)
+                        saveSquareBoilerPlate(request=request, user=square.user, square=square, date_created=square.date_created)
                     except ValidationError:
                         print  "error in saving square"# TODO: log this
             except UserAccount.DoesNotExist:
@@ -523,11 +523,11 @@ def accessInsta(request):
                 userAccount = getActiveUserAccount(request.user, ACCOUNT_INSTAGRAM)
                 print "insta account already present, update account info"
                 userAccount.access_token = contentJson['access_token']
-                userAccount.date_created=time.time()
-                userAccount.account_data=content
-                userAccount.account_pic=contentJson['user']['profile_picture']
-                userAccount.account_handle=contentJson['user']['username']
-                userAccount.is_active=True
+                userAccount.date_created = time.time()
+                userAccount.account_data = content
+                userAccount.account_pic = contentJson['user']['profile_picture']
+                userAccount.account_handle = contentJson['user']['username']
+                userAccount.is_active = True
             except UserAccount.DoesNotExist:
                 print "insta account does not exist, creating fresh account"
                 
@@ -590,7 +590,7 @@ def forgotPwd(request):
             else:
                 protocol = 'http://'
             message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
-            mailer = Emailer(subject="Activation link from sqwag.com",body=message,from_email='coordinator@sqwag.com',to=user_obj.email,date_created=time.time())
+            mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user_obj.email, date_created=time.time())
             mailentry(mailer)
             successResponse['result'] = 'mail sent successfully' 
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
@@ -774,7 +774,7 @@ def changeUserName(request):
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             
 def authFacebook(request):
-    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL+'client_id='+settings.FACEBOOK_APP_ID+'&redirect_uri='+settings.FACEBOOK_CALLBACK_URL+'&response_type=code'
+    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL + 'client_id=' + settings.FACEBOOK_APP_ID + '&redirect_uri=' + settings.FACEBOOK_CALLBACK_URL + '&response_type=code'
     return HttpResponseRedirect(authorizationUrl)
 
 def accessFacebook(request):
@@ -782,24 +782,24 @@ def accessFacebook(request):
         codeReceived = request.GET['code']       
         h = Http()
         data = dict(client_id=settings.FACEBOOK_APP_ID, client_secret=settings.FACEBOOK_APP_SECRET,
-                    grant_type='authorization_code',redirect_uri=settings.FACEBOOK_CALLBACK_URL,
+                    grant_type='authorization_code', redirect_uri=settings.FACEBOOK_CALLBACK_URL,
                     code=codeReceived)
         resp, content = h.request(settings.FACEBOOK_ACCESS_TOKEN_URL, "POST", urlencode(data))
         print resp
         accesstoken = dict(urlparse.parse_qsl(content)).get('access_token')
         #respJson = json.loads(resp)
-        if resp.status==200:
-            userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
+        if resp.status == 200:
+            userinfo = h.request('https://graph.facebook.com/me?access_token=' + accesstoken, "GET")
             userinformation = json.loads(userinfo[1])
-            userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
+            userPic = h.request('https://graph.facebook.com/' + userinformation['username'] + '/picture?type=small')
             userPicture = userPic[0]
             userAccount = CreateUserAccount(user=request.user,
                                             account=ACCOUNT_FACEBOOK,
-                                            account_id = userinformation['id'],
-                                            access_token = accesstoken,
+                                            account_id=userinformation['id'],
+                                            access_token=accesstoken,
                                             account_data=userinfo,
                                             account_pic=userPicture['content-location'],
-                                            account_handle =userinformation['username'],
+                                            account_handle=userinformation['username'],
                                             is_active=True,
                                             last_object_id=0)
             try:
@@ -813,7 +813,7 @@ def accessFacebook(request):
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             except ValidationError, e:
                 failureResponse['status'] = SYSTEM_ERROR
-                failureResponse['error'] = "some error occured, please try later"+e.message
+                failureResponse['error'] = "some error occured, please try later" + e.message
                 #TODO: log it
                 return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         else:
@@ -826,7 +826,7 @@ def accessFacebook(request):
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     
 def authFacebookNewUser(request):
-    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL+'client_id='+settings.FACEBOOK_APP_ID+'&redirect_uri='+settings.FACEBOOK_CALLBACK_URL_NEW_USER+'&response_type=code&scope=email'
+    authorizationUrl = settings.FACEBOOK_AUTHORIZE_URL + 'client_id=' + settings.FACEBOOK_APP_ID + '&redirect_uri=' + settings.FACEBOOK_CALLBACK_URL_NEW_USER + '&response_type=code&scope=email'
     return HttpResponseRedirect(authorizationUrl)
 
 def accessFacebookNewUser(request):
@@ -834,16 +834,16 @@ def accessFacebookNewUser(request):
         codeReceived = request.GET['code']       
         h = Http()
         data = dict(client_id=settings.FACEBOOK_APP_ID, client_secret=settings.FACEBOOK_APP_SECRET,
-                    grant_type='authorization_code',redirect_uri=settings.FACEBOOK_CALLBACK_URL_NEW_USER,
+                    grant_type='authorization_code', redirect_uri=settings.FACEBOOK_CALLBACK_URL_NEW_USER,
                     code=codeReceived)
         resp, content = h.request(settings.FACEBOOK_ACCESS_TOKEN_URL, "POST", urlencode(data))
         print resp
         accesstoken = dict(urlparse.parse_qsl(content)).get('access_token')
         #respJson = json.loads(resp)
-        if resp.status==200:
-            userinfo = h.request('https://graph.facebook.com/me?access_token='+accesstoken,"GET")
+        if resp.status == 200:
+            userinfo = h.request('https://graph.facebook.com/me?access_token=' + accesstoken, "GET")
             userinformation = json.loads(userinfo[1])
-            userPic = h.request('https://graph.facebook.com/'+userinformation['username']+'/picture?type=small')
+            userPic = h.request('https://graph.facebook.com/' + userinformation['username'] + '/picture?type=small')
             userPicture = userPic[0]
             try:
                 user = User.objects.get(username=userinformation['email'])
@@ -883,14 +883,14 @@ def accessFacebookNewUser(request):
 #                CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
             #code for elastic search end
             except User.DoesNotExist:
-                user =  User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
+                user = User.objects.create_user(userinformation['email'], userinformation['email'], 'temp123')
                 user.first_name = userinformation['first_name']
                 user.last_name = userinformation['last_name']
                 user.is_active = False
                 user.date_joined = datetime.datetime.now()
                 user.save()       
             # create user profile
-                usrprof = UserProfile(user=user,sqwag_image_url=userPicture['content-location'],sqwag_cover_image_url=userPicture['content-location'],sqwag_count=0, following_count=0,followed_by_count=0)
+                usrprof = UserProfile(user=user, sqwag_image_url=userPicture['content-location'], sqwag_cover_image_url=userPicture['content-location'], sqwag_count=0, following_count=0, followed_by_count=0)
                 usrprof.save()
                 usrprof.displayname = userinformation['name']
                 usrprof.fullname = userinformation['name']
@@ -901,7 +901,7 @@ def accessFacebookNewUser(request):
                 #userdata['user_profile'] = UserProfile.objects.get(pk=usrprof.id)
                 #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                 #code for elasticsearch ends
-                relationShip = Relationship(subscriber=user,producer=user)
+                relationShip = Relationship(subscriber=user, producer=user)
                 relationShip.date_subscribed = time.time()
                 relationShip.permission = True
                 relationShip.save()
@@ -910,15 +910,15 @@ def accessFacebookNewUser(request):
                 #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
                 #code for elasticsearch ends
             try:
-                userAccount = UserAccount.objects.get(user=user,account=ACCOUNT_FACEBOOK)
+                userAccount = UserAccount.objects.get(user=user, account=ACCOUNT_FACEBOOK)
             except UserAccount.DoesNotExist:
                 userAccount = CreateUserAccount(user=user,
                                             account=ACCOUNT_FACEBOOK,
-                                            account_id = userinformation['id'],
-                                            access_token = accesstoken,
+                                            account_id=userinformation['id'],
+                                            access_token=accesstoken,
                                             account_data=userinfo,
                                             account_pic=userPicture['content-location'],
-                                            account_handle =userinformation['username'],
+                                            account_handle=userinformation['username'],
                                             )
                 try:
                     userAccount.full_clean()
@@ -936,16 +936,21 @@ def accessFacebookNewUser(request):
                     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 except ValidationError, e:
                     failureResponse['status'] = SYSTEM_ERROR
-                    failureResponse['error'] = "some error occured, please try later"+e.message
+                    failureResponse['error'] = "some error occured, please try later" + e.message
                     #TODO: log it
                     return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #redirect to home page of the user as user is already registered and active
             complete_user = getCompleteUserInfo(user=user)
             c = Context(getUserContextObject(complete_user))
-            user = authenticate(username=userinformation['email'], password='123456')
+            user = authenticate(username=userinformation['email'],password='temp123')
             if user is not None:
                 login(request, user)
                 return HttpResponseRedirect('/');
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['message'] = 'auth error'
+                return HttpResponseRedirect('/?damn=true')
+                #return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #return render_to_response('index.html',c)
             #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
@@ -969,12 +974,12 @@ def selectUserName(request):
                     except TypeError:
                         failureResponse['status'] = BAD_REQUEST
                         failureResponse['error'] = "bad request detected."
-                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                     try:
                         UserProfile.objects.get(username=request.POST["username"])
                         failureResponse['status'] = DUPLICATE
                         failureResponse['error'] = "Username not availaible.Select some other username"
-                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                     except UserProfile.DoesNotExist:
                         user = User.objects.get(pk=id)
                         registration_profile = RegistrationProfile.objects.get(user=user)
@@ -1010,22 +1015,22 @@ def selectUserName(request):
                         mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user.email, date_created=time.time())
                         mailentry(mailer) 
                         successResponse['result'] = "Registration complete.Activation Link is sent to mail." 
-                        return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 else:
                     failureResponse['error'] = "id is missing" #todo: put this in log.
                     failureResponse['status'] = BAD_REQUEST
-                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             else:
                 failureResponse['error'] = "username cannot be blank"
                 failureResponse['status'] = BAD_REQUEST
-                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         elif type == "socialnetwork_facebook":
             if "password" in request.POST:
                 try:
                     UserProfile.objects.get(username=request.POST["username"])
                     failureResponse['status'] = DUPLICATE
                     failureResponse['error'] = "Username not availaible.Select some other username"
-                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                 except UserProfile.DoesNotExist:
                     username = request.POST["username"]
                     id = request.POST["user_id"]
@@ -1057,11 +1062,11 @@ def selectUserName(request):
 #                    CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                     #code for elastic search end
                     successResponse['message'] = "username updated successfully" 
-                    return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
-                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript') 
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript') 
         elif type == "socailnetwork_twitter":
             if "password" in request.POST:
                 if "email" in request.POST:
@@ -1069,7 +1074,7 @@ def selectUserName(request):
                         UserProfile.objects.get(username=request.POST["username"])
                         failureResponse['status'] = DUPLICATE
                         failureResponse['error'] = "Username not availaible.Select some other username"
-                        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                     except UserProfile.DoesNotExist:
                         username = request.POST["username"]
                         id = request.POST["user_id"]
@@ -1105,47 +1110,47 @@ def selectUserName(request):
 #                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                         #code for elastic search end
                         successResponse['message'] = "username updated successfully"
-                        return HttpResponse(simplejson.dumps(successResponse),mimetype='application/javascript')
+                        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = "email field cannot be left blank"
-                    return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                    return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
-                return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
         failureResponse['error'] = "type field is missing"
-        return HttpResponse(simplejson.dumps(failureResponse),mimetype='application/javascript')
+        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
-def getUserSuggestions(request,user):
+def getUserSuggestions(request, user):
     #import jsonpickle
     query = {}
     prefix = {}
-    fields = ["user_auth.first_name","user_auth.last_name","user_auth.username",
-              "user_auth.id","user_auth.email","user_profile.username","user_profile.following_count",
-              "user_profile.displayname","user_profile.sqwag_count","user_profile.sqwag_image_url",
-              "user_profile.sqwag_cover_image_url","user_profile.personal_message",
+    fields = ["user_auth.first_name", "user_auth.last_name", "user_auth.username",
+              "user_auth.id", "user_auth.email", "user_profile.username", "user_profile.following_count",
+              "user_profile.displayname", "user_profile.sqwag_count", "user_profile.sqwag_image_url",
+              "user_profile.sqwag_cover_image_url", "user_profile.personal_message",
               "user_profile.followed_by_count"]
     prefix["user_profile.displayname"] = user
     query["prefix"] = prefix
-    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET,fields=fields)
+    result = GetDocument(query=query, url=ELASTIC_SEARCH_USER_GET, fields=fields)
     print "calling GET"
     jsoncontent = jsonpickle.decode(result)
     user_all = []
     for i in jsoncontent['hits']['hits']:
-        user_all.insert(0,i['fields'])
+        user_all.insert(0, i['fields'])
         print i['fields']
     resultWrapper = paginate(request, 1, user_all, NUMBER_OF_SQUARES)
-    return HttpResponse(jsonpickle.encode(resultWrapper,unpicklable=False),mimetype='application/javascript')
+    return HttpResponse(jsonpickle.encode(resultWrapper, unpicklable=False), mimetype='application/javascript')
 
 def instaSubsCallback(request):
     if request.method == "GET":
         if 'hub.mode' in request.GET and 'hub.challenge' in request.GET and 'hub.verify_token' in request.GET:
             #get the challenge
             challenge = request.GET['hub.challenge']
-            return HttpResponse(challenge,mimetype='application/javascript')
+            return HttpResponse(challenge, mimetype='application/javascript')
         else:
             failureResponse['result'] = SYSTEM_ERROR
             failureResponse['error'] = "some error at instagram server"
@@ -1161,15 +1166,15 @@ def instaSubsCallback(request):
         respArrayObj = jsonpickle.decode(resp)
         for respObj in respArrayObj:
             print respObj['object_id']
-            print "syncing feeds for "+ respObj['object_id']
+            print "syncing feeds for " + respObj['object_id']
             syncInstaFeed(insta_user_id=respObj['object_id'])
-            print "done syncing feeds for "+ respObj['object_id']
+            print "done syncing feeds for " + respObj['object_id']
         print "sync insta feed done"
-        return HttpResponse('thankyou!',mimetype='application/javascript')
+        return HttpResponse('thankyou!', mimetype='application/javascript')
 
 def createInstaSubscription(request):
     h = Http()
-    data = dict(client_id=settings.INSTA_CLIENT_ID,client_secret=settings.INSTA_CLIENT_SECRET,object='user',aspect='media',
+    data = dict(client_id=settings.INSTA_CLIENT_ID, client_secret=settings.INSTA_CLIENT_SECRET, object='user', aspect='media',
                     callback_url=settings.INSTA_SUBS_CALLBACK_URL,
                     verify_token='sqwagbetauser')
     resp, content = h.request(settings.INSTA_SUBSCRIPTION_URL, "POST", urlencode(data))
@@ -1178,12 +1183,12 @@ def createInstaSubscription(request):
     return HttpResponse(content, mimetype='application/javascript')
 
 def test(request):
-    fields = ["user_auth.username","user_auth.email"]
+    fields = ["user_auth.username", "user_auth.email"]
     query = {}
     term = {}
     term['user_auth.username'] = "nikhil1231"
     query['term'] = term
-    r = GetDocument(fields,query,ELASTIC_SEARCH_USER_GET)
+    r = GetDocument(fields, query, ELASTIC_SEARCH_USER_GET)
 
 def pocInsta(request):
     x = syncInstaFeed(insta_user_id=8314228)
@@ -1191,7 +1196,7 @@ def pocInsta(request):
     return HttpResponse(x, mimetype='application/javascript')
 def testName(request):
     #email = request.POST['email']
-    successResponse['status']=1
+    successResponse['status'] = 1
     successResponse['result'] = 'Valid'
     return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
     #return HttpResponse('false',mimetype='application/javascript') 
