@@ -866,7 +866,7 @@ def accessFacebookNewUser(request):
                     user.last_name = userinformation['last_name']
 #                    ES_Obj['user_auth'].last_name = userinformation['last_name']
                 userProf = UserProfile.objects.get(user=user)
-                if not userProf.sqwag_image_url.strip():
+                if not userProf.sqwag_image_url:
                     userProf.sqwag_image_url = userPicture['content-location']
 #                    ES_Obj['user_profile'].sqwag_image_url = userPicture['content-location']
                 if not userProf.sqwag_cover_image_url:
