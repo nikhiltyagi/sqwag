@@ -9,7 +9,7 @@ var router = {
 
 			getData: function(){
 				$("#main").html('<div id="content"></div>');
-				$(self.feedTemplate.targetElement).html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+				$(self.feedTemplate.targetElement).html('<div id="sqwag-list-id" class="sqwag-list"></div>');
 				var config = SQ.router.routes[router.currentRoute];
 				SQ.backbone.init(config.bb_config);
 				SQ.backbone.feedHandler.getFeed();
@@ -25,7 +25,7 @@ var router = {
 					// bind events
 
 					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
-					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+					$('#content').html('<div id="sqwag-list-id" class="sqwag-list"></div>');
 					var config = SQ.router.routes[router.currentRoute];
 					SQ.backbone.init(config.bb_config);
 					SQ.backbone.feedHandler.getFeed();
@@ -140,7 +140,7 @@ var router = {
 					};
 
 					$(self.profileTemplate.targetElement).append('<div id="content"></div>');
-					$('#content').html('<div id="sqwag-list-id" class="sqwag-list row"></div>');
+					$('#content').html('<div id="sqwag-list-id" class="sqwag-list"></div>');
 					var config = SQ.router.routes[router.currentRoute];
 					SQ.backbone.init(config.bb_config);
 					SQ.backbone.feedHandler.getFeed();
