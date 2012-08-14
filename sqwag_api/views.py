@@ -831,7 +831,7 @@ def authFacebookNewUser(request):
 
 def accessFacebookNewUser(request):
     if 'code' in request.GET:
-        codeReceived = request.GET['code']       
+        codeReceived = request.GET['code']
         h = Http()
         data = dict(client_id=settings.FACEBOOK_APP_ID, client_secret=settings.FACEBOOK_APP_SECRET,
                     grant_type='authorization_code', redirect_uri=settings.FACEBOOK_CALLBACK_URL_NEW_USER,

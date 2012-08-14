@@ -51,7 +51,7 @@ body {
   margin-bottom: 88px;
 }
 .navbar-inner {
-  background: url('../img/bg-bar.png') repeat-x;
+  background: url('../img/bg-bar.jpg') repeat-x;
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
@@ -372,7 +372,15 @@ body{background:url(../img/bg_pattern.png) repeat;}
 .form_sbt_wrap{float:left;}
 .form_sbt_wrap input{border:1px solid #070606;background:url("../img/btn_bg.png") repeat-x;height:29px;margin:4px 0;width:72px;color:#fff;line-height:35px;font:bold 14px/29px Arial;}
 a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
-.register_blk{float:right;width:490px;margin:65px 0px 0px 10px;border:1px solid #ccc;}
+/*.register_blk{float:right;width:490px;margin:65px 0px 0px 10px;border:1px solid #ccc;}*/
+.register_blk {
+float: right;
+width: 490px;
+margin: 65px 0px 0px 10px;
+border: 1px solid #5C5C5C;
+box-shadow: 0px 0px 5px #2E2E2E;
+}
+
 .register_blk form{margin:0px;}
 .register_blk_hd{background:#424242;height:36px;}
 .register_blk_hd h2{font:bold 18px/32px Arial;color:#FFF;font-size:17px;font-weight: bold;line-height:32px;}
@@ -469,6 +477,12 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
 .register_step2 .fb_signin_inner form{margin:0px;padding:20px 0px 0px;}
 .register_step2 .register_blk_right.fb_signin_inner .modal-footer p{margin-top:10px;}
 .fgt_pwd_req .register_blk_right.fb_signin_inner  label{line-height:26px;}
+
+textarea {
+height: auto;
+resize: none;
+}
+
 
 
 

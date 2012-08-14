@@ -568,7 +568,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
             if not topsqr.user_account:
                 accountType = 'NA'
             else:
-                accountType = topsqr.user_account.id                
+                accountType = topsqr.user_account.id
             usr = getCompleteUserInfo(request,topsqr.user,accountType)
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
