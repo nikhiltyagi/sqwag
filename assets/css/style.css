@@ -483,7 +483,7 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
   display:none;
 }
   
-.window {
+/*.window {
   position:fixed;
   left:0;
   top:0;
@@ -492,4 +492,13 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
   display:none;
   z-index:9999;
   padding:20px;
+}*/
+
+.window {
+position: fixed;
+left: 0px;
+top: 0px;
+display: none;
+z-index: 9999;
+padding: 20px;
 }
