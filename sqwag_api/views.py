@@ -843,7 +843,7 @@ def accessFacebookNewUser(request):
         if resp.status == 200:
             userinfo = h.request('https://graph.facebook.com/me?access_token=' + accesstoken, "GET")
             userinformation = json.loads(userinfo[1])
-            userPic = h.request('https://graph.facebook.com/' + userinformation['username'] + '/picture?type=small')
+            userPic = h.request('http://graph.facebook.com/' + userinformation['username'] + '/picture?type=small')
             userPicture = userPic[0]
             try:
                 user = User.objects.get(username=userinformation['email'])
