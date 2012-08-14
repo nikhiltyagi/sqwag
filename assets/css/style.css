@@ -55,11 +55,6 @@ body {
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }*/
-.navbar-inner {
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-    background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.7);
-}
-
 
 /* sprites */
 .sprite > li > a {
@@ -379,13 +374,7 @@ body{background:url(../img/bg_pattern.png) repeat;}
 .form_sbt_wrap input{border:1px solid #070606;background:url("../img/btn_bg.png") repeat-x;height:29px;margin:4px 0;width:72px;color:#fff;line-height:35px;font:bold 14px/29px Arial;}
 a.forgot_pwd_link{padding-left:115px;color:#fff;font-size:11px;}
 /*.register_blk{float:right;width:490px;margin:65px 0px 0px 10px;border:1px solid #ccc;}*/
-.register_blk {
-float: right;
-width: 490px;
-margin: 65px 0px 0px 10px;
-border: 1px solid #5C5C5C;
-box-shadow: 0px 0px 5px #2E2E2E;
-}
+
 
 .register_blk form{margin:0px;}
 .register_blk_hd{background:#424242;height:36px;}
@@ -484,10 +473,48 @@ span.letter_count{float:right;font:bold 10px/16px Arial;}
 .register_step2 .register_blk_right.fb_signin_inner .modal-footer p{margin-top:10px;}
 .fgt_pwd_req .register_blk_right.fb_signin_inner  label{line-height:26px;}
 
+
+/*styles by flo*/
 textarea {
 height: auto;
 resize: none;
 }
+
+.navbar-inner {
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: rgb(44, 44, 44);
+    background-image: -moz-linear-gradient(center top , rgb(51, 51, 51), rgb(34, 34, 34));
+    background-repeat: repeat-x;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25), 0px -1px 0px rgba(0, 0, 0, 0.1) inset;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin: 0px;
+    font-weight: bold;
+    color: rgb(235, 235, 235);
+    text-rendering: optimizelegibility;
+}
+img {
+    max-width: 100%;
+    margin-top: 5px;
+}
+.register_blk {
+float: right;
+width: 490px;
+margin: 65px 0px 0px 10px;
+border: 1px solid #5C5C5C;
+box-shadow: 0px 0px 5px #2E2E2E;
+}
+
+.window {
+position: fixed;
+left: 0px;
+top: 0px;
+display: none;
+z-index: 9999;
+}
+/*styles by flo ends*/
 
 
 
@@ -514,10 +541,3 @@ resize: none;
   padding:20px;
 }*/
 
-.window {
-position: fixed;
-left: 0px;
-top: 0px;
-display: none;
-z-index: 9999;
-}
