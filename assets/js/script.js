@@ -308,7 +308,7 @@ var SQ = {
     });
 
     // validate email on blur
-    $("#email").bind('blur',function(){
+    /*$("#email").bind('blur',function(){
       
       $.ajax({
         url:"/sqwag/testname/",
@@ -325,7 +325,7 @@ var SQ = {
         }
       });
 
-    });
+    });*/
   
 //register-form-step2
     $("#register-form-step2").validate({
