@@ -7,7 +7,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 
 class FbCustomBackend(ModelBackend):
-    def authenticate(self, username =None, password=None, token=None):
+    def authenticate(self, username =None,token=None):
         try:
             user = User.objects.get(username=username)
             if user.is_active and token=='facebook':

@@ -945,7 +945,7 @@ def accessFacebookNewUser(request):
                 login(request, user)
                 return HttpResponseRedirect('/');
             else:
-                user = authenticate(username=userinformation['email'],password='temp123', token='facebook')
+                user = authenticate(username=userinformation['email'],token='facebook')
                 if user is not None:
                     login(request, user)
                     return HttpResponseRedirect('/');

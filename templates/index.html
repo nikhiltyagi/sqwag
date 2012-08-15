@@ -196,7 +196,7 @@
             <input type="password" name="password" id="password-login"/>           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
-            <a href="#" class="forgot_pwd_link">Forgot password?</a>
+            <a href="#fpwd-step1" class="forgot_pwd_link" name="modal">Forgot password?</a>
           </div>
           <div class="form_sbt_wrap">
            <input type="submit" value="Log in" name="login_sbt" id="login_sbt"/>  
@@ -285,8 +285,11 @@
           <input id="submit-feedback" type="submit" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
-<div class="fgt_pwd_req" style="display:none">
-    <div class="register_blk fpwd_step1 window" >
+
+<div id="fpwd-step1" class="fgt_pwd_req window">
+
+
+    <div  class="register_blk fpwd_step1" >
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -296,7 +299,7 @@
             <form action=""  method="post">
               <div class="form-controls">
                 <label for="reset_pwd">Reset your password</label>
-                <input class="input" type="text" name="resetpassword" id="reset_pwd" value="Email" />
+                <input class="input" type="text" name="resetpassword" id="reset_pwd_email" />
               </div>              
               <div class="modal-footer">
                 <input class="btn btn-primary" type="submit" value="Register" />
@@ -305,7 +308,10 @@
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- fpwd_step1 -->
-    <div class="register_blk fpwd_step2 window">
+    
+</div><!-- fgt_pwd_req -->
+
+<div class="register_blk fpwd_step2">
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -317,7 +323,8 @@
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- fpwd_step2 -->
-</div><!-- fgt_pwd_req -->
+
+
 	<div id="fb-step2" class="register_blk register_step2 fb_signin window">
     <div class="register_blk_hd">
       <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
