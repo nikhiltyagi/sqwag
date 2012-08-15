@@ -940,16 +940,19 @@ def accessFacebookNewUser(request):
                     #TODO: log it
                     return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #redirect to home page of the user as user is already registered and active
-            complete_user = getCompleteUserInfo(user=user)
-            c = Context(getUserContextObject(complete_user))
             user = authenticate(username=userinformation['email'],password='temp123')
             if user is not None:
                 login(request, user)
                 return HttpResponseRedirect('/');
             else:
-                failureResponse['status'] = BAD_REQUEST
-                failureResponse['message'] = 'auth error'
-                return HttpResponseRedirect('/?damn=true')
+                user = authenticate(username=userinformation['email'],password='temp123', token='facebook')
+                if user is not None:
+                    login(request, user)
+                    return HttpResponseRedirect('/');
+                else:
+                    failureResponse['status'] = BAD_REQUEST
+                    failureResponse['message'] = 'auth error'
+                    return HttpResponseRedirect('/?damn=true')
                 #return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #return render_to_response('index.html',c)
             #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
