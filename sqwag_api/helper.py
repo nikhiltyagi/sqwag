@@ -124,10 +124,10 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
         return resultWrapper
     if square:
         if not square.user_account:
-            accountType = 'NA'
+            accountId = 'NA'
         else:
-            accountType = square.user_account.id
-        square.complete_user =  getCompleteUserInfo(request,user,accountType)['result']
+            accountId = square.user_account.id
+        square.complete_user =  getCompleteUserInfo(request,user,accountId)['result']
         userSquare.complete_user = square.complete_user
         squareResponse['square'] = square
         squareResponse['user_square'] = userSquare
@@ -170,7 +170,7 @@ def paginate(request, page, inputList, itemsPerPage):
         resultWrapper['error'] = "page is out of bounds"
     return resultWrapper
 
-def getCompleteUserInfo(request=None,user=None,accountType=None):
+def getCompleteUserInfo(request=None,user=None,accountId=None):
     resultWrapper = {}
     userInfo = {}
     if user:
@@ -182,7 +182,7 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
 #            userInfo['user'] = GetUser(i['user_auth'])
 #            userInfo['user_profile'] = GetUserProfile(i['user_profile'])
 #        filter = {}  
-#        if not accountType:
+#        if not accountId:
 #            useracc_obj = []
 #            fields = ["account","account_pic","account_handle","py/object","id","account_id","account_data"]
 #            filter1 = CreateObject(type="term",typeindex="user_id",typevalue=user.id)
@@ -193,14 +193,14 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
 #            for i in jsoncontent['hits']['hits']:
 #                print i['fields']
 #                useracc_obj.insert(0,i['fields'])
-#        elif accountType=='NA':
+#        elif accountId=='NA':
 #            useracc_obj = {}
 #        else:
 #            useracc_obj = []
 #            fields = ["account","account_pic","account_handle","py/object"]
 #            filter1 = CreateObject(type="term",typeindex="user_id",typevalue=user.id)
 #            filter2 = CreateObject(type="term",typeindex="is_active",typevalue=True)
-#            filter3 = CreateObject(type="term",typeindex="account",typevalue=accountType)
+#            filter3 = CreateObject(type="term",typeindex="account",typevalue=accountId)
 #            filter['and'] = [filter1,filter2,filter3]
 #            result = GetDocument(filter=filter,url=ELASTIC_SEARCH_USERACCOUNT_GET,fields=fields)
 #            jsoncontent = jsonpickle.decode(result)
@@ -226,12 +226,12 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
                                                      "sqwag_image_url","sqwag_cover_image_url","username","fullname","personal_message").get(user=user)
             userInfo['user'] = User.objects.values("is_active","username","first_name","last_name","email","id").get(pk=user.id)#TODO : change this.this is bad
             userInfo['user_profile'] = userProfile
-            if not accountType:
-                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user,is_active=True)
-            elif accountType=='NA':
+            if not accountId:
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user)
+            elif accountId=='NA':
                 useracc_obj = {}
             else:    
-                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(user=user,account=accountType,is_active=True)
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountId)
             userInfo['user_accounts']= useracc_obj
             if request is not None and not request.user.is_anonymous():
                 try:
