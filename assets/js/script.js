@@ -306,6 +306,47 @@ var SQ = {
           return false; 
         }
     });
+    
+    $("#fpwd-step1-form").validate({
+        rules: {
+            email:{
+              required: true,
+              email: true
+            }
+        },
+        messages: {
+            email: {
+              required: "Please specify email",
+              email: "Please enter valid email"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/forgotpwd/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                alert('yippie'+ data.result);
+                //SQ.refresh();
+              }
+              else {
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
+    });
+    
 
     // validate email on blur
     /*$("#email").bind('blur',function(){

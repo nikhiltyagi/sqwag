@@ -35,7 +35,7 @@ import urlparse
 
 successResponse = {}
 successResponse['status'] = SUCCESS_STATUS_CODE
-successResponse['message'] = SUCCESS_MSG
+successResponse['result'] = SUCCESS_MSG
 failureResponse = {}
 
 def index(request):
@@ -595,7 +595,7 @@ def forgotPwd(request):
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['result'] = NOT_FOUND
-            failureResponse['message'] = 'invalid username'
+            failureResponse['error'] = 'invalid username'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
 
 def forgotPwdKey(request, id, key):
@@ -814,11 +814,11 @@ def accessFacebook(request):
                 return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = resp.status
-            failureResponse['message'] = 'facebook ERROR'
+            failureResponse['error'] = 'facebook ERROR'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
-        failureResponse['message'] = 'GET parameter missing'
+        failureResponse['error'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     
 def authFacebookNewUser(request):
@@ -938,26 +938,26 @@ def accessFacebookNewUser(request):
             user = authenticate(username=userinformation['email'],password='temp123')
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect('/');
+                return HttpResponseRedirect('/')
             else:
                 user = authenticate(username=userinformation['email'],token='facebook')
                 if user is not None:
                     login(request, user)
-                    return HttpResponseRedirect('/');
+                    return HttpResponseRedirect('/')
                 else:
                     failureResponse['status'] = BAD_REQUEST
-                    failureResponse['message'] = 'auth error'
+                    failureResponse['error'] = 'auth error'
                     return HttpResponseRedirect('/?damn=true')
                 #return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             #return render_to_response('index.html',c)
             #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
         else:
             failureResponse['status'] = resp.status
-            failureResponse['message'] = 'facebook ERROR'
+            failureResponse['error'] = 'facebook ERROR'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
     else:
         failureResponse['status'] = BAD_REQUEST
-        failureResponse['message'] = 'GET parameter missing'
+        failureResponse['error'] = 'GET parameter missing'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')   
 
 def selectUserName(request):
@@ -1057,8 +1057,14 @@ def selectUserName(request):
 #                    userdata['user_profile'] = ES_Obj['user_profile']  
 #                    CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                     #code for elastic search end
-                    successResponse['message'] = "username updated successfully" 
-                    return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                    userAuth = authenticate(username=user.username,password=user.password)
+                    if userAuth is not None:
+                        login(request, user)
+                        return HttpResponseRedirect('/')
+                    else:
+                        failureResponse['status'] = SYSTEM_ERROR
+                        failureResponse['error'] = "System error detected, please try again later."
+                        return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
             else:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
@@ -1104,7 +1110,7 @@ def selectUserName(request):
 #                       userdata['user_profile'] = ES_Obj['user_profile']  
 #                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                         #code for elastic search end
-                        successResponse['message'] = "username updated successfully"
+                        successResponse['result'] = "username updated successfully"
                         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST

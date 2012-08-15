@@ -287,8 +287,6 @@
 </div>
 
 <div id="fpwd-step1" class="fgt_pwd_req window">
-
-
     <div  class="register_blk fpwd_step1" >
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
@@ -296,10 +294,10 @@
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
           <div class="register_blk_right" id="register-form">
-            <form action=""  method="post">
+            <form id="fpwd-step1-form" method="post">
               <div class="form-controls">
                 <label for="reset_pwd">Reset your password</label>
-                <input class="input" type="text" name="resetpassword" id="reset_pwd_email" />
+                <input class="input" type="text" name="email" id="reset_pwd_email" />
               </div>              
               <div class="modal-footer">
                 <input class="btn btn-primary" type="submit" value="Register" />
@@ -308,21 +306,22 @@
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- fpwd_step1 -->
-    
 </div><!-- fgt_pwd_req -->
 
-<div class="register_blk fpwd_step2">
-        <div class="register_blk_hd">
-          <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
-          <span class="align_right"><h2>Did you forget your password?</h2></span>
-        </div><!-- register_blk_hd-->
-        <div class="register_blk_inner">
-          <div class="register_blk_right ack_req_pwd" id="ack_req_pwd">
-            <h3>Thank you!</h3>
-            <p>Check your inbox and follow the steps to reset your password.</p>
-          </div><!-- register_blk_right -->
-        </div><!-- register_blk_inner -->      
-    </div><!-- fpwd_step2 -->
+<div id="fpwd-step2" class="fgt_pwd_req window">
+  <div class="register_blk fpwd_step2">
+      <div class="register_blk_hd">
+        <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
+        <span class="align_right"><h2>Did you forget your password?</h2></span>
+      </div><!-- register_blk_hd-->
+      <div class="register_blk_inner">
+        <div class="register_blk_right ack_req_pwd" id="ack_req_pwd">
+          <h3>Thank you!</h3>
+          <p>Check your inbox and follow the steps to reset your password.</p>
+        </div><!-- register_blk_right -->
+      </div><!-- register_blk_inner -->      
+  </div><!-- fpwd_step2 -->
+</div>
 
 
 	<div id="fb-step2" class="register_blk register_step2 fb_signin window">
@@ -661,6 +660,7 @@ $(document).ready(function() {
       $("#email").DefaultValue("Email");
       $("#password-registration").DefaultValue("nopassword");
       $("#username-register").DefaultValue("username");
+      $("#reset_pwd_email").DefaultValue("Email");
     {% endif %}
 
   {% endif %}
