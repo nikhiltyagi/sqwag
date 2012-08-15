@@ -117,4 +117,4 @@ class SendSqwagForm(forms.Form):
     message = forms.CharField(max_length=2000,required=False)
 
 class forgotPwdForm(forms.Form):
-    username = forms.CharField(max_length=100)
+    email = forms.EmailField()
