@@ -1109,40 +1109,46 @@ def selectUserName(request):
                         failureResponse['error'] = "Username not availaible.Select some other username"
                         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                     except UserProfile.DoesNotExist:
-                        username = request.POST["username"]
-                        id = request.POST["user_id"]
-                        user = User.objects.get(pk=id)
-                        email = request.POST["email"]
-                        print username
-                        userprofile = UserProfile.objects.get(user=user)
-                        userprofile.username = username
-                        user.set_password(request.POST["password"])
-                        user.is_active = True
-                        user.username = email
-                        user.email = email
-                        user.save()
-                        userprofile.save()
-                        #code for elastic search start
-#                       query = {}
-#                       term = {}
-#                       term["user_auth.id"] = user.id
-#                       query['term'] = term
-#                       result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                       for i in result:
-#                           ES_Obj = i
-#                           print ES_Obj
-#                       userdata = {}
-#                       print ES_Obj['user_profile']
-#                       ES_Obj['user_profile'].username = request.POST["username"]
-#                       ES_Obj['user_auth'].is_active = True
-#                       ES_Obj['user_auth'].email = email
-#                       print ES_Obj['user_profile'].username
-#                       userdata['user_auth'] = ES_Obj['user_auth']
-#                       userdata['user_profile'] = ES_Obj['user_profile']  
-#                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
-                        #code for elastic search end
-                        successResponse['result'] = "username updated successfully"
-                        return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                        try:
+                            User.objects.get(email=request.POST["email"])
+                            failureResponse['status'] = DUPLICATE
+                            failureResponse['error'] = "user with this email already exist.Please provide some other mail id"
+                            return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+                        except User.DoesNotExist:
+                            username = request.POST["username"]
+                            id = request.POST["user_id"]
+                            user = User.objects.get(pk=id)
+                            email = request.POST["email"]
+                            print username
+                            userprofile = UserProfile.objects.get(user=user)
+                            userprofile.username = username
+                            user.set_password(request.POST["password"])
+                            user.is_active = True
+                            user.username = email
+                            user.email = email
+                            user.save()
+                            userprofile.save()
+                            #code for elastic search start
+    #                       query = {}
+    #                       term = {}
+    #                       term["user_auth.id"] = user.id
+    #                       query['term'] = term
+    #                       result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+    #                       for i in result:
+    #                           ES_Obj = i
+    #                           print ES_Obj
+    #                       userdata = {}
+    #                       print ES_Obj['user_profile']
+    #                       ES_Obj['user_profile'].username = request.POST["username"]
+    #                       ES_Obj['user_auth'].is_active = True
+    #                       ES_Obj['user_auth'].email = email
+    #                       print ES_Obj['user_profile'].username
+    #                       userdata['user_auth'] = ES_Obj['user_auth']
+    #                       userdata['user_profile'] = ES_Obj['user_profile']  
+    #                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                            #code for elastic search end
+                            successResponse['result'] = "username updated successfully"
+                            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = "email field cannot be left blank"
