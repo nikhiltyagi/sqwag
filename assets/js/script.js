@@ -308,6 +308,73 @@ var SQ = {
           return false; 
         }
     });
+
+  
+  //twitter step 2 regeister
+  $("#twitter-step2-form").validate({
+        rules: {
+            username:{
+              required: true,
+              maxlength: 25
+            },
+            password:{
+              required:true
+            },
+            tos_cbok:{
+              required:true
+            },
+            user_id:{
+              required:true
+            },
+            email:{
+              required:true,
+              email:true
+            }
+        },
+        messages: {
+            username: {
+              required: "Please specify username",
+              maxlength: "username should be less than 25 characters"
+            },
+            password:{
+              required: "Please enter Password"
+            },
+            tos_cbok:{
+              required:"please select the checkbox to agree with TOS"
+            },
+            user_id:{
+              required:"Some error detected. please restart the registration process."
+            },
+            email:{
+              required:"please enter your email id",
+              email:"please enter a valid email id"
+            }
+        },
+        submitHandler: function(form) {
+          // do other stuff for a valid form
+          var options = {
+            url: window.location.href+'sqwag/selectusername/',
+            type:'post',
+            dataType: 'json',
+            beforeSubmit: function(){
+              //skip
+            },
+            success: function(data) {
+              if(data.status == 1) {
+                SQ.refresh();
+              }
+              else {
+                var error_string = SQ.errorHandler(data);
+                self.notify(error_string);
+              }
+              //self.close();
+            }
+          };
+
+          $(form).ajaxSubmit(options);
+          return false; 
+        }
+    });
     
     $("#fpwd-step1-form").validate({
         rules: {
@@ -338,6 +405,7 @@ var SQ = {
               }
               else {
                 var error_string = SQ.errorHandler(data);
+                $("#fpwd-step1").fadeOut();
                 self.notify(error_string);
               }
               //self.close();

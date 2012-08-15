@@ -280,7 +280,7 @@ def accessTweeter(request):
                             access_token_key=sqAccessToken.key,
                             access_token_secret=sqAccessToken.secret)
             followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
-            if request.user.is_authenticated:
+            if request.user.is_authenticated():
                 successResponse['followed'] = followedUser.AsDict()
                 return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
             else:

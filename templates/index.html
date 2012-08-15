@@ -64,62 +64,13 @@
               </div>
             </div>
           </li>
-
-          
         </ul>
         <div class="logo"><a class="js-load" href="#feed"><img src="assets/img/logo.png" /></a></div>
       </div>
     </div>
   </div>
     <div role="main">
-    <!-- <div class="modal hide" id="register-form">
-      <form action="" method="post">
-        <div class="modal-header">
-          <a class="close" data-dismiss="modal">&times;</a>
-          <h1>Create a Sqwag account</h1>
-        </div>
-        <div class="modal-body">
-            <div class="form-controls">
-              <label for="username">Username</label>
-              <input class="input" type="text" name="username" id="username" required />
-            </div>
-            <div class="form-controls">
-              <label for="password">Password</label>
-              <input type="password" name="password" id="password" required />
-            </div>
-            <div class="form-controls">
-              <label for="email">Email</label>
-              <input type="email" name="email" id="email" required />
-            </div>
-        </div>
-        <div class="modal-footer">
-            <input class="btn btn-primary" type="submit" value="register" />
-        </div>
-      </form>
-    </div> -->
     
-    <!-- <div class="modal hide" id="login-form">
-      <form action="" method="post">
-        <div class="modal-header">
-          <a class="close" data-dismiss="modal">&times;</a>
-          <h1>Login</h1>
-        </div>
-        <div class="modal-body">
-          <div class="form-controls">
-            <label>Username</label>
-            <input type="text" name="username"/>
-          </div>
-          <div class="form-controls">
-            <label>Password</label>
-            <input type="password" name="password"/>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <input type="submit" class="btn btn-primary" value="login" />
-        </div>
-      </form>
-    </div>
-     -->
     <div class="modal hide sqwag-form" id="sqwag-text-form">
       <form action="/api/square/create/" method="post">
         <div class="modal-header">
@@ -215,7 +166,7 @@
         <div class="register_blk_inner">
           <div id="register-step1-div" class="register_step1" style="display:block;" >
             <div class="register_blk_left">
-              <a href="#" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
+              <a href="sqwag/authtwitter/register" class="twitter_btn"><img src="assets/img/twitter_btn.png" alt="fb connect" title="fb connect" /></a>
               <a href="sqwag/authfacebooknewuser/" class="fb_btn"><img src="assets/img/fb_btn.png" alt="fb connect" title="fb connect" /></a>            
             </div><!-- register_blk_left -->
             <div class="register_blk_right" id="register-form-div" >
@@ -352,26 +303,28 @@
     </div><!-- register_blk_inner -->      
   </div><!-- fb_signin -->
 
-	<div class="register_blk register_step2 twitter_signin window">
+	<div id="twitter-step2" class="register_blk register_step2 twitter_signin window">
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>New Here? <span>Select your Username and Password!</span></h2></span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
           <div class="register_blk_right fb_signin_inner">
-            <form action="#"  method="post">
+            <form id="twitter-step2-form"  method="post">
               <div class="align_center" style="height:55px;">
                 <label for="twt_username">@</label>
-                <input class="input" type="text" name="twt_username" id="twt_username" value="Username" />
+                <input class="input" type="text" name="username" id="twt_username" value="Username" />
+                <input type="text" name="type" id="fb_user_type" value="socialnetwork_twitter" style="display:none"/>
+            <input type="text" name="user_id" id="user_id-twitter" style="display:none"/>
 				<span class="legend_text">You can change it later!</span>
               </div> 
 			  <div class="align_center">
                 <label for="twt_email" style="display:none;">Email</label>
-                <input class="input" type="text" name="twt_email" id="twt_email" value="Email" />
+                <input class="input" type="text" name="email" id="twt_email" />
               </div>
 			  <div class="align_center">
                 <label for="twt_password" style="display:none;">Password</label>
-                <input class="input" type="password" name="twt_password" id="twt_password" value="Password" />
+                <input class="input" type="password" name="password" id="twt_password" value="Password" />
               </div> 			  
               <div class="modal-footer">
                   <p><input name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
@@ -532,6 +485,17 @@
 
 <script>
 
+function getParameterByName(name)
+{
+  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regexS = "[\\?&]" + name + "=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(window.location.search);
+  if(results == null)
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 //modal window related code
 
     //select all the a tag with name equal to modal
@@ -648,8 +612,7 @@ $(document).ready(function() {
     {% if complete_user and not complete_user.user.is_active %}
       options = {
       };
-      $("#fd_username").DefaultValue("Username");
-      $("#fd_password").DefaultValue("nopassword")
+      
     {% else %}
       options = {
         "route":"publicfeed",
@@ -665,9 +628,22 @@ $(document).ready(function() {
 
   {% endif %}
   {% if complete_user and not complete_user.user.is_active %}
-      var user_id_fb = "{{ complete_user.user.id }}";
-      $("#user_id-fb").val(user_id_fb);
-      launchWindow('#fb-step2');
+      var accountType = getParameterByName('account');
+      if(accountType=='twitter'){
+        $("#twt_username").DefaultValue("Username");
+        $("#twt_password").DefaultValue("nopassword")
+        $("#twt_email").DefaultValue("Email");
+        var user_id_twt = "{{ complete_user.user.id }}";
+        $("#user_id-twitter").val(user_id_fb);
+        launchWindow('#twitter-step2');
+
+      }else if(accountType=='facebook'){
+        $("#fd_username").DefaultValue("Username");
+        $("#fd_password").DefaultValue("nopassword")
+        var user_id_fb = "{{ complete_user.user.id }}";
+        $("#user_id-fb").val(user_id_fb);
+        launchWindow('#fb-step2');
+      }
       $.ajax({
         url:"/sqwag/logout/",
         datatype:"json",
