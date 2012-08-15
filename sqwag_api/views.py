@@ -575,9 +575,9 @@ def getInstaFeed(request):
 def forgotPwd(request):
     form = forgotPwdForm(request.POST)
     if form.is_valid():
-        user = form.cleaned_data['username']
-        user_obj = User.objects.get(username=user)
-        if user_obj:
+        email = form.cleaned_data['email']
+        try:
+            user_obj = User.objects.get(email=email)
             user_prof = UserProfile.objects.get(user=user_obj)
             activation_key = user_prof.create_reset_key(user_prof)
             user_prof.pwd_reset_key = activation_key
@@ -589,25 +589,30 @@ def forgotPwd(request):
             else:
                 protocol = 'http://'
             message = protocol + host + '/sqwag/pwdreset/' + str(user_obj.id) + '/' + activation_key
-            mailer = Emailer(subject="Activation link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user_obj.email, date_created=time.time())
+            mailer = Emailer(subject="pwd reset link from sqwag.com", body=message, from_email='coordinator@sqwag.com', to=user_obj.email, date_created=time.time())
             mailentry(mailer)
             successResponse['result'] = 'mail sent successfully' 
             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-        else:
-            failureResponse['result'] = NOT_FOUND
-            failureResponse['message'] = 'invalid username'
+        except User.DoesNotExist: 
+            failureResponse['status'] = NOT_FOUND
+            failureResponse['error'] = 'no user with this email.please enter your registered mail id'
             return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+    else:
+        failureResponse['status'] = BAD_REQUEST
+        failureResponse['error'] = form.errors
+        return failureResponse
 
 def forgotPwdKey(request, id, key):
-    userProf = UserProfile.objects.get(user=id, pwd_reset_key=key)
+    try:
+        userProf = UserProfile.objects.get(user=id, pwd_reset_key=key)
     #TODO change http response to rendertoresponse
-    if userProf:
         successResponse['result'] = 'you can change your pwd'
         return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
-    else:
+    except UserProfile.DoesNotExist:
         failureResponse['result'] = BAD_REQUEST
         failureResponse['error'] = 'username and activation key does not match'
         return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
+
 def newPwd(request):
     form = PwdResetForm(request.POST)
     if form.is_valid():
