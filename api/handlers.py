@@ -177,9 +177,9 @@ class ShareSquareHandler(BaseHandler):
                     squareObj.save()
                     squareResponse = {}
                     if not squareObj.user_account:
-                        accountType = 'NA'
+                        accountId = 'NA'
                     else:
-                        accountType = squareObj.user_account.id
+                        accountId = squareObj.user_account.id
                     try:
                         usrprofile = UserProfile.objects.get(user=request.user)
                     except UserProfile.DoesNotExist:
@@ -195,7 +195,7 @@ class ShareSquareHandler(BaseHandler):
                     #userdata['user_profile'] = UserProfile.objects.get(user=request.user)  
                     #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
                         #code for elastic search end
-                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)['result']
+                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountId)['result']
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')['result']
                     squareResponse['user_square'] = userSquareObj
@@ -425,14 +425,14 @@ class HomePageFeedHandler(BaseHandler):
 #                rslt = GetDocument(query=query,url=ELATIC_SEARCH_SQUARE_GET)
 #                for l in rslt:
 #                    if not l.user_account_id:
-#                        accountType = 'NA'
+#                        accountId = 'NA'
 #                    else:
-#                        accountType = l.user_account_id
+#                        accountId = l.user_account_id
 #                    sqr_obj = l
 #                user = User.objects.get(pk=l.user_id)
-#                l.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                l.complete_user = getCompleteUserInfo(request,user,accountId)['result']
 #                user = User.objects.get(pk=i.user_id)
-#                i.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                i.complete_user = getCompleteUserInfo(request,user,accountId)['result']
 #                square_obj['square'] =  l
 #                square_obj['user_square'] = i
 #                visited[l.id]=True
@@ -454,10 +454,10 @@ class HomePageFeedHandler(BaseHandler):
             if not usrsquare.square.id in visited:
                 square_obj = {}
                 if not usrsquare.square.user_account:
-                    accountType = 'NA'
+                    accountId = 'NA'
                 else:
-                    accountType = usrsquare.square.user_account.id
-                usrsquare.square.complete_user = getCompleteUserInfo(request,usrsquare.square.user,accountType)['result']
+                    accountId = usrsquare.square.user_account.id
+                usrsquare.square.complete_user = getCompleteUserInfo(request,usrsquare.square.user,accountId)['result']
                 square_obj['square'] = usrsquare.square
                 usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
                 square_obj['user_square'] = usrsquare
@@ -546,17 +546,17 @@ class TopSqwagsFeedsHandler(BaseHandler):
 #            print i
 #            square_obj = {}
 #            if not i.user_account_id:
-#                accountType = "NA"
+#                accountId = "NA"
 #            else:
-#                accountType = i.user_account_id
-#            i.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountType)['result']
+#                accountId = i.user_account_id
+#            i.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountId)['result']
 #            filter1 = CreateObject(type="term",typeindex="square_id",typevalue=i.id)
 #            filter2 = CreateObject(type="term",typeindex="user_id",typevalue=i.user_id)
 #            filter = {}
 #            filter['and'] = [filter1,filter2]
 #            usersquare_result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,filter=filter)
 #            for j in usersquare_result:
-#                j.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountType)['result']
+#                j.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountId)['result']
 #            square_obj['square'] = i
 #            square_obj['user_square'] = j
 #            squares_all.append(square_obj)
@@ -568,10 +568,10 @@ class TopSqwagsFeedsHandler(BaseHandler):
         for topsqr in topSquares:
             square_obj = {}
             if not topsqr.user_account:
-                accountType = 'NA'
+                accountId = 'NA'
             else:
-                accountType = topsqr.user_account.id                
-            usr = getCompleteUserInfo(request,topsqr.user,accountType)
+                accountId = topsqr.user_account.id                
+            usr = getCompleteUserInfo(request,topsqr.user,accountId)
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
             try:
@@ -580,7 +580,7 @@ class TopSqwagsFeedsHandler(BaseHandler):
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = 'User square not found'
                 return failureResponse
-            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
+            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountId)['result']
             square_obj['user_square'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
@@ -666,14 +666,14 @@ class PublicSqwagsFeedsHandler(BaseHandler):
 #        for res in result:
 #            squareObj = {}
 #            if not res.user_account_id:
-#                accountType = 'NA'
+#                accountId = 'NA'
 #            else:
-#                accountType = res.user_account_id
+#                accountId = res.user_account_id
 #            query = CreateObject(type="term",typeindex="user_auth.id",typevalue=res.user_id)
 #            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #            for i in result:
 #                user = i['user_auth']
-#            res.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#            res.complete_user = getCompleteUserInfo(request,user,accountId)['result']
 #            squareObj['square'] = res
 #            filter1 = CreateObject(type="term",typeindex="square_id",typevalue=res.id)
 #            filter2 = CreateObject(type="term",typeindex="user_id",typevalue=res.user_id)
@@ -694,10 +694,10 @@ class PublicSqwagsFeedsHandler(BaseHandler):
         for topsqr in topSquares:
             square_obj = {}
             if not topsqr.user_account:
-                accountType = 'NA'
+                accountId = 'NA'
             else:
-                accountType = topsqr.user_account.id
-            usr = getCompleteUserInfo(request,topsqr.user,accountType)
+                accountId = topsqr.user_account.id
+            usr = getCompleteUserInfo(request,topsqr.user,accountId)
             topsqr.complete_user = usr['result']
             square_obj['square'] = topsqr
             try:
@@ -706,7 +706,7 @@ class PublicSqwagsFeedsHandler(BaseHandler):
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = 'User square not found'
                 return failureResponse
-            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountType)['result']
+            usrSqur.complete_user = getCompleteUserInfo(request,topsqr.user,accountId)['result']
             square_obj['user_square'] = usrSqur
             #square_obj['is_following'] = getRelationship(topsqr.user,request.user)             
             squares_all.append(square_obj)#optimize
@@ -821,13 +821,13 @@ class UserSquareHandler(BaseHandler):
 #                    for j in usr:
 #                        owner = j['user_auth']
 #                    if k.user_account_id:
-#                        accountType = j.user_account_id
+#                        accountId = j.user_account_id
 #                    else:
-#                        accountType = 'NA'
-#                square.complete_user = getCompleteUserInfo(request,owner,accountType)['result']
+#                        accountId = 'NA'
+#                square.complete_user = getCompleteUserInfo(request,owner,accountId)['result']
 #                if not userSquare.is_owner:
-#                    accountType = 'NA'
-#                    userSquare.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                    accountId = 'NA'
+#                    userSquare.complete_user = getCompleteUserInfo(request,user,accountId)['result']
 #                else:
 #                    userSquare.complete_user = square.complete_user
 #            result = {}
@@ -851,13 +851,13 @@ class UserSquareHandler(BaseHandler):
             square = usrsquare.square
             owner = usrsquare.square.user
             if not usrsquare.square.user_account:
-                accountType = 'NA'
+                accountId = 'NA'
             else:
-                accountType = usrsquare.square.user_account.id
-            square.complete_user = getCompleteUserInfo(request,owner,accountType)['result']
+                accountId = usrsquare.square.user_account.id
+            square.complete_user = getCompleteUserInfo(request,owner,accountId)['result']
             if  not usrsquare.is_owner:
-                accountType = 'NA'
-                usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,accountType)['result']
+                accountId = 'NA'
+                usrsquare.complete_user = getCompleteUserInfo(request,usrsquare.user,accountId)['result']
                 #square.sharing_user_content_description = usrsquare.content_description 
             else:
                 usrsquare.complete_user = square.complete_user
@@ -1256,9 +1256,9 @@ class recieveSqwag(BaseHandler):
                     #code for elastic search end
                     squareResponse = {}
                     if not squareObj.user_account:
-                        accountType = 'NA'
+                        accountId = 'NA'
                     else:
-                        accountType = squareObj.user_account.id
+                        accountId = squareObj.user_account.id
                     try:
                         usrprofile = UserProfile.objects.get(user=request.user)
                     except UserProfile.DoesNotExist:
@@ -1273,7 +1273,7 @@ class recieveSqwag(BaseHandler):
 #                    userdata['user_profile'] = UserProfile.objects.get(user=request.user)  
                     #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
                     #code for elastic search end    
-                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
+                    squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountId)
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
                     squareResponse['user_square'] = userSquareObj    

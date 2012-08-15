@@ -25,6 +25,9 @@ var SQ = {
   
   notify: function(data) {
     $('#console').text(data).fadeIn('slow');
+    setTimeout( function(){
+      $('#console').fadeOut('slow');
+    }, 7000 );
   },
   
   refresh: function() {
@@ -230,10 +233,9 @@ var SQ = {
             },
             success: function(data) {
               if(data.status == 1) {
-                $(".register_step1").hide();
-                $(".register_step2").show();close
+                $("#register-step1-div").hide();
+                $("#register-step2-div").show();
                 $("#user_id").val(data.result);
-                self.notify(data.result);
               }
               else {
                 var error_string = SQ.errorHandler(data);
@@ -400,7 +402,7 @@ var SQ = {
               success: function(data) {
                 if(data.status == 1) {
                   $(".register_step2").hide();
-                  $(".register_step1").show();
+                  $("#register-step1-div").show();
                   $("#user_id").val("");
                   self.notify(data.result);
                 }
