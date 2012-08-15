@@ -331,8 +331,8 @@ var SQ = {
             },
             success: function(data) {
               if(data.status == 1) {
-                alert('yippie'+ data.result);
-                //SQ.refresh();
+                $("#fpwd-step1").fadeOut();
+                launchWindow('#fpwd-step2');
               }
               else {
                 var error_string = SQ.errorHandler(data);
