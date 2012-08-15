@@ -353,7 +353,7 @@ var SQ = {
         submitHandler: function(form) {
           // do other stuff for a valid form
           var options = {
-            url: window.location.href+'sqwag/selectusername/',
+            url: window.location.protocol+"//"+window.location.host+'/sqwag/selectusername/',
             type:'post',
             dataType: 'json',
             beforeSubmit: function(){

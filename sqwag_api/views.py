@@ -1100,7 +1100,7 @@ def selectUserName(request):
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = "password field cannot be left blank"
                 return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript') 
-        elif type == "socailnetwork_twitter":
+        elif type == "socialnetwork_twitter":
             if "password" in request.POST:
                 if "email" in request.POST:
                     try:
@@ -1147,8 +1147,14 @@ def selectUserName(request):
     #                       userdata['user_profile'] = ES_Obj['user_profile']  
     #                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                             #code for elastic search end
-                            successResponse['result'] = "username updated successfully"
-                            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+                            userAuth = authenticate(username=user.username,password=user.password)
+                            if userAuth is not None:
+                                login(request, user)
+                                return HttpResponseRedirect('/')
+                            else:
+                                failureResponse['status'] = SYSTEM_ERROR
+                                failureResponse['error'] = "System error detected, please try again later."
+                                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['error'] = "email field cannot be left blank"
