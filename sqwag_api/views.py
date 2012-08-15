@@ -305,9 +305,8 @@ def activateUser(request, id, key):
 #            term["user_auth.id"] = user.id
 #            query['term'] = term
 #            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#            jsoncontent = jsonpickle.decode(result)
-#            for i in jsoncontent['hits']['hits']:
-#                ES_Obj = i['_source']
+#            for i in result:
+#                ES_Obj = i
 #                print ES_Obj
 #            userdata = {}
 #            print ES_Obj['user_auth']
@@ -640,9 +639,8 @@ def editEmail(request):
 #                term["user_auth.id"] = user.id
 #                query['term'] = term
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                jsoncontent = jsonpickle.decode(result)
-#                for i in jsoncontent['hits']['hits']:
-#                    ES_Obj = i['_source']
+#                for i in result:
+#                    ES_Obj = i
 #                    print ES_Obj
 #                userdata = {}
 #                print ES_Obj['user_auth']
@@ -685,9 +683,8 @@ def editDisplayName(request):
 #            term["user_auth.id"] = user.id
 #            query['term'] = term
 #            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#            jsoncontent = jsonpickle.decode(result)
 #            for i in jsoncontent['hits']['hits']:
-#                ES_Obj = i['_source']
+#                ES_Obj = i
 #                print ES_Obj
 #            userdata = {}
 #            print ES_Obj['user_profile']
@@ -748,9 +745,8 @@ def changeUserName(request):
 #                term["user_auth.id"] = user.id
 #                query['term'] = term
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                jsoncontent = jsonpickle.decode(result)
-#                for i in jsoncontent['hits']['hits']:
-#                    ES_Obj = i['_source']
+#                for i in result:
+#                    ES_Obj = i
 #                    print ES_Obj
 #                userdata = {}
 #                print ES_Obj['user_profile']
@@ -852,9 +848,8 @@ def accessFacebookNewUser(request):
 #                term["user_auth.id"] = user.id
 #                query['term'] = term
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                jsoncontent = jsonpickle.decode(result)
-#                for i in jsoncontent['hits']['hits']:
-#                    ES_Obj = i['_source']
+#                for i in result:
+#                    ES_Obj = i
 #                    print ES_Obj
 #                print ES_Obj['user_profile']
 
@@ -977,9 +972,8 @@ def selectUserName(request):
 #                        term["user_auth.id"] = user.id
 #                        query['term'] = term
 #                        result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                        jsoncontent = jsonpickle.decode(result)
-#                        for i in jsoncontent['hits']['hits']:
-#                            ES_Obj = i['_source']
+#                        for i in result:
+#                            ES_Obj = i
 #                            print ES_Obj
 #                        userdata = {}
 #                        print ES_Obj['user_profile']
@@ -1031,9 +1025,8 @@ def selectUserName(request):
 #                    term["user_auth.id"] = user.id
 #                    query['term'] = term
 #                    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                    jsoncontent = jsonpickle.decode(result)
-#                    for i in jsoncontent['hits']['hits']:
-#                        ES_Obj = i['_source']
+#                    for i in result:
+#                        ES_Obj = i
 #                        print ES_Obj
 #                    userdata = {}
 #                    print ES_Obj['user_profile']
@@ -1078,9 +1071,8 @@ def selectUserName(request):
 #                       term["user_auth.id"] = user.id
 #                       query['term'] = term
 #                       result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#                       jsoncontent = jsonpickle.decode(result)
-#                       for i in jsoncontent['hits']['hits']:
-#                           ES_Obj = i['_source']
+#                       for i in result:
+#                           ES_Obj = i
 #                           print ES_Obj
 #                       userdata = {}
 #                       print ES_Obj['user_profile']
@@ -1111,21 +1103,23 @@ def getUserSuggestions(request,user):
     #import jsonpickle
     query = {}
     prefix = {}
-    fields = ["user_auth.first_name","user_auth.last_name","user_auth.username",
-              "user_auth.id","user_auth.email","user_profile.username","user_profile.following_count",
-              "user_profile.displayname","user_profile.sqwag_count","user_profile.sqwag_image_url",
-              "user_profile.sqwag_cover_image_url","user_profile.personal_message",
-              "user_profile.followed_by_count"]
     prefix["user_profile.displayname"] = user
     query["prefix"] = prefix
-    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET,fields=fields)
+    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
     print "calling GET"
     jsoncontent = jsonpickle.decode(result)
     user_all = []
     for i in jsoncontent['hits']['hits']:
-        user_all.insert(0,i['fields'])
-        print i['fields']
+        #user_all.insert(0,i['fields'])
+        print i['_source']
+        complete_user = {}
+        complete_user['user'] = GetUser(i['_source']['user_auth'])
+        complete_user['user_profile'] = GetUserProfile(i['_source']['user_profile'])
+        print complete_user
+        user_all.insert(0,complete_user)
+        #print i['fields']
     resultWrapper = paginate(request, 1, user_all, NUMBER_OF_SQUARES)
+    print jsonpickle.encode(resultWrapper,unpicklable=False)
     return HttpResponse(jsonpickle.encode(resultWrapper,unpicklable=False),mimetype='application/javascript')
 
 def instaSubsCallback(request):

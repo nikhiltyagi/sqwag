@@ -22,6 +22,7 @@ import tempfile
 import time
 from twisted.python.reflect import ObjectNotFound
 from sqwag_api.elsaticsearch import *
+from sqwag_api.elasticsearch_api import *
 import urllib
 
 
@@ -107,7 +108,9 @@ def saveSquareBoilerPlate(request=None,user=None, square=None, date_created=None
         except UserAccount.DoesNotExist:
             print "user account instagram does not exist"
     square.save()
-    CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
+    #code for elastic search start
+    #CreateDocument(Square.objects.get(pk=square.id),square.id,ELASTIC_SEARCH_SQUARE_POST)
+    #code for elastic search ends
     is_owner = True
     squareResponse = {}
     userSquare = createUserSquare(None,user,square,is_owner)
@@ -171,6 +174,53 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
     resultWrapper = {}
     userInfo = {}
     if user:
+    #code for elastic search start
+#        query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
+#        result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#        for i in result:
+#            print i
+#            userInfo['user'] = GetUser(i['user_auth'])
+#            userInfo['user_profile'] = GetUserProfile(i['user_profile'])
+#        filter = {}  
+#        if not accountType:
+#            useracc_obj = []
+#            fields = ["account","account_pic","account_handle","py/object","id","account_id","account_data"]
+#            filter1 = CreateObject(type="term",typeindex="user_id",typevalue=user.id)
+#            filter2 = CreateObject(type="term",typeindex="is_active",typevalue=True)
+#            filter['and'] = [filter1,filter2]
+#            result = GetDocument(filter=filter,url=ELASTIC_SEARCH_USERACCOUNT_GET,fields=fields)
+#            jsoncontent = jsonpickle.decode(result)
+#            for i in jsoncontent['hits']['hits']:
+#                print i['fields']
+#                useracc_obj.insert(0,i['fields'])
+#        elif accountType=='NA':
+#            useracc_obj = {}
+#        else:
+#            useracc_obj = []
+#            fields = ["account","account_pic","account_handle","py/object"]
+#            filter1 = CreateObject(type="term",typeindex="user_id",typevalue=user.id)
+#            filter2 = CreateObject(type="term",typeindex="is_active",typevalue=True)
+#            filter3 = CreateObject(type="term",typeindex="account",typevalue=accountType)
+#            filter['and'] = [filter1,filter2,filter3]
+#            result = GetDocument(filter=filter,url=ELASTIC_SEARCH_USERACCOUNT_GET,fields=fields)
+#            jsoncontent = jsonpickle.decode(result)
+#            for i in jsoncontent['hits']['hits']:
+#                print i['fields']
+#                useracc_obj.insert(0,i['fields'])            
+#        userInfo['user_accounts']= useracc_obj
+#        if request is not None and not request.user.is_anonymous():
+#            userInfo['is_following'] = False
+#            filter1 = CreateObject(type="term",typeindex="subscriber_id",typevalue=request.user.id)
+#            filter2 = CreateObject(type="term",typeindex="producer_id",typevalue=user.id)
+#            filter['and'] = [filter1,filter2]
+#            result = GetDocument(filter=filter,url=ELASTIC_SEARCH_RELATIONSHIP_GET)
+#            #jsoncontent = jsonpickle.decode(result)
+#            for i in result:
+#                userInfo['is_following'] = True
+#        resultWrapper['status']=SUCCESS_STATUS_CODE
+#        resultWrapper['result']=userInfo
+#        return resultWrapper                          
+    #code for elastic search end
         try:
             userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
                                                      "sqwag_image_url","sqwag_cover_image_url","username","fullname","personal_message").get(user=user)
@@ -181,7 +231,7 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
             elif accountType=='NA':
                 useracc_obj = {}
             else:    
-                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType,is_active=True)
+                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(user=user,account=accountType,is_active=True)
             userInfo['user_accounts']= useracc_obj
             if request is not None and not request.user.is_anonymous():
                 try:
@@ -263,7 +313,9 @@ def createUserSquare(request,user,square,is_owner,is_private=False):
     if is_private:
         userSquare.is_private = True
     userSquare.save()
-    CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+    #code for elasti search starts
+    #CreateDocument(UserSquare.objects.get(pk=userSquare.id),userSquare.id,ELASTIC_SEARCH_USERSQUARE_POST)
+    #code for elastic search ends
     return userSquare
 
 def getRelationship(producer,subscriber):
@@ -281,53 +333,6 @@ def getActiveUserAccount(user, account):
     except:
         return UserAccount.objects.get(user=user, account=account,is_active=True)
 
-
-def getCompleteUserInfoTest(request,user,accountType=None):
-    resultWrapper = {}
-    userInfo = {}
-    if user:
-#        try:
-            #userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
-            #                                         "sqwag_image_url","sqwag_cover_image_url","username","fullname").get(user=user)
-        fields = ['user_profile.following_count','user_profile.followed_by_count','user_profile.displayname','user_profile.sqwag_count',
-                  'user_profile.sqwag_image_url','user_profile.sqwag_cover_image_url','user_profile.username','user_profile.fullname',
-                  'user_auth.username','user_auth.first_name','user_auth.last_name','user_auth.email']
-        term = {}
-        filter = {}
-        term['user_auth.id'] = user.id
-        filter['term'] = term
-        result = GetDocument(url=ELASTIC_SEARCH_USER_GET,fields=fields,filter=filter)
-        print result
-        result = jsonpickle.decode(result)
-        for res in result['hits']['hits']:
-            x = res['fields']
-        return x
-            #userInfo['user'] = User.objects.values("username","first_name","last_name","email").get(pk=user.id)#TODO : change this.this is bad
-            #userInfo['user_profile'] = userProfile
-#            if not accountType:
-#                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user,is_active=True)
-#            elif accountType=='NA':
-#                useracc_obj = {}
-#            else:    
-#                useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").get(pk=accountType,is_active=True)
-#            userInfo['user_accounts']= useracc_obj
-#            if not request.user.is_anonymous():
-#                try:
-#                    Relationship.objects.get(subscriber=request.user,producer=user)
-#                    userInfo['is_following'] = True
-#                except Relationship.DoesNotExist:
-#                    userInfo['is_following'] = False
-#            resultWrapper['status']=SUCCESS_STATUS_CODE
-#            resultWrapper['result']=userInfo
-#            return resultWrapper
-#        except UserProfile.DoesNotExist:
-#            resultWrapper['status']=SYSTEM_ERROR
-#            resultWrapper['error']= 'user profile does not exist'
-#            return resultWrapper
-    else:
-        resultWrapper['status']=BAD_REQUEST
-        resultWrapper['error']='user object is null'
-        return resultWrapper;
         
 def syncInstaFeed(insta_user_id=None ):
     #access_token ='52192801.6e7b6c7.d45ef561f92b414f8e0c9630220b3c09'
@@ -401,3 +406,25 @@ def CreateUserAccount(user=None,account=None,account_id=None,access_token=None,a
                               date_created=time.time(),account_data=account_data,account_pic=account_pic,
                               account_handle=account_handle,is_active=is_active,last_object_id=0)
     return userAccount
+
+def GetUser(user=None):
+    userdata = {}
+    userdata['username'] = user.username
+    userdata['first_name'] = user.first_name
+    userdata['last_name'] = user.last_name
+    userdata['email'] = user.email
+    userdata['id'] = user.id
+    return userdata
+
+def GetUserProfile(userProf=None):
+    userdata = {}
+    userdata['username'] = userProf.username
+    userdata['displayname'] = userProf.displayname
+    userdata['fullname'] = userProf.fullname
+    userdata['following_count'] = userProf.following_count
+    userdata['sqwag_count'] = userProf.sqwag_count
+    userdata['personal_message'] = userProf.personal_message
+    userdata['followed_by_count'] = userProf.followed_by_count
+    userdata['sqwag_image_url'] = userProf.sqwag_image_url
+    userdata['sqwag_cover_image_url'] = userProf.sqwag_cover_image_url
+    return userdata

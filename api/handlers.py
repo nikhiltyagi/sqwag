@@ -9,6 +9,7 @@ from sqwag_api.constants import *
 from sqwag_api.forms import *
 from sqwag_api.helper import *
 from sqwag_api.models import *
+from sqwag_api.elasticsearch_api import *
 import array
 import simplejson
 import time
@@ -76,64 +77,40 @@ class ImageSquareHandler(BaseHandler):
 class UserSelfFeedsHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
-              'date_created',)
-    #exclude = ('id', re.compile(r'^private_'))
-#    model = Square
+              'date_created')
     def read(self, request, page=1):
         if not request.user.is_authenticated():
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse 
         userSquares = UserSquare.objects.filter(user=request.user,is_deleted=False,is_private=False).order_by('date_shared')
+        #code for elastic search start
 #        filter = {}
-#        term = {}
-#        date_shared = {}
-#        dt = {}
-#        date_shared['order'] = "asc"
-#        dt['date_shared'] = date_shared
-#        sort = [dt]
-#        term["user_id"] = request.user.id
-#        term["is_deleted"] = False
-#        term["is_private"] = False
-#        #term["is_deleted"] = False
-#        #term["is_private"] = False
-#        filter['term'] = term
-#        fields = ["content_description","id","square_id","py/object"]
-#        print "calling GET"
-#        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,fields=fields,filter=filter,sort=sort)
-#        print "Done"
-#        js = simplejson.loads(result)
-#        print "simple json"
-#        print js['hits']['hits']
-#        jsoncontent = jsonpickle.decode(result)
-#        print "json pickle"
-#        print jsoncontent['hits']['hits']
-#        squrs_all = []
-#        for i in jsoncontent['hits']['hits']:
+#        filter1 = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#        filter2 = CreateObject(type="term",typeindex="is_private",typevalue=False)
+#        filter3 = CreateObject(type="term",typeindex="user_id",typevalue=request.user.id)
+#        srt = CreateObject(type="date_shared",typeindex="order",typevalue="asc")
+#        sort = [srt]
+#        filter['and'] = [filter1,filter2,filter3]
+#        result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,filter=filter,sort=sort)
+#        squares_all = []
+#        for i in result:
 #            sqr_obj = {}
-#            #print i['_source'].id
-#            #print i['_source'].square_id
-#            #print jsonpickle.encode(i['_source'],unpicklable=False)
-#            term = {}
-#            term['id'] = i['fields'].square_id
-#            query = {}
-#            query['term'] = term
-#            #fields = ["content_description","user_id","content_type","content_src","content_data","date_created","user_account_id",]
+#            query = CreateObject(type="term",typeindex="id",typevalue=i.square_id)
 #            square = GetDocument(query,ELATIC_SEARCH_SQUARE_GET)
-#            rs = jsonpickle.decode(square)
-#            print rs
-#            for x in rs['hits']['hits']:
-#                if not x['_source'].user_account:
+#            for x in square:
+#                if not x.user_account_id:
 #                    account_type = 'NA'
 #                else:
-#                    account_type = x['_source'].user_account
-#            x['_source'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-#            sqr_obj['square'] = x['_source']
-#            i['fields'].complete_user = getCompleteUserInfoTest(request,request.user,account_type)
-#            sqr_obj['user_square'] = i['fields']
-#            squrs_all.insert(0,sqr_obj)
-#        print jsonpickle.encode(squrs_all,unpicklable=False)
-#        print paginate(request,page,squrs_all,NUMBER_OF_SQUARES)
+#                    account_type = x.user_account_id
+#            x.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
+#            sqr_obj['square'] = x
+#            i.complete_user = getCompleteUserInfo(request,request.user,account_type)['result']
+#            sqr_obj['user_square'] = i
+#            squares_all.insert(0,sqr_obj)
+#        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+#        return resultWrapper
+    #code for elastic search ends
         squares_all = []
         visited = {}#this won't be required once resawaq for own sqwag is disabled
         for usrsquare in userSquares:
@@ -161,7 +138,6 @@ class ShareSquareHandler(BaseHandler):
     fields = ('complete_user','id','content_src','content_type','content_data','content_description','shared_count','liked_count',
               'date_created',)
     successResponse = {}
-#    model = Square
     successResponse['status'] = SUCCESS_STATUS_CODE
     successResponse['message'] = SUCCESS_MSG
     failureResponse = {}
@@ -278,7 +254,7 @@ class RelationshipHandler(BaseHandler):
                 userProfile = UserProfile.objects.get(user=usr)
                 userProfile.followed_by_count += 1 
                 userProfile.save()
-                #code or elastic search starts(tested and working fine)
+                #code for elastic search starts(tested and working fine)
                 #userdata = {}
                 #userdata['user_auth'] = User.objects.get(pk=usr.id)
                 #userdata['user_profile'] = UserProfile.objects.get(user=usr)
@@ -327,10 +303,29 @@ class GetFollowersHandler(BaseHandler):
                 return failureResponse
         else:
             user = request.user
+        #code for elastic start
+#        query = CreateObject(type="term",typeindex="producer_id",typevalue=user.id)
+#        not_res = CreateObject(type="term",typeindex="subscriber_id",typevalue=user.id)
+#        filter = {"not" : not_res}
+#        result = {"filtered" :{"query":query,"filter":filter}}
+#        res = GetDocument(query=result,url=ELASTIC_SEARCH_RELATIONSHIP_GET)
+#        if len(res) != 0:
+#            rel_all = []
+#            for i in res:
+#                print i
+#                rel_all.insert(0,i)
+#            resultWrapper = relationshipPaginator(request,rel_all, NUMBER_OF_SQUARES, page, user, 'subscriber')
+#            return resultWrapper
+#        else:
+#            failureResponse['status'] = NOT_FOUND
+#            failureResponse['error'] = "oops, no body is following you."
+#            return failureResponse
+        #code for elastic search ends
         try:
-            relationships =  Relationship.objects.filter(producer=user)
+            relationships =  Relationship.objects.filter(producer=user)            
             if relationships.count() > 1:
                 resultWrapper = relationshipPaginator(request,relationships, NUMBER_OF_SQUARES, page, user, 'subscriber')
+                print jsonpickle.encode(resultWrapper,unpicklable=True)
                 return resultWrapper
             else:
                 failureResponse['status'] = NOT_FOUND
@@ -360,6 +355,24 @@ class GetProducersHandler(BaseHandler):
                 return failureResponse
         else:
             user = request.user
+        #code for elastic search starts
+#            query = CreateObject(type="term",typeindex="subscriber_id",typevalue=user.id)
+#            not_res = CreateObject(type="term",typeindex="producer_id",typevalue=user.id)
+#            filter = {"not" : not_res}
+#            result = {"filtered" :{"query":query,"filter":filter}}
+#            res = GetDocument(query=result,url=ELASTIC_SEARCH_RELATIONSHIP_GET)
+#            if len(res) != 0:
+#                rel_all = []
+#                for i in res:
+#                    print i
+#                    rel_all.insert(0,i)
+#                resultWrapper = relationshipPaginator(request,rel_all, NUMBER_OF_SQUARES, page, user, 'producer')
+#                return resultWrapper
+#            else:
+#                failureResponse['status'] = NOT_FOUND
+#                failureResponse['error'] = "oops, you are not following no body."
+#                return failureResponse        
+        #code for elastic search ends
         try:
             relationships =  Relationship.objects.filter(subscriber=user)
             if relationships.count() > 1:
@@ -389,9 +402,51 @@ class HomePageFeedHandler(BaseHandler):
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
         user = request.user
+        #code for elastic search start
+#        query = CreateObject(type="term",typeindex="subscriber_id",typevalue=user.id)
+#        result = GetDocument(query=query,url=ELASTIC_SEARCH_RELATIONSHIP_GET)
+#        prducers = []
+#        for i in result:
+#            producer = i.producer_id
+#            prducers.insert(0,producer)
+#        print prducers
+#        filter = {}
+#        query = CreateObject(type="terms",typeindex="user_id",typevalue=prducers)
+#        filter = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#        qry = {"filtered" :{"query":query,"filter":filter}}
+#        result = GetDocument(query=qry,url=ELASTIC_SEARCH_USERSQUARE_GET)
+#        sqrs_all = []
+#        visited = {}
+#        for i in result:
+#            print i
+#            if not i.square_id in visited:
+#                square_obj = {}
+#                query = CreateObject(type="term",typeindex="id",typevalue=i.square_id)
+#                rslt = GetDocument(query=query,url=ELATIC_SEARCH_SQUARE_GET)
+#                for l in rslt:
+#                    if not l.user_account_id:
+#                        accountType = 'NA'
+#                    else:
+#                        accountType = l.user_account_id
+#                    sqr_obj = l
+#                user = User.objects.get(pk=l.user_id)
+#                l.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                user = User.objects.get(pk=i.user_id)
+#                i.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                square_obj['square'] =  l
+#                square_obj['user_square'] = i
+#                visited[l.id]=True
+#                sqrs_all.insert(0,square_obj)
+#            else:
+#                print "ignore this square"
+#        resultWrapper = paginate(request, page, sqrs_all, NUMBER_OF_SQUARES)
+#        return resultWrapper
+        #code for elastic search end
         relationships = Relationship.objects.filter(subscriber=user)
+        print relationships
         producers =  [relationship.producer for relationship in relationships]
         userSquares = UserSquare.objects.filter(user__in=producers,is_deleted=False).order_by('date_shared')
+        print userSquares
         squares_all = []
         visited = {}
         for usrsquare in userSquares:
@@ -480,6 +535,34 @@ class TopSqwagsFeedsHandler(BaseHandler):
             failureResponse['status'] = AUTHENTICATION_ERROR
             failureResponse['error'] = "Login Required"#rc.FORBIDDEN
             return failureResponse
+        #code for elastic start
+#        query = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#        sort1 = CreateObject(type="shared_count",typeindex="order",typevalue="desc")
+#        sort2 = CreateObject(type="date_created",typeindex="order",typevalue="desc")
+#        sort = [sort1,sort2]
+#        result = GetDocument(query=query,url=ELATIC_SEARCH_SQUARE_GET,sort=sort)
+#        squares_all = []
+#        for i in result:
+#            print i
+#            square_obj = {}
+#            if not i.user_account_id:
+#                accountType = "NA"
+#            else:
+#                accountType = i.user_account_id
+#            i.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountType)['result']
+#            filter1 = CreateObject(type="term",typeindex="square_id",typevalue=i.id)
+#            filter2 = CreateObject(type="term",typeindex="user_id",typevalue=i.user_id)
+#            filter = {}
+#            filter['and'] = [filter1,filter2]
+#            usersquare_result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,filter=filter)
+#            for j in usersquare_result:
+#                j.complete_user = getCompleteUserInfo(request,User.objects.get(pk=i.id),accountType)['result']
+#            square_obj['square'] = i
+#            square_obj['user_square'] = j
+#            squares_all.append(square_obj)
+#        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+#        return resultWrapper
+        #code for elastic search end
         topSquares = Square.objects.filter(is_deleted=False).order_by('-shared_count','-date_created')
         squares_all = []
         for topsqr in topSquares:
@@ -519,6 +602,19 @@ class TopPeopleHandler(BaseHandler):
         # get user profiles with most followers
         userProfiles = UserProfile.objects.all().order_by("-followed_by_count")
         #userProfiles = Square.objects.filter(user=request.user).order_by('-date_created')
+        #code for elastic search start
+#        sort = CreateObject(type="user_profile.followed_by_count",typeindex="order",typevalue="desc")
+#        sort = [sort]
+#        query = {"match_all" : {}}
+#        result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET,sort=sort)
+#        userProfiles = []
+#        for i in result:
+#            print i
+#            if not i['user_auth'].id == request.user.id:
+#                userProfiles.append(i['user_profile'])
+#            else:
+#                print "ignore self"
+        #code for elastic search end
         paginator = Paginator(userProfiles,8)
         try:
             profiles = paginator.page(page)
@@ -561,6 +657,38 @@ class PublicSqwagsFeedsHandler(BaseHandler):
 #    model = Square
     
     def read(self, request, page=1, *args, **kwargs):
+        #code for elastic search start
+#        sort = CreateObject(type="date_created",typeindex="order",typevalue="desc")
+#        sort = [sort]
+#        query = {"match_all" : {}}
+#        result = GetDocument(query=query,url=ELATIC_SEARCH_SQUARE_GET,sort=sort)
+#        squaresAll = []
+#        for res in result:
+#            squareObj = {}
+#            if not res.user_account_id:
+#                accountType = 'NA'
+#            else:
+#                accountType = res.user_account_id
+#            query = CreateObject(type="term",typeindex="user_auth.id",typevalue=res.user_id)
+#            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#            for i in result:
+#                user = i['user_auth']
+#            res.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#            squareObj['square'] = res
+#            filter1 = CreateObject(type="term",typeindex="square_id",typevalue=res.id)
+#            filter2 = CreateObject(type="term",typeindex="user_id",typevalue=res.user_id)
+#            filter3 = CreateObject(type="term",typeindex="is_private",typevalue=False)
+#            filter = {}
+#            filter['and'] = [filter1,filter2,filter3]
+#            result = GetDocument(url=ELASTIC_SEARCH_USERSQUARE_GET,filter=filter)
+#            for i in result:
+#                usrSqur = i
+#            usrSqur.complete_user = res.complete_user
+#            squareObj['user_square'] = usrSqur
+#            squaresAll.append(squareObj)
+#        resultWrapper = paginate(request, page, squaresAll, 4)
+#        return resultWrapper
+        #code for elastic search end
         topSquares = Square.objects.filter(is_deleted=False).order_by('-date_created')
         squares_all = []
         for topsqr in topSquares:
@@ -670,16 +798,59 @@ class UserSquareHandler(BaseHandler):
 #            failureResponse['status'] = AUTHENTICATION_ERROR
 #            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
 #            return failureResponse
+        #code for elastic start
+#        filter1 = CreateObject(type="term",typeindex="id",typevalue=id)
+#        filter2 = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#        filter = {}
+#        filter['and'] = [filter1,filter2]
+#        result = GetDocument(filter=filter,url=ELASTIC_SEARCH_USERSQUARE_GET)
+#        if len(result) != 0:
+#            for i in result:
+#                userSquare = i
+#                query = CreateObject(type="term",typeindex="user_auth.id",typevalue=i.user_id)
+#                usr = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                for j in usr:
+#                    user = j['user_auth']
+#                
+#                query = CreateObject(type="term",typeindex="id",typevalue=i.square_id)
+#                sqr = GetDocument(query=query,url=ELATIC_SEARCH_SQUARE_GET)
+#                for k in sqr:
+#                    square = k
+#                    query = CreateObject(type="term",typeindex="user_auth.id",typevalue=k.user_id)
+#                    usr = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                    for j in usr:
+#                        owner = j['user_auth']
+#                    if k.user_account_id:
+#                        accountType = j.user_account_id
+#                    else:
+#                        accountType = 'NA'
+#                square.complete_user = getCompleteUserInfo(request,owner,accountType)['result']
+#                if not userSquare.is_owner:
+#                    accountType = 'NA'
+#                    userSquare.complete_user = getCompleteUserInfo(request,user,accountType)['result']
+#                else:
+#                    userSquare.complete_user = square.complete_user
+#            result = {}
+#            result['square'] = square
+#            result['user_square'] = userSquare    
+#            successResponse['result'] = result
+#            return successResponse 
+#        else:
+#            failureResponse['status'] = BAD_REQUEST
+#            failureResponse['error'] = 'user square does not exist'
+#            return failureResponse              
+        #code for elastic search end
         try:
             usrsquare = UserSquare.objects.get(pk=id,is_deleted=False)
         except UserSquare.DoesNotExist:
             failureResponse['status'] = BAD_REQUEST
             failureResponse['error'] = 'user square does not exist'
+            return failureResponse
         if usrsquare:
             result = {}
             square = usrsquare.square
             owner = usrsquare.square.user
-            if not usrsquare.square.user_account.id:
+            if not usrsquare.square.user_account:
                 accountType = 'NA'
             else:
                 accountType = usrsquare.square.user_account.id
@@ -730,6 +901,45 @@ class restUserSquareHandler(BaseHandler):
 #            failureResponse['status'] = AUTHENTICATION_ERROR
 #            failureResponse['error'] = "Login Required"#rc.FORBIDDEN
 #            return failureResponse
+        #code for elastic search start
+#        filter1 = CreateObject(type="term",typeindex="id",typevalue=id)
+#        filter2 = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#        filter = {}
+#        filter['and'] = [filter1,filter2]
+#        result = GetDocument(filter=filter,url=ELASTIC_SEARCH_USERSQUARE_GET)
+#        if len(result) != 0:
+#            for i in result:
+#                filter1 = CreateObject(type="term",typeindex="square_id",typevalue=i.square_id)
+#                filter2 = CreateObject(type="term",typeindex="is_deleted",typevalue=False)
+#                filter3 = CreateObject(type="term",typeindex="is_private",typevalue=False)
+#                filter = {}
+#                filter['and'] = [filter1,filter2,filter3]
+#                sort = CreateObject(type="date_shared",typeindex="order",typevalue="desc")
+#                sort = [sort]
+#                query = {"match_all" : {}}
+#                qry = {"filtered" :{"query":query,"filter":filter}}
+#                userSquares = GetDocument(query=qry,url=ELASTIC_SEARCH_USERSQUARE_GET,sort=sort)
+#                squares_all = []
+#                for j in userSquares:
+#                    userSquare = j
+#                    if j.is_owner:
+#                        print "ignore the owner"
+#                    elif i==j:
+#                        print "ignore the sharing user"
+#                    else:
+#                        query = CreateObject(type="term",typeindex="user_auth.id",typevalue=j.user_id)
+#                        usr = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                        for k in usr:
+#                            user = k['user_auth']
+#                        userSquare.complete_user = getCompleteUserInfo(request,user,'NA')['result']
+#                        squares_all.append(userSquare)
+#            successResponse['result'] = squares_all
+#            return successResponse
+#        else:
+#            failureResponse['status'] = BAD_REQUEST
+#            failureResponse['error'] = 'user square does not exist'
+#            return failureResponse        
+        #code for elastic search end
         try:
             usrsquare = UserSquare.objects.get(pk=id)
         except UserSquare.DoesNotExist:
@@ -965,7 +1175,7 @@ class sendSqwag(BaseHandler):
                 return failureResponse
             originalSquare = usrSquare.square
             try: 
-                recievingUser = User.objects.get(username=userName)
+                recievingUser = UserProfile.objects.get(username=userName)
             except User.DoesNotExist:
                 failureResponse['status'] = BAD_REQUEST
                 failureResponse['error'] = 'user to whom sqwag needs to be sent does not exist'
@@ -985,11 +1195,17 @@ class sendSqwag(BaseHandler):
                     privateusrsqr.date_shared = time.time()
                     privateusrsqr.content_description = message
                     privateusrsqr.save()
+                    #code for elastic search start
+                    #CreateDocument(UserSquare.objects.get(pk=privateusrsqr.id),privateusrsqr.id,ELASTIC_SEARCH_USERSQUARE_POST)
+                    #code for elastic search end
                 noti = Notifications(user=recievingUser,userSquare=privateusrsqr,sendingUser=user,notification_type='square')
                 noti.date_created = time.time()
                 #noti.notification_message = message
                 originalSquare.shared_count = originalSquare.shared_count + 1
                 originalSquare.save()
+                #code for elastic search start
+                #CreateDocument(Square.objects.get(pk=originalSquare.id),originalSquare.id,ELASTIC_SEARCH_SQUARE_POST)
+                #code for elastic search end
                 noti.save()
                 privateSquare = PrivateSquare(user=recievingUser,userSquare=privateusrsqr)
                 privateSquare.save()
@@ -1035,6 +1251,9 @@ class recieveSqwag(BaseHandler):
                 if userSquareObj:
                     squareObj.shared_count = squareObj.shared_count + 1
                     squareObj.save()
+                    #code for elastic search start
+                    #CreateDocument(Square.objects.get(pk=squareObj.id),squareObj.id,ELASTIC_SEARCH_SQUARE_POST)
+                    #code for elastic search end
                     squareResponse = {}
                     if not squareObj.user_account:
                         accountType = 'NA'
@@ -1048,6 +1267,12 @@ class recieveSqwag(BaseHandler):
                         return failureResponse
                     usrprofile.sqwag_count = usrprofile.sqwag_count + 1
                     usrprofile.save()
+                    #code for elastic search start
+#                    userdata = {}
+#                    userdata['user_auth'] = User.objects.get(pk=request.user.id)
+#                    userdata['user_profile'] = UserProfile.objects.get(user=request.user)  
+                    #CreateDocument(userdata,request.user.id,ELASTIC_SEARCH_USER_POST)
+                    #code for elastic search end    
                     squareObj.complete_user = getCompleteUserInfo(request,squareObj.user,accountType)
                     squareResponse['square'] = squareObj
                     userSquareObj.complete_user = getCompleteUserInfo(request,request.user,'NA')
