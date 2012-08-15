@@ -10,7 +10,7 @@ class FbCustomBackend(ModelBackend):
     def authenticate(self, username =None,token=None):
         try:
             user = User.objects.get(username=username)
-            if user.is_active and token=='facebook':
+            if user.is_active and token=='social':
                 return user
         except User.DoesNotExist:
             return None

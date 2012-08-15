@@ -206,11 +206,15 @@ def accessTweeter(request):
         # check if an entry already exists in useraccount
         user = request.user
         if not request.user.is_authenticated():
-            user = User.objects.create_user("uname", "temp123", "email")
-            user.username = str(user.id)
-            user.email = str(user.id)
-            user.is_active = False
-            userProfile = UserProfile(user=user,
+            try:
+                userAccount = UserAccount.objects.get(account_id=oauthAccess.mUser.GetId())
+                user = userAccount.user
+            except UserAccount.DoesNotExist:
+                user = User.objects.create_user(oauthAccess.mUser.GetId(), str(oauthAccess.mUser.GetId()), "temp123")
+            #user.username = str(user.id)
+            #user.email = str(user.id)
+                user.is_active = False
+                userProfile = UserProfile(user=user,
                                       sqwag_image_url=oauthAccess.mUser.GetProfileImageUrl(),
                                       sqwag_cover_image_url=oauthAccess.mUser.GetProfileImageUrl(),
                                       sqwag_count=0,
@@ -218,30 +222,36 @@ def accessTweeter(request):
                                       followed_by_count=0,
                                       displayname=oauthAccess.mUser.GetScreenName(),
                                       fullname=oauthAccess.mUser.GetName())
-            relationShip = Relationship(subscriber=user, producer=user)
-            relationShip.date_subscribed = time.time()
-            relationShip.permission = True
-            relationShip.save()
-            user.save()
-            userProfile.save()
-            #code for elastic search starts
-            #userdata = {}
-            #userdata['user_auth'] = User.objects.get(pk=user.id)
-            #userdata['user_profile'] = UserProfile.objects.get(user=user)  
-            #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
-            #rel = Relationship.objects.get(subscriber=sub,producer=prod)
-            #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
-            #Code for elastic search ends
+                relationShip = Relationship(subscriber=user, producer=user)
+                relationShip.date_subscribed = time.time()
+                relationShip.permission = True
+                relationShip.save()
+                user.save()
+                userProfile.save()
+                #code for elastic search starts
+                #userdata = {}
+                #userdata['user_auth'] = User.objects.get(pk=user.id)
+                #userdata['user_profile'] = UserProfile.objects.get(user=user)  
+                #CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+                #rel = Relationship.objects.get(subscriber=sub,producer=prod)
+                #CreateDocument(rel,relationShip.id,ELASTIC_SEARCH_RELATIONSHIP_POST)
+                #Code for elastic search ends
         try:
-            userAccount = getActiveUserAccount(user, ACCOUNT_TWITTER)
-            print oauthAccess.mUser.GetId()
-            userAccount.account_id = oauthAccess.mUser.GetId()
-            userAccount.access_token = oauthAccess.mOauthAccessToken.to_string()
-            userAccount.date_created = time.time()
-            userAccount.account_data = oauthAccess.mUser.AsJsonString()
-            userAccount.account_pic = oauthAccess.mUser.GetProfileImageUrl()
-            userAccount.account_handle = oauthAccess.mUser.GetScreenName()
-            
+            #userAccount = getActiveUserAccount(user, ACCOUNT_TWITTER)
+            userAccount = UserAccount.objects.get(account_id=oauthAccess.mUser.GetId())
+            if userAccount.user == user:
+                print oauthAccess.mUser.GetId()
+                userAccount.account_id = oauthAccess.mUser.GetId()
+                userAccount.access_token = oauthAccess.mOauthAccessToken.to_string()
+                userAccount.date_created = time.time()
+                userAccount.account_data = oauthAccess.mUser.AsJsonString()
+                userAccount.account_pic = oauthAccess.mUser.GetProfileImageUrl()
+                userAccount.account_handle = oauthAccess.mUser.GetScreenName()
+                userAccount.is_active = True
+            else:
+                failureResponse['status'] = BAD_REQUEST
+                failureResponse['error'] = "this twitter account is already connected to a registered sqwag user."
+                return HttpResponse(simplejson.dumps(failureResponse), mimetype='application/javascript')
         except UserAccount.DoesNotExist:
         # make entry in userAccount table
             userAccount = CreateUserAccount(user=user,
@@ -270,8 +280,24 @@ def accessTweeter(request):
                             access_token_key=sqAccessToken.key,
                             access_token_secret=sqAccessToken.secret)
             followedUser = api.CreateFriendship(oauthAccess.mUser.GetId())
-            successResponse['followed'] = followedUser.AsDict()
-            return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            if request.user.is_authenticated:
+                successResponse['followed'] = followedUser.AsDict()
+                return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
+            else:
+                username = user.username
+                user = authenticate(username=username,password='temp123')
+                if user is not None:
+                    login(request, user)
+                    return HttpResponseRedirect('/?account=twitter');
+                else:
+                    user = authenticate(username=username,token='social')
+                    if user is not None:
+                        login(request, user)
+                        return HttpResponseRedirect('/?account=twitter');
+                    else:
+                        failureResponse['status'] = BAD_REQUEST
+                        failureResponse['message'] = 'auth error'
+                        return HttpResponseRedirect('/?damn=true')
         except ValidationError, e :
             failureResponse['status'] = SYSTEM_ERROR
             failureResponse['error'] = "some error occured, please try later" + e.message
@@ -931,7 +957,7 @@ def accessFacebookNewUser(request):
                     #usracc = UserAccount.objects.get(pk=userAccount.id)
                     #CreateDocument(usracc,usracc.id,ELASTIC_SEARCH_USERACCOUNT_POST)
                     #Code for Elastic Search ends
-                    successResponse['result'] = userinfo;
+                    #successResponse['result'] = userinfo;
                 #return render_to_response('index.html')
                     #return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
                 except ValidationError, e:
@@ -943,12 +969,12 @@ def accessFacebookNewUser(request):
             user = authenticate(username=userinformation['email'],password='temp123')
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect('/');
+                return HttpResponseRedirect('/?account=facebook');
             else:
-                user = authenticate(username=userinformation['email'],token='facebook')
+                user = authenticate(username=userinformation['email'],token='social')
                 if user is not None:
                     login(request, user)
-                    return HttpResponseRedirect('/');
+                    return HttpResponseRedirect('/?account=facebook');
                 else:
                     failureResponse['status'] = BAD_REQUEST
                     failureResponse['message'] = 'auth error'
