@@ -27,6 +27,7 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend','sqwag_api.FbCustomBackend.FbCustomBackend',)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -181,5 +182,5 @@ LOGGING = {
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_USER_ID = 44  #kind of misleading name. this is user's id in auth_user table
+SQWAG_USER_ID = 1  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"

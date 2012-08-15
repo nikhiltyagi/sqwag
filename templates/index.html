@@ -1,27 +1,31 @@
 <!doctype html>
 <html class="no-js" lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title>Sqwag</title>
-	<meta name="description" content="">
-	<meta name="author" content="">
+    <title>Sqwag</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-	<meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width">
 
-	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
-	<link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
-  
+  <script type="text/javascript">
+    if (window.location.href.indexOf('#_=_') > 0) {
+      window.location = window.location.href.replace(/#.*/, '');
+    }
+  </script>
 </head>
 <body>
 <div class="container">
-	<header>
+    <header>
     <!-- TODO: figure out a better way. This is jugaad -->
     <a id="feed"></a>
     
-	</header>
+    </header>
   {% if complete_user %}
   <div class="navbar">
     <div class="navbar-inner">
@@ -31,8 +35,8 @@
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="create-feed">Create <b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="#sqwag-text-form" data-toggle="modal">text</a></li>
-              <li><a href="#sqwag-image-form" data-toggle="modal">image</a></li>
+              <li id="text-item"><a href="#create_text" name="modal">text</a></li>
+              <li id="image-item"><a href="#create_image" name="modal">image</a></li>
             </ul>
           </li>
           <li class="divider-vertical"></li>
@@ -56,7 +60,7 @@
                 {% else %}
                 <h2>{{complete_user.user.username }}</h2>
                 {% endif %}
-                <div class=""><span class="profile-link">@{{complete_user.user_profile.fullname }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
+                <div class=""><span class="profile-link">@{{complete_user.user_profile.username }}</span> (<a href="sqwag/logout" class="js-link">Sign Out</a>)</div>
               </div>
             </div>
           </li>
@@ -67,7 +71,7 @@
       </div>
     </div>
   </div>
-	<div role="main">
+    <div role="main">
     <!-- <div class="modal hide" id="register-form">
       <form action="" method="post">
         <div class="modal-header">
@@ -75,21 +79,21 @@
           <h1>Create a Sqwag account</h1>
         </div>
         <div class="modal-body">
-        	<div class="form-controls">
-        	  <label for="username">Username</label>
-        	  <input class="input" type="text" name="username" id="username" required />
-        	</div>
-        	<div class="form-controls">
-        	  <label for="password">Password</label>
-        	  <input type="password" name="password" id="password" required />
-        	</div>
-        	<div class="form-controls">
-        	  <label for="email">Email</label>
-        	  <input type="email" name="email" id="email" required />
-        	</div>
+            <div class="form-controls">
+              <label for="username">Username</label>
+              <input class="input" type="text" name="username" id="username" required />
+            </div>
+            <div class="form-controls">
+              <label for="password">Password</label>
+              <input type="password" name="password" id="password" required />
+            </div>
+            <div class="form-controls">
+              <label for="email">Email</label>
+              <input type="email" name="email" id="email" required />
+            </div>
         </div>
         <div class="modal-footer">
-        	<input class="btn btn-primary" type="submit" value="register" />
+            <input class="btn btn-primary" type="submit" value="register" />
         </div>
       </form>
     </div> -->
@@ -142,34 +146,30 @@
     
     <div class="modal hide" id="sqwag-image-form">
       <form enctype="multipart/form-data" method="post" action="/api/imagesquare/create/">
-		<div class="modal-header">
+        <div class="modal-header">
           <h1>create square</h1>
         </div>
-        	<div class="modal-body">
-        		<div class="form-controls">
-        		  <label for="imagefile">chose Image</label>
-        		  <input id "imagefile" type="file" name="content_file" />
-        		</div>
-        		<div class="form-controls">
-        		            <label for="sq-data">data</label>
-        		            <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?" required></textarea>
-        		          </div>
-        		          <div class="form-controls">
-        		            <label for="sq-data">description</label>
-        		            <input type="text" id="sq-data" name="content_description" required />
-        		          </div>
-                      <input type="hidden" name="content_type" value="image" />
-        		          <input type="hidden" name="content_src" value="image"/>
-        	</div>
+            <div class="modal-body">
+                <div class="form-controls">
+                  <label for="imagefile">chose Image</label>
+                  <input id "imagefile" type="file" name="content_file" />
+                </div>
+                <div class="form-controls">
+                  <label for="sq-data">data</label>
+                  <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?" required></textarea>
+                </div>
+                <div class="form-controls">
+                  <label for="sq-data">description</label>
+                  <input type="text" id="sq-data" name="content_description" required />
+                </div>
+                <input type="hidden" name="content_type" value="image" />
+                <input type="hidden" name="content_src" value="image"/>
+            </div>
         <div class="modal-footer">
           <input type="submit" class="btn btn-primary" value="Add sqwag" />
         </div>
       </form>
         </div>
-    
-    
-    
-   
   {% else %}
     <div id="landing_pg_wrap">
    <!--  <div class="logo_blk"><a href="\"><img src="assets/img/logo.png" alt="Sqwag" title="Sqwag" /></a></div>--><!-- logo_blk -->
@@ -196,7 +196,7 @@
             <input type="password" name="password" id="password-login"/>           
             <input type="checkbox" name="rememberme" id="rememberme" />
             <label for="rememberme" class="remember_me_label">Remember me</label>
-            <a href="#" class="forgot_pwd_link">Forgot password?</a>
+            <a href="#fpwd-step1" class="forgot_pwd_link" name="modal">Forgot password?</a>
           </div>
           <div class="form_sbt_wrap">
            <input type="submit" value="Log in" name="login_sbt" id="login_sbt"/>  
@@ -285,8 +285,11 @@
           <input id="submit-feedback" type="submit" class="btn btn-primary fr" value="submit" />
       </form>
 </div>
-<div class="fgt_pwd_req" style="display:none;">
-	<div class="register_blk" >
+
+<div id="fpwd-step1" class="fgt_pwd_req window">
+
+
+    <div  class="register_blk fpwd_step1" >
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -296,7 +299,7 @@
             <form action=""  method="post">
               <div class="form-controls">
                 <label for="reset_pwd">Reset your password</label>
-                <input class="input" type="text" name="resetpassword" id="reset_pwd" value="Email" />
+                <input class="input" type="text" name="resetpassword" id="reset_pwd_email" />
               </div>              
               <div class="modal-footer">
                 <input class="btn btn-primary" type="submit" value="Register" />
@@ -304,8 +307,11 @@
             </form>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- register_blk -->
-	<div class="register_blk">
+    </div><!-- fpwd_step1 -->
+    
+</div><!-- fgt_pwd_req -->
+
+<div class="register_blk fpwd_step2">
         <div class="register_blk_hd">
           <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
           <span class="align_right"><h2>Did you forget your password?</h2></span>
@@ -313,62 +319,152 @@
         <div class="register_blk_inner">
           <div class="register_blk_right ack_req_pwd" id="ack_req_pwd">
             <h3>Thank you!</h3>
-			<p>Check your inbox and follow the steps to reset your password.</p>
+            <p>Check your inbox and follow the steps to reset your password.</p>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- register_blk -->
-</div><!-- fgt_pwd_req -->
-<div class="register_blk sqwag_popup add_photo">
+    </div><!-- fpwd_step2 -->
+
+
+	<div id="fb-step2" class="register_blk register_step2 fb_signin window">
+    <div class="register_blk_hd">
+      <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
+      <span class="align_right"><h2>New Here? <span>Select your Username and Password!</span></h2></span>
+    </div><!-- register_blk_hd-->
+    <div class="register_blk_inner">
+      <div class="register_blk_right fb_signin_inner">
+        <form id="fb-step2-form" method="post">
+          <div class="align_center" style="height:55px;">
+            <label for="fd_username">@</label>
+            <input class="input" type="text" name="username" id="fd_username"/>
+		<span class="legend_text">You can change it later!</span>
+          </div> 
+	  <div class="align_center">
+            <label for="fd_password" style="display:none;">Password</label>
+            <input class="input" type="password" name="password" id="fd_password" />
+            <input type="text" name="type" id="fb_user_type" value="socialnetwork_facebook" style="display:none"/>
+            <input type="text" name="user_id" id="user_id-fb" style="display:none"/>
+          </div> 			  
+          <div class="modal-footer">
+              <p><input style="margin-left: 81px;" name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+              <input class="btn btn-primary" type="submit" value="Done!" /></p>
+            </div>
+        </form>
+      </div><!-- register_blk_right -->
+    </div><!-- register_blk_inner -->      
+  </div><!-- fb_signin -->
+
+	<div class="register_blk register_step2 twitter_signin window">
+        <div class="register_blk_hd">
+          <span class="align_left"><img src="assets/img/key.png"  alt="key image"/></span>
+          <span class="align_right"><h2>New Here? <span>Select your Username and Password!</span></h2></span>
+        </div><!-- register_blk_hd-->
+        <div class="register_blk_inner">
+          <div class="register_blk_right fb_signin_inner">
+            <form action="#"  method="post">
+              <div class="align_center" style="height:55px;">
+                <label for="twt_username">@</label>
+                <input class="input" type="text" name="twt_username" id="twt_username" value="Username" />
+				<span class="legend_text">You can change it later!</span>
+              </div> 
+			  <div class="align_center">
+                <label for="twt_email" style="display:none;">Email</label>
+                <input class="input" type="text" name="twt_email" id="twt_email" value="Email" />
+              </div>
+			  <div class="align_center">
+                <label for="twt_password" style="display:none;">Password</label>
+                <input class="input" type="password" name="twt_password" id="twt_password" value="Password" />
+              </div> 			  
+              <div class="modal-footer">
+                  <p><input name="tos_cbok" id= "tos_cbox_id" type="checkbox"/><label for="tos_cbox_id">I have read and I agree with the <a href="#">Terms of Service</a> </label>
+                  <input class="btn btn-primary" type="submit" value="Done!" /></p>
+                </div>
+            </form>
+          </div><!-- register_blk_right -->
+        </div><!-- register_blk_inner -->      
+    </div><!-- twitter_signin -->
+
+<div id="create_image" class="register_blk sqwag_popup add_photo window">
         <div class="register_blk_hd">
           <span class="align_left_hd"><img src="assets/img/photo_icon.png"  alt="photo image"/></span>
           <span class="align_right_hd"><h2>Sqwag a photo!</h2></span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
           <div class="register_blk_right" id="add_photo">
-            <form action=""  method="post">
+            <form id="create-image-form" enctype="multipart/form-data" method="post" action="/api/imagesquare/create/">
               <div class="form-controls">
-			  <div>
-					<label for="select_photo" style="display:none;">Select a photo</label>
-					<input class="input" type="file" name="selectphoto" id="select_photo" value="Select a photo" />
-				</div>
-				<div>
-					<label>Add Caption</label>
-					<textarea rows="2" cols="20"></textarea>
-					<span class="letter_count">0/180</span>
-				</div>
+              <div>
+                    <label for="select_photo" style="display:none;">Select a photo</label>
+                    <input class="input" type="file" name="content_file" id="select_photo" value="Select a photo" />
+                </div>
+                <div>
+                    <label>Add Caption</label>
+                    <textarea name="content_description" rows="2" cols="20"></textarea>
+                    <input type="hidden" name="content_data" value="image data" />
+                    <input type="hidden" name="content_type" value="image" />
+                    <input type="hidden" name="content_src" value="sqwag.com"/>
+                    <span class="letter_count">0/180</span>
+                </div>
               </div>              
               <div class="modal-footer">
-				<div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
+                <div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
                 <input class="btn btn-primary" type="submit" value="Sqwag!" />
               </div>
             </form>
+
+<!-- <form enctype="multipart/form-data" method="post" action="/api/imagesquare/create/">
+        <div class="modal-header">
+          <h1>create square</h1>
+        </div>
+            <div class="modal-body">
+                <div class="form-controls">
+                  <label for="imagefile">chose Image</label>
+                  <input id "imagefile" type="file" name="content_file" />
+                </div>
+                <div class="form-controls">
+                  <label for="sq-data">data</label>
+                  <textarea type="text" id="sq-data" name="content_data" placeholder="What do you want to say?" required></textarea>
+                </div>
+                <div class="form-controls">
+                  <label for="sq-data">description</label>
+                  <input type="text" id="sq-data" name="content_description" required />
+                </div>
+                <input type="hidden" name="content_type" value="image" />
+                <input type="hidden" name="content_src" value="image"/>
+            </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary" value="Add sqwag" />
+        </div>
+      </form> -->
+
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- add_photo -->
-	<div class="register_blk sqwag_popup add_text">
+    <div id ="create_text" class="register_blk sqwag_popup add_text window">
         <div class="register_blk_hd">
           <span class="align_left_hd"><img src="assets/img/text.png"  alt="photo image"/></span>
           <span class="align_right_hd"><h2>What's on your mind?</h2></span>
         </div><!-- register_blk_hd-->
         <div class="register_blk_inner">
           <div class="register_blk_right" id="add_text">
-            <form action=""  method="post">
+            <form id="create-text-form" method="post">
               <div class="form-controls">
-				<div>
-					<label>Add Caption</label>
-					<textarea rows="2" cols="20"></textarea>
-					<span class="letter_count">0/180</span>
-				</div>
+                <div>
+                    <label>Add Caption</label>
+                    <textarea name="content_data" rows="2" cols="20"></textarea>
+                    <input type="hidden" name="content_type" value="text" />
+                    <input type="hidden" name="content_src" value="sqwag.com"/>
+                    <span class="letter_count">0/180</span>
+                </div>
               </div>              
               <div class="modal-footer">
-				<div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
+                <div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
                 <input class="btn btn-primary" type="submit" value="Sqwag!" />
               </div>
             </form>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- add_text -->
-	<div class="register_blk sqwag_popup add_tweet">
+    <div class="register_blk sqwag_popup add_tweet" >
         <div class="register_blk_hd">
           <span class="align_left_hd"><img src="assets/img/twitter.png"  alt="photo image"/></span>
           <span class="align_right_hd"><h2>What's Happening?</h2></span>
@@ -377,21 +473,20 @@
           <div class="register_blk_right" id="add_tweet">
             <form action=""  method="post">
               <div class="form-controls">
-				<div>
-					<label>Add Caption</label>
-					<textarea rows="2" cols="20"></textarea>
-					<span class="letter_count">0/180</span>
-				</div>
+                <div>
+                    <label>Add Caption</label>
+                    <textarea rows="2" cols="20"></textarea>
+                    <span class="letter_count">0/180</span>
+                </div>
               </div>              
               <div class="modal-footer">
-				<div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><p>Share this !</p></div>
+                <div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><p>Share this !</p></div>
                 <input class="btn btn-primary" type="submit" value="Sqwag!" />
               </div>
             </form>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- add_text -->
-	
+    </div><!-- add_tweet -->	
 	<div class="register_blk sqwag_popup add_video">
         <div class="register_blk_hd">
           <span class="align_left_hd"><img src="assets/img/video.png"  alt="photo image"/></span>
@@ -401,27 +496,25 @@
           <div class="register_blk_right" id="add_video">
             <form action=""  method="post">
               <div class="form-controls">
-				<div>
-					<label class="position_right" for="youtube_url">YouTube URL:</label>
-					<input class="input" type="text" name="youtube_url" id="youtube_url" value="" />
-				</div>
-				<div>
-					<label>Add Caption</label>
-					<textarea rows="2" cols="20"></textarea>
-					<span class="letter_count">0/180</span>
-				</div>
+                <div>
+                    <label class="position_right" for="youtube_url">YouTube URL:</label>
+                    <input class="input" type="text" name="youtube_url" id="youtube_url" value="" />
+                </div>
+                <div>
+                    <label>Add Caption</label>
+                    <textarea rows="2" cols="20"></textarea>
+                    <span class="letter_count">0/180</span>
+                </div>
               </div>              
               <div class="modal-footer">
-				<div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
+                <div class="share_this"><a href=""><img src="assets/img/fb_icon_small.png" width="10px" /></a><a href=""><img width="19px" src="assets/img/twitter_icon_small.png" /></a><p>Share this !</p></div>
                 <input class="btn btn-primary" type="submit" value="Sqwag!" />
               </div>
             </form>
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
-    </div><!-- add_text -->
-
-
-<div class="overlay" style="display:none;"></div><!-- overlay -->
+    </div><!-- add_video -->
+<div id="mask"></div><!-- overlay -->
 <script src="assets/js/libs/jquery-1.7.2.min.js"></script>
 <script src="assets/js/libs/jquery.form-defaults.min.js"></script>
 <script src="assets/js/libs/jquery.tabSlideOut.v1.4.js"></script>
@@ -437,41 +530,162 @@
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
 <script src="assets/js/script.js?12"></script>
+
+<script>
+
+//modal window related code
+
+    //select all the a tag with name equal to modal
+    $('a[name=modal]').click(function(e) {
+      //Cancel the link behavior
+      e.preventDefault();
+      
+      //Get the A tag
+      var id = $(this).attr('href');
+    
+      //Get the screen height and width
+      var maskHeight = $(document).height();
+      var maskWidth = $(window).width();
+    
+      //Set heigth and width to mask to fill up the whole screen
+      $('#mask').css({'width':maskWidth,'height':maskHeight});
+      
+      //transition effect   
+      $('#mask').fadeIn(400);  
+      $('#mask').fadeTo("slow",0.8);  
+    
+      //Get the window height and width
+      var winH = $(window).height();
+      var winW = $(window).width();
+                
+      //Set the popup window to center
+      $(id).css('top',  winH/2-$(id).height()/2);
+      $(id).css('left', winW/2-$(id).width()/2);
+    
+      //transition effect
+      $(id).fadeIn(400); 
+    
+    });
+    
+    //if close button is clicked
+    $('.window .close').click(function (e) {
+      //Cancel the link behavior
+      e.preventDefault();
+      
+      $('#mask').hide();
+      $('.window').hide();
+    });   
+    
+    //if mask is clicked
+    $('#mask').click(function () {
+      $(this).hide();
+      $('.window').hide();
+    });   
+
+    $(window).resize(function () {
+     
+      var box = $('.window');
+   
+      //Get the screen height and width
+      var maskHeight = $(document).height();
+      var maskWidth = $(window).width();
+    
+      //Set height and width to mask to fill up the whole screen
+      $('#mask').css({'width':maskWidth,'height':maskHeight});
+             
+      //Get the window height and width
+      var winH = $(window).height();
+      var winW = $(window).width();
+
+      //Set the popup window to center
+      box.css('top',  winH/2 - box.height()/2);
+      box.css('left', winW/2 - box.width()/2);
+     
+    });
+
+function launchWindow(id) {
+  
+    //Get the screen height and width
+    var maskHeight = $(document).height();
+    var maskWidth = $(window).width();
+  
+    //Set heigth and width to mask to fill up the whole screen
+    $('#mask').css({'width':maskWidth,'height':maskHeight});
+    
+    //transition effect   
+    $('#mask').fadeIn(1000);  
+    $('#mask').fadeTo("slow",0.8);  
+  
+    //Get the window height and width
+    var winH = $(window).height();
+    var winW = $(window).width();
+              
+    //Set the popup window to center
+    $(id).css('top',  winH/2-$(id).height());
+    $(id).css('left', winW/2-$(id).width()/2);
+  
+    //transition effect
+    $(id).fadeIn(400); 
+  }
+</script>
+
 <script>
 
 $(document).ready(function() {
+
+  
+
   $("#feedback").DefaultValue("we love feedback :)");
   var context = {
       "router" :router,
-      "route": "home",
       "backbone": bb,
   };
 
-  {% if complete_user %}
+  {% if complete_user and complete_user.user.is_active%}
     options = {
       "route":"home",
     };
   {% else %}
-    options = {
-      "route":"publicfeed",
-    };
-    $("#username").DefaultValue("Username");
-    $("#password-login").DefaultValue("nopassword");
-    $("#fullname").DefaultValue("Full Name");
-    $("#email").DefaultValue("Email");
-    $("#password-registration").DefaultValue("nopassword");
-    $("#username-register").DefaultValue("username");
-    
-    
+    {% if complete_user and not complete_user.user.is_active %}
+      options = {
+      };
+      $("#fd_username").DefaultValue("Username");
+      $("#fd_password").DefaultValue("nopassword")
+    {% else %}
+      options = {
+        "route":"publicfeed",
+      };
+      $("#username").DefaultValue("Username");
+      $("#password-login").DefaultValue("nopassword");
+      $("#fullname").DefaultValue("Full Name");
+      $("#email").DefaultValue("Email");
+      $("#password-registration").DefaultValue("nopassword");
+      $("#username-register").DefaultValue("username");
+    {% endif %}
 
+  {% endif %}
+  {% if complete_user and not complete_user.user.is_active %}
+      var user_id_fb = "{{ complete_user.user.id }}";
+      $("#user_id-fb").val(user_id_fb);
+      launchWindow('#fb-step2');
+      $.ajax({
+        url:"/sqwag/logout/",
+        datatype:"json",
+        type:"POST",
+        data:{
+        },
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            console.log(data.result);
+          }else{
+            console.log(data.error);
+          }
+        }
+      });
   {% endif %}
   $.extend(context,options);
   SQ.init(context);
-
 });
 </script>
-
-
-
 </body>
 </html>

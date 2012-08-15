@@ -224,7 +224,7 @@ def getCompleteUserInfo(request=None,user=None,accountType=None):
         try:
             userProfile = UserProfile.objects.values("following_count","followed_by_count","displayname","sqwag_count",
                                                      "sqwag_image_url","sqwag_cover_image_url","username","fullname","personal_message").get(user=user)
-            userInfo['user'] = User.objects.values("username","first_name","last_name","email","id").get(pk=user.id)#TODO : change this.this is bad
+            userInfo['user'] = User.objects.values("is_active","username","first_name","last_name","email","id").get(pk=user.id)#TODO : change this.this is bad
             userInfo['user_profile'] = userProfile
             if not accountType:
                 useracc_obj = UserAccount.objects.values("account","account_pic","account_handle").filter(user=user,is_active=True)
@@ -428,3 +428,25 @@ def GetUserProfile(userProf=None):
     userdata['sqwag_image_url'] = userProf.sqwag_image_url
     userdata['sqwag_cover_image_url'] = userProf.sqwag_cover_image_url
     return userdata
+
+def getUserContextObject(complete_user):
+    userContextObj = None
+    if complete_user:
+        if complete_user['status']==1:
+            complete_user = complete_user['result']
+            user_profile = complete_user['user_profile']
+            if user_profile['sqwag_image_url']:
+                user_image_url = complete_user['user_profile']['sqwag_image_url']
+            elif complete_user['user_accounts']:
+                for user_account in complete_user['user_accounts']:
+                    if user_account['account_pic']:
+                        user_image_url = user_account['account_pic']
+                        break
+            else:
+                user_image_url = "http://graph.facebook.com/apnerve/picture/"
+        userContextObj = {
+            'complete_user': complete_user,
+            'user_image_url': user_image_url,
+        }
+    return userContextObj
+

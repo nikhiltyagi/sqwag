@@ -39,6 +39,7 @@ urlpatterns = patterns('sqwag_api.views',
     url(r'^getusersuggestions/(?P<user>\w+)/$','getUserSuggestions',name='getUserSuggestions'),
     url(r'^pocinsta/$','pocInsta',name='pocInsta'),
     url(r'^selectusername/$','selectUserName',name='selectUserName'),
+    url(r'^testname/$','testName',name='testName'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
