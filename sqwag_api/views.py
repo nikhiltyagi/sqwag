@@ -327,10 +327,7 @@ def activateUser(request, id, key):
             user.is_active = True
             user.save()
             #code for elastic search start(This is tested and working fine)
-#            query = {}
-#            term = {}
-#            term["user_auth.id"] = user.id
-#            query['term'] = term
+#            query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #            for i in result:
 #                ES_Obj = i
@@ -666,10 +663,7 @@ def editEmail(request):
                 user.email = email
                 user.username = email
                 #code for elastic search start(tested and working fine)
-#                query = {}
-#                term = {}
-#                term["user_auth.id"] = user.id
-#                query['term'] = term
+#                query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #                for i in result:
 #                    ES_Obj = i
@@ -710,12 +704,9 @@ def editDisplayName(request):
             userProf = UserProfile.objects.get(user=user)
             userProf.displayname = displayname
             #code for elastic search start(tested and working fine)
-#            query = {}
-#            term = {}
-#            term["user_auth.id"] = user.id
-#            query['term'] = term
+#            query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-#            for i in jsoncontent['hits']['hits']:
+#            for i in result:
 #                ES_Obj = i
 #                print ES_Obj
 #            userdata = {}
@@ -772,10 +763,7 @@ def changeUserName(request):
             except UserProfile.DoesNotExist:
                 usrProf.username = username
             #code for elastic search start(tested and working fine)
-#                query = {}
-#                term = {}
-#                term["user_auth.id"] = user.id
-#                query['term'] = term
+#                query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #                for i in result:
 #                    ES_Obj = i
@@ -875,10 +863,7 @@ def accessFacebookNewUser(request):
             try:
                 user = User.objects.get(username=userinformation['email'])
                 #code for elastic search start(tested and working fine)
-#                query = {}
-#                term = {}
-#                term["user_auth.id"] = user.id
-#                query['term'] = term
+#                query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #                result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #                for i in result:
 #                    ES_Obj = i
@@ -1018,10 +1003,7 @@ def selectUserName(request):
                         userprofile.username = request.POST["username"]
                         userprofile.save()
                         #code for elastic search start(tested and working fine)
-#                        query = {}
-#                        term = {}
-#                        term["user_auth.id"] = user.id
-#                        query['term'] = term
+#                        query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #                        result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #                        for i in result:
 #                            ES_Obj = i
@@ -1071,10 +1053,7 @@ def selectUserName(request):
                     user.save()
                     userprofile.save()
                     #code for elastic search start(tested and working fine)
-#                    query = {}
-#                    term = {}
-#                    term["user_auth.id"] = user.id
-#                    query['term'] = term
+#                    query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
 #                    result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
 #                    for i in result:
 #                        ES_Obj = i
@@ -1129,23 +1108,20 @@ def selectUserName(request):
                             user.save()
                             userprofile.save()
                             #code for elastic search start
-    #                       query = {}
-    #                       term = {}
-    #                       term["user_auth.id"] = user.id
-    #                       query['term'] = term
-    #                       result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
-    #                       for i in result:
-    #                           ES_Obj = i
-    #                           print ES_Obj
-    #                       userdata = {}
-    #                       print ES_Obj['user_profile']
-    #                       ES_Obj['user_profile'].username = request.POST["username"]
-    #                       ES_Obj['user_auth'].is_active = True
-    #                       ES_Obj['user_auth'].email = email
-    #                       print ES_Obj['user_profile'].username
-    #                       userdata['user_auth'] = ES_Obj['user_auth']
-    #                       userdata['user_profile'] = ES_Obj['user_profile']  
-    #                       CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
+#                            query = CreateObject(type="term",typeindex="user_auth.id",typevalue=user.id)
+#                            result = GetDocument(query=query,url=ELASTIC_SEARCH_USER_GET)
+#                            for i in result:
+#                                ES_Obj = i
+#                                print ES_Obj
+#                            userdata = {}
+#                            print ES_Obj['user_profile']
+#                            ES_Obj['user_profile'].username = request.POST["username"]
+#                            ES_Obj['user_auth'].is_active = True
+#                            ES_Obj['user_auth'].email = email
+#                            print ES_Obj['user_profile'].username
+#                            userdata['user_auth'] = ES_Obj['user_auth']
+#                            userdata['user_profile'] = ES_Obj['user_profile']  
+#                            CreateDocument(userdata,user.id,ELASTIC_SEARCH_USER_POST)
                             #code for elastic search end
                             successResponse['result'] = "username updated successfully"
                             return HttpResponse(simplejson.dumps(successResponse), mimetype='application/javascript')
