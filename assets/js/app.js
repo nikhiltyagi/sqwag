@@ -218,7 +218,6 @@ var bb = {
           }
         });
       },
-
     };
     new self.AppView;
   }
