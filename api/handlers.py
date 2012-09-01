@@ -894,7 +894,7 @@ class restUserSquareHandler(BaseHandler):
     fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
              'shared_count','liked_count','comment','displayname')
-    def read(self,request,id):
+    def read(self,request,id,page=1):
 #        if request.user.is_authenticated():
 #                id = request.user.id
 #        else:
@@ -959,7 +959,8 @@ class restUserSquareHandler(BaseHandler):
             else:
                 usrsqr.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
                 squares_all.append(usrsqr)
-        successResponse['result'] = squares_all
+        resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
+        successResponse['result'] = resultWrapper
         return successResponse
     
 class unfollowHandler(BaseHandler):
