@@ -20,7 +20,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'sqwag',                      # Or path to database file if using sqlite3.
+        'NAME': 'sqwag-dj',                      # Or path to database file if using sqlite3.
         'USER': 'root',                      # Not used with sqlite3.
         'PASSWORD': 'root',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -182,5 +182,5 @@ LOGGING = {
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SQWAG_TWITTER_USER = 'sqwaglc'
-SQWAG_USER_ID = 8  #kind of misleading name. this is user's id in auth_user table
+SQWAG_USER_ID = 3  #kind of misleading name. this is user's id in auth_user table
 AUTH_PROFILE_MODULE = "sqwag_api.UserProfile"
