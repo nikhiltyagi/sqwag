@@ -466,7 +466,7 @@
           </div><!-- register_blk_right -->
         </div><!-- register_blk_inner -->      
     </div><!-- add_video -->
-	<div class="sqwag_popup_big" style="display:none;">
+	<div id="sqwag_popup_big" class="sqwag_popup_big window" style="display:none;">
 		<div class="sqwag_popup_big_left">cv</div><!-- sqwag_popup_big_left -->
 		<div class="sqwag_popup_big_right">
 			<div class="feed_blk comments_wrap">
@@ -477,7 +477,7 @@
 				  <a href="#" class="resqwag">Sqwag!</a>
 				</div>
 			  </div><!-- feed_blk_hd -->  
-			  <div class="feed_blk_cnt">
+			  <div id="feed_blk_cnt" class="feed_blk_cnt">
 				<div class="comments_cmn_blk">
 					<div class="comments_left">
 					<img src="/assets/img/photo_video.png" width="48px" height="48px" alt="name pic" />
@@ -524,6 +524,7 @@
 <script src="assets/js/libs/underscore-min.js"></script>
 <script src="assets/js/libs/backbone-min.js"></script>
 <script src="assets/js/libs/ICanHaz.min.js"></script>
+<script src="assets/js/comment_feeds.js?123"></script>
 <script src="assets/js/script.js?12"></script>
 
 <script>
@@ -645,6 +646,7 @@ $(document).ready(function() {
   var context = {
       "router" :router,
       "backbone": bb,
+      "cmt_feedhandler": cmtFeedHandler
   };
 
   {% if complete_user and complete_user.user.is_active%}

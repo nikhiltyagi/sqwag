@@ -944,7 +944,8 @@ class restUserSquareHandler(BaseHandler):
             usrsquare = UserSquare.objects.get(pk=id)
         except UserSquare.DoesNotExist:
             failureResponse['status'] = BAD_REQUEST
-            failureResponse['error'] = 'user square does not exist'        
+            failureResponse['error'] = 'user square does not exist'
+            return failureResponse
         #print usrsquare.user
         usrsquares = UserSquare.objects.filter(square=usrsquare.square,is_deleted=False,is_private=False).order_by('-date_shared')
         result = {}

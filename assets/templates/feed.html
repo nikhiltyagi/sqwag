@@ -1,13 +1,14 @@
 <div id="sqwag-list-id" class="sqwag-list row">
+
   <script id="tweet" type="text/html">
-    <div class="feed_blk twitter_blk">
+    <div class="feed_blk twitter_blk" data-id="{{ user_square.id }}">
       <div class="feed_blk_hd">
           <h3>{{ square.shared_count }}</h3>
           <div class="align_right">
               <a href="#" >Send</a>
               <a href="#" data-id="{{ user_square.id }}" class="resqwag">Sqwag!</a>
           </div>
-      </div><!-- feed_blk_hd -->  
+      </div><!-- feed_blk_hd -->
       <div class="feed_blk_cnt">
           <img src="{{ square.complete_user.user_accounts.account_pic }}" width=52px height=52px />
           <h4>{{ square.complete_user.user_accounts.account_handle }}</h4>
@@ -19,7 +20,7 @@
   </script>
   
   <script id="text" type="text/html">
-    <div class="feed_blk text_blk">
+    <div class="feed_blk text_blk" data-id="{{ user_square.id }}">
       <div class="feed_blk_hd">
         <h3>{{ square.shared_count }}</h3>
         <div class="align_right">
@@ -72,7 +73,7 @@
   </script>
 
   <script id="image" type="text/html">
-    <div class="feed_blk photo_blk">
+    <div class="feed_blk photo_blk" data-id="{{ user_square.id }}">
       <div class="feed_blk_hd">
           <h3>{{ square.shared_count }}</h3>
           <div class="align_right">
@@ -87,7 +88,7 @@
   </script>
 
   <script id="song" type="text/html">
-    <div class="feed_blk song_blk">
+    <div class="feed_blk song_blk" data-id="{{ user_square.id }}">
       <div class="feed_blk_hd">
         <h3>{{ square.shared_count }}</h3>
         <div class="align_right">
@@ -105,7 +106,7 @@
   </script>
 
   <script id="video" type="text/html">
-    <div class="feed_blk photo_blk">
+    <div class="feed_blk photo_blk" data-id="{{ user_square.id }}">
         <div class="feed_blk_hd">
           <h3>{{ square.shared_count }}</h3>
           <div class="align_right">
@@ -121,5 +122,17 @@
     </div><!-- landing_pg_wrap -->  
       </div><!-- content -->
     </div><!-- main --> 
+  </script>
+
+  <script id="comment" type="text/html">
+    <div class="comments_cmn_blk">
+      <div class="comments_left">
+      <img src="/assets/img/photo_video.png" width="48px" height="48px" alt="name pic" />
+      </div><!-- comments_left -->
+      <div class="comments_right">
+      <p><a href="">Vaibhav Saini</a> Can I get one please?</p>
+      <p class="time">3 min ago - Flag - Unsqwag</p>
+      </div><!-- comments_right -->
+    </div><!-- comments_cmn_blk -->
   </script>
 </div>

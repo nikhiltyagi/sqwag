@@ -8,6 +8,8 @@ var SQ = {
     self.bindButtons();
     self.bindSqwags();
     self.router = context.router;
+    self.context.cmt_feedhandler.init();
+
     //initialize routers 
     self.router.init();
     // route to a template
@@ -16,8 +18,6 @@ var SQ = {
     }
     setInterval(smartDate.refresh, 60*1000);
   },
-
-  
 
   close: function() {
     $('.close').click();
@@ -525,6 +525,7 @@ var SQ = {
     $('.resqwag').live('click', function() {
       var user_square_id = $(this).data('id');
       self.backbone.feedHandler.reSqwag({'square_id' : user_square_id});
+      return false;
     });
 
     $(".action-retweet").live('click',function(){
@@ -628,6 +629,44 @@ var SQ = {
         mask.hide();
       }
     });
+
+    $('.feed_blk').live('click', function(event) {
+      var user_square_id = $(this).data('id');
+      // get comments for this usersquare
+      $.ajax({
+        url:"api/usersquare/"+user_square_id,
+        datatype:"json",
+        type:"GET",
+        success:function(data,textStatus,jqXHR){
+          if(data.status==1){
+            //populate
+            // population done
+            // call rest usersquare to get comments
+            var config = {
+                "dataSource":{
+                  user_square_id:user_square_id,
+                  page: 1,
+                  url:"api/restusersquare/",
+                },
+            };
+            SQ.context.cmt_feedhandler.init(config);
+            SQ.context.cmt_feedhandler.getFeed(); 
+            // populate data
+            
+          }else{
+            var error_string = SQ.errorHandler(data);
+            self.notify(error_string);
+          }
+        }
+      });
+      //launchWindow('#sqwag_popup_big');
+
+      //sqwag_popup_big
+    });
+
+
+
+
   },
 
   
