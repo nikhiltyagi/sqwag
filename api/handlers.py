@@ -467,7 +467,7 @@ class HomePageFeedHandler(BaseHandler):
                 # do nothing, ignore
                 print 'ignore this square'
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
-        return resultWrapper      
+        return resultWrapper
 
 class DeleteSquareHandler(BaseHandler):
     methods_allowed = ('POST')
@@ -893,7 +893,7 @@ class restUserSquareHandler(BaseHandler):
     methods_allowed = ('GET')
     fields = ('complete_user','id','first_name','last_name','username','account','account_id','account_pic','sqwag_image_url',
              'content_src','content_type','content_data','content_description','date_created',
-             'shared_count','liked_count','comment','displayname')
+             'shared_count','liked_count','comment','displayname','date_shared')
     def read(self,request,id,page=1):
 #        if request.user.is_authenticated():
 #                id = request.user.id
@@ -960,8 +960,7 @@ class restUserSquareHandler(BaseHandler):
                 usrsqr.complete_user = getCompleteUserInfo(request,usrsquare.user,'NA')['result']
                 squares_all.append(usrsqr)
         resultWrapper = paginate(request, page, squares_all, NUMBER_OF_SQUARES)
-        successResponse['result'] = resultWrapper
-        return successResponse
+        return resultWrapper
     
 class unfollowHandler(BaseHandler):
     methods_allowed = ('GET')

@@ -637,6 +637,9 @@ var SQ = {
         url:"api/usersquare/"+user_square_id,
         datatype:"json",
         type:"GET",
+        beforeSend: function (jqXHR, settings){
+          $("#feed_blk_cnt").html("");
+        },
         success:function(data,textStatus,jqXHR){
           if(data.status==1){
             //populate
@@ -651,12 +654,13 @@ var SQ = {
             };
             SQ.context.cmt_feedhandler.init(config);
             SQ.context.cmt_feedhandler.getFeed(); 
-            // populate data
-            
           }else{
             var error_string = SQ.errorHandler(data);
             self.notify(error_string);
           }
+        },
+        complete: function(jqXHR, textStatus){
+          launchWindow('#sqwag_popup_big');
         }
       });
       //launchWindow('#sqwag_popup_big');

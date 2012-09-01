@@ -14,7 +14,7 @@ var cmtFeedHandler = {
     var me = this;
     if(me.isNext){
       $.ajax({
-        url: me.config.dataSource.url + me.config.dataSource.page,
+        url: me.config.dataSource.url + me.config.dataSource.user_square_id +'/'+ me.config.dataSource.page,
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           if (data.status == 1) {
